@@ -1,4 +1,5 @@
 using System.CommandLine;
+using System.Text.Json;
 using Spectre.Console;
 using GitPkg.Models;
 using GitPkg.Services;
@@ -11,7 +12,8 @@ public static class InstallCommand
     {
         var cmd = new Command("install", "从 GitHub Release 安装工具");
 
-        var repoArg = new Argument<string>("owner/repo", "GitHub 仓库 (owner/repo[@version])");
+        var repoArg = new Argument<string?>("owner/repo", () => null, "GitHub 仓库 (owner/repo[@version])");
+        repoArg.Arity = ArgumentArity.ZeroOrOne;
         cmd.AddArgument(repoArg);
 
         var dirOpt = new Option<string?>("--dir", "自定义安装目录");
@@ -24,21 +26,34 @@ public static class InstallCommand
         var gpgOpt = new Option<string?>("--verify-gpg", "GPG 密钥 ID，用于签名校验");
         cmd.AddOption(gpgOpt);
 
+        var fromOpt = new Option<string?>("--from", "从清单文件批量安装");
+        cmd.AddOption(fromOpt);
+
+        var dryRunOpt = new Option<bool>("--dry-run", "预览批量安装，不实际执行");
+        cmd.AddOption(dryRunOpt);
+
         cmd.SetHandler(async context =>
         {
             var repo = context.ParseResult.GetValueForArgument(repoArg);
             var dir = context.ParseResult.GetValueForOption(dirOpt);
             var addPath = context.ParseResult.GetValueForOption(addPathOpt);
             var gpgKey = context.ParseResult.GetValueForOption(gpgOpt);
+            var fromFile = context.ParseResult.GetValueForOption(fromOpt);
+            var dryRun = context.ParseResult.GetValueForOption(dryRunOpt);
             var ct = context.GetCancellationToken();
 
             try
             {
-                await HandleAsync(repo, dir, addPath, gpgKey, ct);
+                if (fromFile != null)
+                    await HandleBatchAsync(fromFile, dryRun, addPath, ct);
+                else if (repo != null)
+                    await HandleSingleAsync(repo, dir, addPath, gpgKey, ct);
+                else
+                    throw new ArgumentException("请指定 owner/repo 或使用 --from <file>");
             }
             catch (HttpRequestException ex) when (ex.Message.Contains("Not Found") || ex.Message.Contains("资源不存在"))
             {
-                AnsiConsole.MarkupLine($"[red]✗ 仓库 {repo} 不存在[/]");
+                AnsiConsole.MarkupLine($"[red]✗ 资源不存在: {ex.Message.Split(": ").Last()}[/]");
                 context.ExitCode = 1;
             }
             catch (HttpRequestException ex)
@@ -61,7 +76,64 @@ public static class InstallCommand
         return cmd;
     }
 
-    private static async Task HandleAsync(string repo, string? dir, bool addPath, string? gpgKey, CancellationToken ct)
+    private static async Task HandleBatchAsync(string fromFile, bool dryRun, bool addPath, CancellationToken ct)
+    {
+        if (!File.Exists(fromFile))
+            throw new FileNotFoundException($"清单文件不存在: {fromFile}");
+
+        var jsonContext = new AppJsonContext();
+        await using var stream = File.OpenRead(fromFile);
+        var manifest = await JsonSerializer.DeserializeAsync(stream, jsonContext.ToolManifest, ct);
+        if (manifest == null || manifest.Tools.Count == 0)
+        {
+            AnsiConsole.MarkupLine("[yellow]清单文件为空[/]");
+            return;
+        }
+
+        AnsiConsole.MarkupLine(dryRun
+            ? $"[blue]预览模式 — 将从 {fromFile} 安装 {manifest.Tools.Count} 个工具[/]"
+            : $"[blue]将从 {fromFile} 批量安装 {manifest.Tools.Count} 个工具[/]");
+
+        var success = 0;
+        var failed = 0;
+
+        foreach (var tool in manifest.Tools)
+        {
+            var repo = tool.Repo.Contains('@') ? tool.Repo : $"{tool.Repo}@{tool.Version}";
+
+            if (dryRun)
+            {
+                var installDir = ManifestService.GetToolDir(tool.Name);
+                AnsiConsole.MarkupLine($"  [grey]→ {tool.Name} {tool.Version} ({tool.Repo}) → {installDir}[/]");
+                success++;
+            }
+            else
+            {
+                try
+                {
+                    await InstallSingleAsync(repo, null, addPath, null, ct);
+                    success++;
+                }
+                catch (Exception ex)
+                {
+                    AnsiConsole.MarkupLine($"  [red]✗ {tool.Name}: {ex.Message}[/]");
+                    failed++;
+                }
+            }
+        }
+
+        var summary = dryRun
+            ? $"预览: {success} 个工具"
+            : $"安装: {success} | 失败: {failed}";
+        AnsiConsole.MarkupLine($"[bold]{summary}[/]");
+    }
+
+    private static async Task HandleSingleAsync(string repo, string? dir, bool addPath, string? gpgKey, CancellationToken ct)
+    {
+        await InstallSingleAsync(repo, dir, addPath, gpgKey, ct);
+    }
+
+    private static async Task InstallSingleAsync(string repo, string? dir, bool addPath, string? gpgKey, CancellationToken ct)
     {
         var gitHub = new GitHubService(GitPkgApp.Http);
         var matcher = new AssetMatcher();
@@ -97,7 +169,7 @@ public static class InstallCommand
             return;
         }
 
-        // 4. Select asset
+        // 4. Select asset (auto-pick in batch mode, prompt in interactive)
         GitHubAsset selected;
         if (matches.Count == 1)
         {
@@ -192,11 +264,10 @@ public static class InstallCommand
         if (File.Exists(archivePath))
             File.Delete(archivePath);
 
-        // 9. Handle nested directory (common pattern: archive contains single dir with same name)
+        // 9. Handle nested directory
         var bins = FindExecutables(installDir);
         if (bins.Count == 0)
         {
-            // Try one level of nesting
             var subDirs = Directory.GetDirectories(installDir);
             if (subDirs.Length == 1)
             {
@@ -245,7 +316,6 @@ public static class InstallCommand
         string? version = null;
         var rest = input;
 
-        // Check for @version suffix
         var atIndex = input.LastIndexOf('@');
         if (atIndex > 0)
         {
@@ -309,11 +379,9 @@ public static class InstallCommand
         foreach (var file in Directory.GetFiles(dir, "*", SearchOption.TopDirectoryOnly))
         {
             var name = Path.GetFileNameWithoutExtension(file).ToLowerInvariant();
-            // Skip common non-executable files
             if (name is "license" or "readme" or "changelog" or "copying")
                 continue;
 
-            // On Windows, check .exe/.bat/.cmd
             if (OperatingSystem.IsWindows())
             {
                 var ext = Path.GetExtension(file).ToLowerInvariant();
@@ -322,7 +390,6 @@ public static class InstallCommand
             }
             else
             {
-                // Unix: check if file is executable or has no extension (common for Unix binaries)
                 var ext = Path.GetExtension(file).ToLowerInvariant();
                 if (ext == "" || ext == ".sh")
                     bins.Add(file);
