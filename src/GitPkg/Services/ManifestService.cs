@@ -5,28 +5,34 @@ namespace GitPkg.Services;
 
 public class ManifestService
 {
-    private static readonly string BaseDir = Path.Combine(
+    private static readonly string DefaultBaseDir = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
         ".gitpkg");
 
-    private static readonly string ManifestPath = Path.Combine(BaseDir, "manifest.json");
-
+    private readonly string _baseDir;
+    private readonly string _manifestPath;
     private readonly AppJsonContext _jsonContext = new();
+
+    public ManifestService(string? baseDir = null)
+    {
+        _baseDir = baseDir ?? DefaultBaseDir;
+        _manifestPath = Path.Combine(_baseDir, "manifest.json");
+    }
 
     public async Task<ToolManifest> LoadAsync(CancellationToken ct = default)
     {
-        if (!File.Exists(ManifestPath))
+        if (!File.Exists(_manifestPath))
             return new ToolManifest();
 
-        await using var stream = File.OpenRead(ManifestPath);
+        await using var stream = File.OpenRead(_manifestPath);
         return await JsonSerializer.DeserializeAsync(stream, _jsonContext.ToolManifest, ct)
                ?? new ToolManifest();
     }
 
     public async Task SaveAsync(ToolManifest manifest, CancellationToken ct = default)
     {
-        Directory.CreateDirectory(BaseDir);
-        await using var stream = File.Create(ManifestPath);
+        Directory.CreateDirectory(_baseDir);
+        await using var stream = File.Create(_manifestPath);
         await JsonSerializer.SerializeAsync(stream, manifest, _jsonContext.ToolManifest, ct);
     }
 
@@ -64,10 +70,10 @@ public class ManifestService
     }
 
     public static string GetToolDir(string toolName)
-        => Path.Combine(BaseDir, "tools", toolName);
+        => Path.Combine(DefaultBaseDir, "tools", toolName);
 
     public static string GetTmpDir()
-        => Path.Combine(BaseDir, "tmp");
+        => Path.Combine(DefaultBaseDir, "tmp");
 
     public static string GetRepoName(string ownerRepo)
     {

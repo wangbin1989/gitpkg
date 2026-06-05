@@ -18,15 +18,19 @@ public static class InstallCommand
         dirOpt.AddAlias("-d");
         cmd.AddOption(dirOpt);
 
+        var addPathOpt = new Option<bool>("--add-path", "将工具目录加入 PATH 环境变量");
+        cmd.AddOption(addPathOpt);
+
         cmd.SetHandler(async context =>
         {
             var repo = context.ParseResult.GetValueForArgument(repoArg);
             var dir = context.ParseResult.GetValueForOption(dirOpt);
+            var addPath = context.ParseResult.GetValueForOption(addPathOpt);
             var ct = context.GetCancellationToken();
 
             try
             {
-                await HandleAsync(repo, dir, ct);
+                await HandleAsync(repo, dir, addPath, ct);
             }
             catch (HttpRequestException ex) when (ex.Message.Contains("Not Found") || ex.Message.Contains("资源不存在"))
             {
@@ -53,7 +57,7 @@ public static class InstallCommand
         return cmd;
     }
 
-    private static async Task HandleAsync(string repo, string? dir, CancellationToken ct)
+    private static async Task HandleAsync(string repo, string? dir, bool addPath, CancellationToken ct)
     {
         var gitHub = new GitHubService(GitPkgApp.Http);
         var matcher = new AssetMatcher();
@@ -182,7 +186,23 @@ public static class InstallCommand
             InstalledAt = DateTime.UtcNow
         }, ct);
 
-        // 10. Success
+        // 10. PATH setup
+        if (addPath)
+        {
+            var shell = PathService.DetectShell() ?? "bash";
+            var added = PathService.AddToPath(installDir, shell);
+            if (added)
+            {
+                var configFile = PathService.GetConfigFilePath(shell);
+                AnsiConsole.MarkupLine($"[blue]ℹ PATH 已更新，请执行 source {configFile} 或重新打开终端[/]");
+            }
+            else
+            {
+                AnsiConsole.MarkupLine("[grey]  PATH 中已存在该目录，跳过[/]");
+            }
+        }
+
+        // 11. Success
         var versionDisplay = release.Name ?? release.TagName;
         AnsiConsole.MarkupLine($"[green]✓ {toolName} {versionDisplay} 已安装到 {installDir}[/]");
     }
