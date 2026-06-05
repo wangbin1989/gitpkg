@@ -160,30 +160,23 @@ public static class InstallCommand
         var platform = PlatformInfo.Current();
         var matches = matcher.Match(release.Assets, platform);
 
+        // 4. Select asset
+        GitHubAsset selected;
+
         if (matches.Count == 0)
         {
-            AnsiConsole.MarkupLine($"[red]✗ 未找到适用于 {platform} 的资产[/]");
-            AnsiConsole.MarkupLine($"[grey]  Release 包含 {release.Assets.Count} 个资产:[/]");
-            foreach (var a in release.Assets)
-                AnsiConsole.MarkupLine($"    [grey]- {a.Name}[/]");
-            return;
+            AnsiConsole.MarkupLine($"[yellow]⚠ 未找到自动匹配 {platform} 的资产[/]");
+            AnsiConsole.MarkupLine("[grey]以下为全部可用资产，请手动选择:[/]");
+            selected = PromptAssetSelection(release.Assets);
         }
-
-        // 4. Select asset (auto-pick in batch mode, prompt in interactive)
-        GitHubAsset selected;
-        if (matches.Count == 1)
+        else if (matches.Count == 1)
         {
             selected = matches[0];
         }
         else
         {
             AnsiConsole.MarkupLine($"[yellow]发现 {matches.Count} 个匹配的资产，请选择:[/]");
-            var choices = matches.Select(m => $"{m.Name} ({FormatSize(m.Size)})").ToArray();
-            var prompt = new SelectionPrompt<string>()
-                .Title("选择要安装的资产")
-                .AddChoices(choices);
-            var chosen = AnsiConsole.Prompt(prompt);
-            selected = matches[Array.IndexOf(choices, chosen)];
+            selected = PromptAssetSelection(matches);
         }
 
         var installDir = dir ?? ManifestService.GetToolDir(toolName);
@@ -309,6 +302,23 @@ public static class InstallCommand
         // 12. Success
         var versionDisplay = release.Name ?? release.TagName;
         AnsiConsole.MarkupLine($"[green]✓ {toolName} {versionDisplay} 已安装到 {installDir}[/]");
+    }
+
+    private static GitHubAsset PromptAssetSelection(List<GitHubAsset> assets)
+    {
+        if (!AnsiConsole.Profile.Capabilities.Interactive)
+        {
+            var first = assets[0];
+            AnsiConsole.MarkupLine($"[grey]非交互模式，自动选择 [bold]{first.Name}[/][/]");
+            return first;
+        }
+
+        var choices = assets.Select(a => $"{a.Name} ({FormatSize(a.Size)})").ToArray();
+        var prompt = new SelectionPrompt<string>()
+            .Title("选择要安装的资产")
+            .AddChoices(choices);
+        var chosen = AnsiConsole.Prompt(prompt);
+        return assets[Array.IndexOf(choices, chosen)];
     }
 
     private static (string owner, string repo, string? version) ParseRepo(string input)
