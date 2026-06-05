@@ -1,0 +1,105 @@
+name: Build and Release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - run: dotnet test
+
+  build:
+    needs: test
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Linux
+          - os: ubuntu-latest
+            rid: linux-x64
+            name: linux-x86_64
+          - os: ubuntu-24.04-arm
+            rid: linux-arm64
+            name: linux-arm64
+          # macOS
+          - os: macos-13
+            rid: osx-x64
+            name: darwin-x86_64
+          - os: macos-latest
+            rid: osx-arm64
+            name: darwin-arm64
+          # Windows
+          - os: windows-latest
+            rid: win-x64
+            name: windows-x86_64
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Publish
+        run: dotnet publish src/GitPkg -c Release -r ${{ matrix.rid }} -o publish
+
+      - name: Package (Unix)
+        if: runner.os != 'Windows'
+        run: |
+          cd publish
+          tar -czf ../gpkg-${{ matrix.name }}.tar.gz gpkg
+          sha256sum ../gpkg-${{ matrix.name }}.tar.gz > ../gpkg-${{ matrix.name }}.tar.gz.sha256
+
+      - name: Package (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          cd publish
+          Compress-Archive -Path gpkg.exe -DestinationPath ../gpkg-${{ matrix.name }}.zip
+          $hash = (Get-FileHash ../gpkg-${{ matrix.name }}.zip -Algorithm SHA256).Hash.ToLower()
+          "$hash  gpkg-${{ matrix.name }}.zip" | Out-File ../gpkg-${{ matrix.name }}.zip.sha256
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: gpkg-${{ matrix.name }}
+          path: |
+            gpkg-${{ matrix.name }}.*
+            !publish/
+
+  release:
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Prepare release assets
+        run: |
+          mkdir dist
+          find artifacts -type f -not -path '*/publish/*' -exec cp {} dist/ \;
+          ls -lh dist/
+
+      - name: Generate checksums
+        run: |
+          cd dist
+          sha256sum *.tar.gz *.zip > checksums.txt
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*
+          generate_release_notes: true
+          fail_on_unmatched_files: true
