@@ -11,6 +11,7 @@ root.AddCommand(UpdateCommand.Create());
 root.AddCommand(OutdatedCommand.Create());
 root.AddCommand(UninstallCommand.Create());
 root.AddCommand(ListCommand.Create());
+root.AddCommand(InfoCommand.Create());
 root.AddCommand(ManifestCommand.Create());
 
 return await root.InvokeAsync(args);

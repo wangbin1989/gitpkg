@@ -21,16 +21,20 @@ public static class InstallCommand
         var addPathOpt = new Option<bool>("--add-path", "将工具目录加入 PATH 环境变量");
         cmd.AddOption(addPathOpt);
 
+        var gpgOpt = new Option<string?>("--verify-gpg", "GPG 密钥 ID，用于签名校验");
+        cmd.AddOption(gpgOpt);
+
         cmd.SetHandler(async context =>
         {
             var repo = context.ParseResult.GetValueForArgument(repoArg);
             var dir = context.ParseResult.GetValueForOption(dirOpt);
             var addPath = context.ParseResult.GetValueForOption(addPathOpt);
+            var gpgKey = context.ParseResult.GetValueForOption(gpgOpt);
             var ct = context.GetCancellationToken();
 
             try
             {
-                await HandleAsync(repo, dir, addPath, ct);
+                await HandleAsync(repo, dir, addPath, gpgKey, ct);
             }
             catch (HttpRequestException ex) when (ex.Message.Contains("Not Found") || ex.Message.Contains("资源不存在"))
             {
@@ -57,7 +61,7 @@ public static class InstallCommand
         return cmd;
     }
 
-    private static async Task HandleAsync(string repo, string? dir, bool addPath, CancellationToken ct)
+    private static async Task HandleAsync(string repo, string? dir, bool addPath, string? gpgKey, CancellationToken ct)
     {
         var gitHub = new GitHubService(GitPkgApp.Http);
         var matcher = new AssetMatcher();
@@ -145,10 +149,39 @@ public static class InstallCommand
                 task.Value(task.MaxValue);
             });
 
-        // 6. SHA256 verification
+        // 6. GPG verification (optional)
+        if (gpgKey != null)
+        {
+            var sigAsset = GpgVerifier.FindSignatureAsset(release.Assets, selected.Name);
+            if (sigAsset == null)
+            {
+                AnsiConsole.MarkupLine("[yellow]⚠ 未找到 GPG 签名文件，跳过签名校验[/]");
+            }
+            else
+            {
+                var sigPath = Path.Combine(tmpDir, sigAsset.Name);
+                await gitHub.DownloadFileAsync(sigAsset.DownloadUrl, sigPath, ct: ct);
+
+                AnsiConsole.Markup("[grey]校验 GPG 签名...[/]");
+                var gpg = new GpgVerifier();
+                var valid = await gpg.VerifyAsync(archivePath, sigPath, gpgKey, ct);
+
+                File.Delete(sigPath);
+
+                if (!valid)
+                {
+                    File.Delete(archivePath);
+                    throw new InvalidOperationException("GPG 签名校验失败");
+                }
+
+                AnsiConsole.MarkupLine("[green] ✓[/]");
+            }
+        }
+
+        // 7. SHA256 verification
         await VerifyChecksumAsync(gitHub, verifier, release.Assets, selected.Name, archivePath, ct);
 
-        // 7. Extract
+        // 8. Extract
         AnsiConsole.MarkupLine($"[grey]解压到 {installDir}...[/]");
         if (Directory.Exists(installDir))
             Directory.Delete(installDir, recursive: true);
@@ -159,7 +192,7 @@ public static class InstallCommand
         if (File.Exists(archivePath))
             File.Delete(archivePath);
 
-        // 8. Handle nested directory (common pattern: archive contains single dir with same name)
+        // 9. Handle nested directory (common pattern: archive contains single dir with same name)
         var bins = FindExecutables(installDir);
         if (bins.Count == 0)
         {
@@ -176,7 +209,7 @@ public static class InstallCommand
             }
         }
 
-        // 9. Update manifest
+        // 10. Update manifest
         await manifest.AddToolAsync(new ToolEntry
         {
             Name = toolName,
@@ -186,7 +219,7 @@ public static class InstallCommand
             InstalledAt = DateTime.UtcNow
         }, ct);
 
-        // 10. PATH setup
+        // 11. PATH setup
         if (addPath)
         {
             var shell = PathService.DetectShell() ?? "bash";
@@ -202,7 +235,7 @@ public static class InstallCommand
             }
         }
 
-        // 11. Success
+        // 12. Success
         var versionDisplay = release.Name ?? release.TagName;
         AnsiConsole.MarkupLine($"[green]✓ {toolName} {versionDisplay} 已安装到 {installDir}[/]");
     }

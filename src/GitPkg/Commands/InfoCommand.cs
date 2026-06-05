@@ -1,0 +1,124 @@
+using System.CommandLine;
+using Spectre.Console;
+using GitPkg.Services;
+
+namespace GitPkg.Commands;
+
+public static class InfoCommand
+{
+    public static Command Create()
+    {
+        var cmd = new Command("info", "查看工具详情");
+
+        var nameArg = new Argument<string>("name", "工具名称或 owner/repo");
+        cmd.AddArgument(nameArg);
+
+        cmd.SetHandler(async context =>
+        {
+            var name = context.ParseResult.GetValueForArgument(nameArg);
+            var ct = context.GetCancellationToken();
+
+            try
+            {
+                await HandleAsync(name, ct);
+            }
+            catch (HttpRequestException ex) when (ex.Message.Contains("Not Found") || ex.Message.Contains("资源不存在"))
+            {
+                AnsiConsole.MarkupLine($"[red]✗ 仓库 {name} 不存在[/]");
+                context.ExitCode = 1;
+            }
+            catch (Exception ex)
+            {
+                AnsiConsole.MarkupLine($"[red]✗ 错误: {ex.Message}[/]");
+                context.ExitCode = 1;
+            }
+        });
+
+        return cmd;
+    }
+
+    private static async Task HandleAsync(string input, CancellationToken ct)
+    {
+        var gitHub = new GitHubService(GitPkgApp.Http);
+        var manifest = new ManifestService();
+
+        // Determine if input is installed tool name or owner/repo
+        string owner, repoName;
+        Models.ToolEntry? installed = null;
+
+        var tool = await manifest.FindToolAsync(input, ct);
+        if (tool != null)
+        {
+            installed = tool;
+            var parts = tool.Repo.Split('/');
+            owner = parts[0];
+            repoName = parts[1];
+        }
+        else if (input.Contains('/'))
+        {
+            var parts = input.Split('/');
+            if (parts.Length != 2)
+                throw new ArgumentException("无效格式，应为 owner/repo");
+            owner = parts[0];
+            repoName = parts[1];
+        }
+        else
+        {
+            AnsiConsole.MarkupLine($"[red]✗ {input} 未找到已安装的工具，请使用 owner/repo 格式[/]");
+            return;
+        }
+
+        // Get repo info
+        var repo = await gitHub.GetRepoAsync(owner, repoName, ct);
+
+        // Get latest release
+        Models.GitHubRelease release;
+        try
+        {
+            release = await gitHub.GetLatestReleaseAsync(owner, repoName, ct);
+        }
+        catch
+        {
+            release = new Models.GitHubRelease { TagName = "(无 Release)", Assets = [] };
+        }
+
+        // Build panel
+        var content = new List<string>();
+
+        content.Add($"仓库:     {owner}/{repoName}");
+        if (repo.Description != null)
+            content.Add($"描述:     {repo.Description}");
+
+        if (installed != null)
+            content.Add($"已安装:   {installed.Version} ({installed.InstalledAt.ToLocalTime():yyyy-MM-dd})");
+
+        var releaseDisplay = release.Name ?? release.TagName;
+        var releaseDate = release.PublishedAt != default
+            ? release.PublishedAt.ToLocalTime().ToString("yyyy-MM-dd")
+            : "-";
+        content.Add($"最新版本: {releaseDisplay} ({releaseDate})");
+
+        if (release.Assets.Count > 0)
+        {
+            content.Add("可用资产:");
+            foreach (var a in release.Assets)
+                content.Add($"  - {a.Name} ({FormatSize(a.Size)})");
+        }
+
+        var panel = new Panel(string.Join("\n", content))
+        {
+            Header = new PanelHeader($" {input} "),
+            Border = BoxBorder.Rounded
+        };
+
+        AnsiConsole.Write(panel);
+    }
+
+    private static string FormatSize(long bytes) => bytes switch
+    {
+        >= 1024 * 1024 * 1024 => $"{bytes / (1024.0 * 1024 * 1024):F1} GB",
+        >= 1024 * 1024 => $"{bytes / (1024.0 * 1024):F1} MB",
+        >= 1024 => $"{bytes / 1024.0:F1} KB",
+        _ => $"{bytes} B"
+    };
+}
