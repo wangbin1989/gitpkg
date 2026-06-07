@@ -286,8 +286,9 @@ public static class InstallCommand
         // 11. PATH setup
         if (addPath)
         {
+            var pathDir = FindExecutableDir(installDir);
             var shell = PathService.DetectShell() ?? "bash";
-            var added = PathService.AddToPath(installDir, shell);
+            var added = PathService.AddToPath(pathDir, shell);
             if (added)
             {
                 var configFile = PathService.GetConfigFilePath(shell);
@@ -407,6 +408,21 @@ public static class InstallCommand
         }
 
         return bins;
+    }
+
+    private static string FindExecutableDir(string installDir)
+    {
+        if (FindExecutables(installDir).Count > 0)
+            return installDir;
+
+        foreach (var sub in new[] { "bin" })
+        {
+            var path = Path.Combine(installDir, sub);
+            if (Directory.Exists(path) && FindExecutables(path).Count > 0)
+                return path;
+        }
+
+        return installDir;
     }
 
     private static string FormatSize(long bytes) => bytes switch
