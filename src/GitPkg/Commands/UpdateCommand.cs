@@ -88,15 +88,28 @@ public static class UpdateCommand
                 var platform = PlatformInfo.Current();
                 var matches = matcher.Match(release.Assets, platform);
 
+                GitHubAsset selected;
+
                 if (matches.Count == 0)
                 {
-                    AnsiConsole.MarkupLine($"[yellow]= {tool.Name}: 新版本 {release.TagName} 无匹配资产，跳过[/]");
-                    currentCount++;
-                    continue;
-                }
+                    if (release.Assets.Count == 0)
+                    {
+                        AnsiConsole.MarkupLine($"[yellow]= {tool.Name}: 新版本 {release.TagName} 无可用资产，跳过[/]");
+                        currentCount++;
+                        continue;
+                    }
 
-                // Pick best match
-                var selected = matches[0];
+                    AnsiConsole.MarkupLine($"[yellow]⚠ {tool.Name}: 未找到匹配 {platform} 的资产，手动选择:[/]");
+                    selected = PromptAssetSelection(release.Assets);
+                }
+                else if (matches.Count == 1)
+                {
+                    selected = matches[0];
+                }
+                else
+                {
+                    selected = matches[0];
+                }
                 var tmpDir = ManifestService.GetTmpDir();
                 Directory.CreateDirectory(tmpDir);
                 var archivePath = Path.Combine(tmpDir, selected.Name);
@@ -189,4 +202,29 @@ public static class UpdateCommand
         if (failed > 0) summary += $" | 失败: {failed}";
         AnsiConsole.MarkupLine($"[bold]{summary}[/]");
     }
+
+    private static GitHubAsset PromptAssetSelection(List<GitHubAsset> assets)
+    {
+        if (!AnsiConsole.Profile.Capabilities.Interactive)
+        {
+            var first = assets[0];
+            AnsiConsole.MarkupLine($"[grey]非交互模式，自动选择 [bold]{first.Name}[/][/]");
+            return first;
+        }
+
+        var choices = assets.Select(a => $"{a.Name} ({FormatSize(a.Size)})").ToArray();
+        var prompt = new SelectionPrompt<string>()
+            .Title("选择要安装的资产")
+            .AddChoices(choices);
+        var chosen = AnsiConsole.Prompt(prompt);
+        return assets[Array.IndexOf(choices, chosen)];
+    }
+
+    private static string FormatSize(long bytes) => bytes switch
+    {
+        >= 1024 * 1024 * 1024 => $"{bytes / (1024.0 * 1024 * 1024):F1} GB",
+        >= 1024 * 1024 => $"{bytes / (1024.0 * 1024):F1} MB",
+        >= 1024 => $"{bytes / 1024.0:F1} KB",
+        _ => $"{bytes} B"
+    };
 }
