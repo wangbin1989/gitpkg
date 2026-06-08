@@ -2,6 +2,9 @@
 
 ## [1.1.2] - 2026-06-07
 
+### Changed
+- 提取 `FormatSize` / `PromptAssetSelection` 到 `CommandHelpers`，消除重复代码
+
 ### Fixed
 - 修复 `update` 命令在无自动匹配资产时直接跳过的问题，改为回退到手动选择或非交互模式自动选择
 

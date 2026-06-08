@@ -102,7 +102,7 @@ public static class InfoCommand
         {
             content.Add("可用资产:");
             foreach (var a in release.Assets)
-                content.Add($"  - {a.Name} ({FormatSize(a.Size)})");
+                content.Add($"  - {a.Name} ({CommandHelpers.FormatSize(a.Size)})");
         }
 
         var panel = new Panel(string.Join("\n", content))
@@ -114,11 +114,4 @@ public static class InfoCommand
         AnsiConsole.Write(panel);
     }
 
-    private static string FormatSize(long bytes) => bytes switch
-    {
-        >= 1024 * 1024 * 1024 => $"{bytes / (1024.0 * 1024 * 1024):F1} GB",
-        >= 1024 * 1024 => $"{bytes / (1024.0 * 1024):F1} MB",
-        >= 1024 => $"{bytes / 1024.0:F1} KB",
-        _ => $"{bytes} B"
-    };
 }

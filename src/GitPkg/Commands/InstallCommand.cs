@@ -167,7 +167,7 @@ public static class InstallCommand
         {
             AnsiConsole.MarkupLine($"[yellow]⚠ 未找到自动匹配 {platform} 的资产[/]");
             AnsiConsole.MarkupLine("[grey]以下为全部可用资产，请手动选择:[/]");
-            selected = PromptAssetSelection(release.Assets);
+            selected = CommandHelpers.PromptAssetSelection(release.Assets);
         }
         else if (matches.Count == 1)
         {
@@ -176,7 +176,7 @@ public static class InstallCommand
         else
         {
             AnsiConsole.MarkupLine($"[yellow]发现 {matches.Count} 个匹配的资产，请选择:[/]");
-            selected = PromptAssetSelection(matches);
+            selected = CommandHelpers.PromptAssetSelection(matches);
         }
 
         var installDir = dir ?? ManifestService.GetToolDir(toolName);
@@ -305,23 +305,6 @@ public static class InstallCommand
         AnsiConsole.MarkupLine($"[green]✓ {toolName} {versionDisplay} 已安装到 {installDir}[/]");
     }
 
-    private static GitHubAsset PromptAssetSelection(List<GitHubAsset> assets)
-    {
-        if (!AnsiConsole.Profile.Capabilities.Interactive)
-        {
-            var first = assets[0];
-            AnsiConsole.MarkupLine($"[grey]非交互模式，自动选择 [bold]{first.Name}[/][/]");
-            return first;
-        }
-
-        var choices = assets.Select(a => $"{a.Name} ({FormatSize(a.Size)})").ToArray();
-        var prompt = new SelectionPrompt<string>()
-            .Title("选择要安装的资产")
-            .AddChoices(choices);
-        var chosen = AnsiConsole.Prompt(prompt);
-        return assets[Array.IndexOf(choices, chosen)];
-    }
-
     private static (string owner, string repo, string? version) ParseRepo(string input)
     {
         string? version = null;
@@ -425,11 +408,4 @@ public static class InstallCommand
         return installDir;
     }
 
-    private static string FormatSize(long bytes) => bytes switch
-    {
-        >= 1024 * 1024 * 1024 => $"{bytes / (1024.0 * 1024 * 1024):F1} GB",
-        >= 1024 * 1024 => $"{bytes / (1024.0 * 1024):F1} MB",
-        >= 1024 => $"{bytes / 1024.0:F1} KB",
-        _ => $"{bytes} B"
-    };
 }

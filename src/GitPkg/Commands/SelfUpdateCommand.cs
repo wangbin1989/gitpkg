@@ -84,7 +84,7 @@ public static class SelfUpdateCommand
                 throw new InvalidOperationException("Release 中无可用资产");
 
             AnsiConsole.MarkupLine($"[yellow]⚠ 未找到匹配 {platform} 的资产，手动选择:[/]");
-            selected = PromptAssetSelection(release.Assets);
+            selected = CommandHelpers.PromptAssetSelection(release.Assets);
         }
         else if (matches.Count == 1)
         {
@@ -96,7 +96,7 @@ public static class SelfUpdateCommand
             AnsiConsole.MarkupLine($"[grey]多个匹配，自动选择: {selected.Name}[/]");
         }
 
-        AnsiConsole.MarkupLine($"[grey]下载 {selected.Name} ({FormatSize(selected.Size)})...[/]");
+        AnsiConsole.MarkupLine($"[grey]下载 {selected.Name} ({CommandHelpers.FormatSize(selected.Size)})...[/]");
         var tmpDir = ManifestService.GetTmpDir();
         Directory.CreateDirectory(tmpDir);
         var archivePath = Path.Combine(tmpDir, selected.Name);
@@ -297,28 +297,4 @@ del "{batchPath}" 2>nul
         });
     }
 
-    private static GitHubAsset PromptAssetSelection(List<GitHubAsset> assets)
-    {
-        if (!AnsiConsole.Profile.Capabilities.Interactive)
-        {
-            var first = assets[0];
-            AnsiConsole.MarkupLine($"[grey]非交互模式，自动选择 [bold]{first.Name}[/][/]");
-            return first;
-        }
-
-        var choices = assets.Select(a => $"{a.Name} ({FormatSize(a.Size)})").ToArray();
-        var prompt = new SelectionPrompt<string>()
-            .Title("选择要安装的资产")
-            .AddChoices(choices);
-        var chosen = AnsiConsole.Prompt(prompt);
-        return assets[Array.IndexOf(choices, chosen)];
-    }
-
-    private static string FormatSize(long bytes) => bytes switch
-    {
-        >= 1024 * 1024 * 1024 => $"{bytes / (1024.0 * 1024 * 1024):F1} GB",
-        >= 1024 * 1024 => $"{bytes / (1024.0 * 1024):F1} MB",
-        >= 1024 => $"{bytes / 1024.0:F1} KB",
-        _ => $"{bytes} B"
-    };
 }
