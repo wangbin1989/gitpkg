@@ -6,6 +6,9 @@
 - 更新 NuGet 依赖：`System.CommandLine` 2.0.9、`Spectre.Console` 0.57.0
 - 更新测试依赖：`Microsoft.NET.Test.Sdk` 18.6.0、`coverlet.collector` 10.0.1、`xunit.runner.visualstudio` 3.1.5
 
+### Fixed
+- 修复 Windows 下 `install --add-path` 提示 `source` 命令不可用的问题，PowerShell 改为 `. $PROFILE`，cmd 仅提示重启终端
+
 ## [1.1.2] - 2026-06-07
 
 ### Changed

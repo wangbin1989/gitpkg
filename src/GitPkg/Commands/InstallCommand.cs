@@ -292,7 +292,16 @@ public static class InstallCommand
             if (added)
             {
                 var configFile = PathService.GetConfigFilePath(shell);
-                AnsiConsole.MarkupLine($"[blue]ℹ PATH 已更新，请执行 source {configFile} 或重新打开终端[/]");
+                var reloadCmd = shell switch
+                {
+                    "powershell" => $". $PROFILE",
+                    "cmd" => null,
+                    _ => $"source {configFile}"
+                };
+                var hint = reloadCmd != null
+                    ? $"请执行 {reloadCmd} 或重新打开终端"
+                    : "请重新打开终端";
+                AnsiConsole.MarkupLine($"[blue]ℹ PATH 已更新，{hint}[/]");
             }
             else
             {
