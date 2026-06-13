@@ -11,23 +11,22 @@ public static class UpdateCommand
     {
         var cmd = new Command("update", "更新已安装的工具");
 
-        var nameArg = new Argument<string?>("name", () => null, "工具名称（不指定则更新全部）");
-        nameArg.Arity = ArgumentArity.ZeroOrOne;
-        cmd.AddArgument(nameArg);
+        var nameArg = new Argument<string?>("name") { Description = "工具名称（不指定则更新全部）", Arity = ArgumentArity.ZeroOrOne };
+        cmd.Add(nameArg);
 
-        cmd.SetHandler(async context =>
+        cmd.SetAction(async (parseResult, ct) =>
         {
-            var name = context.ParseResult.GetValueForArgument(nameArg);
-            var ct = context.GetCancellationToken();
+            var name = parseResult.GetValue(nameArg);
 
             try
             {
                 await HandleAsync(name, ct);
+                return 0;
             }
             catch (Exception ex)
             {
                 AnsiConsole.MarkupLine($"[red]✗ 错误: {ex.Message}[/]");
-                context.ExitCode = 1;
+                return 1;
             }
         });
 

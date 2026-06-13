@@ -17,28 +17,27 @@ public static class SelfUpdateCommand
     {
         var cmd = new Command("self-update", "更新 GitPkg 自身到最新版本");
 
-        cmd.SetHandler(async context =>
+        cmd.SetAction(async (parseResult, ct) =>
         {
-            var ct = context.GetCancellationToken();
-
             try
             {
                 await HandleAsync(ct);
+                return 0;
             }
             catch (HttpRequestException ex) when (ex.Message.Contains("Not Found") || ex.Message.Contains("资源不存在"))
             {
                 AnsiConsole.MarkupLine($"[red]✗ 未找到 GitPkg 的最新 Release[/]");
-                context.ExitCode = 1;
+                return 1;
             }
             catch (HttpRequestException ex)
             {
                 AnsiConsole.MarkupLine($"[red]✗ 网络错误: {ex.Message}[/]");
-                context.ExitCode = 1;
+                return 1;
             }
             catch (Exception ex)
             {
                 AnsiConsole.MarkupLine($"[red]✗ 错误: {ex.Message}[/]");
-                context.ExitCode = 1;
+                return 1;
             }
         });
 

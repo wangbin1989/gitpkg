@@ -10,18 +10,17 @@ public static class ListCommand
     {
         var cmd = new Command("list", "列出已安装的工具");
 
-        cmd.SetHandler(async context =>
+        cmd.SetAction(async (parseResult, ct) =>
         {
-            var ct = context.GetCancellationToken();
-
             try
             {
                 await HandleAsync(ct);
+                return 0;
             }
             catch (Exception ex)
             {
                 AnsiConsole.MarkupLine($"[red]✗ 错误: {ex.Message}[/]");
-                context.ExitCode = 1;
+                return 1;
             }
         });
 

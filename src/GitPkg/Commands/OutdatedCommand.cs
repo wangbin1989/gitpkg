@@ -10,18 +10,17 @@ public static class OutdatedCommand
     {
         var cmd = new Command("outdated", "检查已安装工具的更新");
 
-        cmd.SetHandler(async context =>
+        cmd.SetAction(async (parseResult, ct) =>
         {
-            var ct = context.GetCancellationToken();
-
             try
             {
                 await HandleAsync(ct);
+                return 0;
             }
             catch (Exception ex)
             {
                 AnsiConsole.MarkupLine($"[red]✗ 错误: {ex.Message}[/]");
-                context.ExitCode = 1;
+                return 1;
             }
         });
 

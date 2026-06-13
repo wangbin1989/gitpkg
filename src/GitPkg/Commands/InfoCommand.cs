@@ -10,27 +10,27 @@ public static class InfoCommand
     {
         var cmd = new Command("info", "查看工具详情");
 
-        var nameArg = new Argument<string>("name", "工具名称或 owner/repo");
-        cmd.AddArgument(nameArg);
+        var nameArg = new Argument<string>("name") { Description = "工具名称或 owner/repo" };
+        cmd.Add(nameArg);
 
-        cmd.SetHandler(async context =>
+        cmd.SetAction(async (parseResult, ct) =>
         {
-            var name = context.ParseResult.GetValueForArgument(nameArg);
-            var ct = context.GetCancellationToken();
+            var name = parseResult.GetValue(nameArg);
 
             try
             {
                 await HandleAsync(name, ct);
+                return 0;
             }
             catch (HttpRequestException ex) when (ex.Message.Contains("Not Found") || ex.Message.Contains("资源不存在"))
             {
                 AnsiConsole.MarkupLine($"[red]✗ 仓库 {name} 不存在[/]");
-                context.ExitCode = 1;
+                return 1;
             }
             catch (Exception ex)
             {
                 AnsiConsole.MarkupLine($"[red]✗ 错误: {ex.Message}[/]");
-                context.ExitCode = 1;
+                return 1;
             }
         });
 

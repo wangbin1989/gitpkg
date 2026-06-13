@@ -10,22 +10,22 @@ public static class UninstallCommand
     {
         var cmd = new Command("uninstall", "卸载已安装的工具");
 
-        var nameArg = new Argument<string>("name", "工具名称");
-        cmd.AddArgument(nameArg);
+        var nameArg = new Argument<string>("name") { Description = "工具名称" };
+        cmd.Add(nameArg);
 
-        cmd.SetHandler(async context =>
+        cmd.SetAction(async (parseResult, ct) =>
         {
-            var name = context.ParseResult.GetValueForArgument(nameArg);
-            var ct = context.GetCancellationToken();
+            var name = parseResult.GetValue(nameArg);
 
             try
             {
                 await HandleAsync(name, ct);
+                return 0;
             }
             catch (Exception ex)
             {
                 AnsiConsole.MarkupLine($"[red]✗ 错误: {ex.Message}[/]");
-                context.ExitCode = 1;
+                return 1;
             }
         });
 

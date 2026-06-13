@@ -12,35 +12,32 @@ public static class InstallCommand
     {
         var cmd = new Command("install", "从 GitHub Release 安装工具");
 
-        var repoArg = new Argument<string?>("owner/repo", () => null, "GitHub 仓库 (owner/repo[@version])");
-        repoArg.Arity = ArgumentArity.ZeroOrOne;
-        cmd.AddArgument(repoArg);
+        var repoArg = new Argument<string?>("owner/repo") { Description = "GitHub 仓库 (owner/repo[@version])", Arity = ArgumentArity.ZeroOrOne };
+        cmd.Add(repoArg);
 
-        var dirOpt = new Option<string?>("--dir", "自定义安装目录");
-        dirOpt.AddAlias("-d");
-        cmd.AddOption(dirOpt);
+        var dirOpt = new Option<string?>("--dir", "-d") { Description = "自定义安装目录" };
+        cmd.Add(dirOpt);
 
-        var addPathOpt = new Option<bool>("--add-path", "将工具目录加入 PATH 环境变量");
-        cmd.AddOption(addPathOpt);
+        var addPathOpt = new Option<bool>("--add-path") { Description = "将工具目录加入 PATH 环境变量" };
+        cmd.Add(addPathOpt);
 
-        var gpgOpt = new Option<string?>("--verify-gpg", "GPG 密钥 ID，用于签名校验");
-        cmd.AddOption(gpgOpt);
+        var gpgOpt = new Option<string?>("--verify-gpg") { Description = "GPG 密钥 ID，用于签名校验" };
+        cmd.Add(gpgOpt);
 
-        var fromOpt = new Option<string?>("--from", "从清单文件批量安装");
-        cmd.AddOption(fromOpt);
+        var fromOpt = new Option<string?>("--from") { Description = "从清单文件批量安装" };
+        cmd.Add(fromOpt);
 
-        var dryRunOpt = new Option<bool>("--dry-run", "预览批量安装，不实际执行");
-        cmd.AddOption(dryRunOpt);
+        var dryRunOpt = new Option<bool>("--dry-run") { Description = "预览批量安装，不实际执行" };
+        cmd.Add(dryRunOpt);
 
-        cmd.SetHandler(async context =>
+        cmd.SetAction(async (parseResult, ct) =>
         {
-            var repo = context.ParseResult.GetValueForArgument(repoArg);
-            var dir = context.ParseResult.GetValueForOption(dirOpt);
-            var addPath = context.ParseResult.GetValueForOption(addPathOpt);
-            var gpgKey = context.ParseResult.GetValueForOption(gpgOpt);
-            var fromFile = context.ParseResult.GetValueForOption(fromOpt);
-            var dryRun = context.ParseResult.GetValueForOption(dryRunOpt);
-            var ct = context.GetCancellationToken();
+            var repo = parseResult.GetValue(repoArg);
+            var dir = parseResult.GetValue(dirOpt);
+            var addPath = parseResult.GetValue(addPathOpt);
+            var gpgKey = parseResult.GetValue(gpgOpt);
+            var fromFile = parseResult.GetValue(fromOpt);
+            var dryRun = parseResult.GetValue(dryRunOpt);
 
             try
             {
@@ -50,26 +47,27 @@ public static class InstallCommand
                     await HandleSingleAsync(repo, dir, addPath, gpgKey, ct);
                 else
                     throw new ArgumentException("请指定 owner/repo 或使用 --from <file>");
+                return 0;
             }
             catch (HttpRequestException ex) when (ex.Message.Contains("Not Found") || ex.Message.Contains("资源不存在"))
             {
                 AnsiConsole.MarkupLine($"[red]✗ 资源不存在: {ex.Message.Split(": ").Last()}[/]");
-                context.ExitCode = 1;
+                return 1;
             }
             catch (HttpRequestException ex)
             {
                 AnsiConsole.MarkupLine($"[red]✗ 网络错误: {ex.Message}[/]");
-                context.ExitCode = 1;
+                return 1;
             }
             catch (OperationCanceledException)
             {
                 AnsiConsole.MarkupLine("[yellow]操作已取消[/]");
-                context.ExitCode = 1;
+                return 1;
             }
             catch (Exception ex)
             {
                 AnsiConsole.MarkupLine($"[red]✗ 错误: {ex.Message}[/]");
-                context.ExitCode = 1;
+                return 1;
             }
         });
 

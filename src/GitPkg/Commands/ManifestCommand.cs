@@ -12,7 +12,7 @@ public static class ManifestCommand
     {
         var cmd = new Command("manifest", "清单管理");
 
-        cmd.AddCommand(CreateExportCommand());
+        cmd.Add(CreateExportCommand());
 
         return cmd;
     }
@@ -21,10 +21,8 @@ public static class ManifestCommand
     {
         var cmd = new Command("export", "导出清单文件到标准输出");
 
-        cmd.SetHandler(async context =>
+        cmd.SetAction(async (parseResult, ct) =>
         {
-            var ct = context.GetCancellationToken();
-
             try
             {
                 var manifest = new ManifestService();
@@ -33,11 +31,12 @@ public static class ManifestCommand
                 var jsonContext = new AppJsonContext();
                 var json = JsonSerializer.Serialize(tools, jsonContext.ToolManifest);
                 Console.WriteLine(json);
+                return 0;
             }
             catch (Exception ex)
             {
                 AnsiConsole.MarkupLine($"[red]✗ 错误: {ex.Message}[/]");
-                context.ExitCode = 1;
+                return 1;
             }
         });
 

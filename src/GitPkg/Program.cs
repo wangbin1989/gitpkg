@@ -6,13 +6,14 @@ GitPkgApp.Initialize();
 
 var root = new RootCommand("gitpkg — GitHub Release 自动更新工具");
 
-root.AddCommand(InstallCommand.Create());
-root.AddCommand(UpdateCommand.Create());
-root.AddCommand(OutdatedCommand.Create());
-root.AddCommand(UninstallCommand.Create());
-root.AddCommand(ListCommand.Create());
-root.AddCommand(InfoCommand.Create());
-root.AddCommand(ManifestCommand.Create());
-root.AddCommand(SelfUpdateCommand.Create());
+root.Add(InstallCommand.Create());
+root.Add(UpdateCommand.Create());
+root.Add(OutdatedCommand.Create());
+root.Add(UninstallCommand.Create());
+root.Add(ListCommand.Create());
+root.Add(InfoCommand.Create());
+root.Add(ManifestCommand.Create());
+root.Add(SelfUpdateCommand.Create());
 
-return await root.InvokeAsync(args);
+var parseResult = root.Parse(args);
+return await parseResult.InvokeAsync();
