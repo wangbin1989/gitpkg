@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.1.3] - 2026-06-13
+
+### Changed
+- 更新 NuGet 依赖：`System.CommandLine` 2.0.9、`Spectre.Console` 0.57.0
+- 更新测试依赖：`Microsoft.NET.Test.Sdk` 18.6.0、`coverlet.collector` 10.0.1、`xunit.runner.visualstudio` 3.1.5
+
 ## [1.1.2] - 2026-06-07
 
 ### Changed
