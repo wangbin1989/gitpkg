@@ -34,7 +34,7 @@ public static class ListCommand
 
         if (tools.Tools.Count == 0)
         {
-            AnsiConsole.MarkupLine("[grey]暂无已安装工具，使用 gpkg install <owner/repo> 安装[/]");
+            AnsiConsole.MarkupLine("[grey]暂无已安装工具，使用 gitpkg install <owner/repo> 安装[/]");
             return;
         }
 

@@ -277,7 +277,7 @@ public static class SelfUpdateCommand
 
         File.Move(newBinary, newPath, overwrite: true);
 
-        var batchPath = Path.Combine(dir, "gpkg-update.bat");
+        var batchPath = Path.Combine(dir, "gitpkg-update.bat");
         File.WriteAllText(batchPath, $"""
 @echo off
 timeout /t 2 /nobreak >nul

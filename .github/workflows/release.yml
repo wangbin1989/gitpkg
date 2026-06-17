@@ -12,8 +12,8 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/checkout@v6
+      - uses: actions/setup-dotnet@v5
         with:
           dotnet-version: '10.0.x'
       - run: dotnet test
@@ -44,11 +44,17 @@ jobs:
             name: windows-arm64
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v5
         with:
           dotnet-version: '10.0.x'
+
+      - name: Get version
+        id: version
+        run: |
+          VERSION=$(grep -oP '<Version>\K[^<]+' src/GitPkg/GitPkg.csproj)
+          echo "version=v${VERSION}" >> $GITHUB_OUTPUT
 
       - name: Publish
         run: dotnet publish src/GitPkg -c Release -r ${{ matrix.rid }} -o publish
@@ -57,24 +63,21 @@ jobs:
         if: runner.os != 'Windows'
         run: |
           cd publish
-          tar -czf ../gpkg-${{ matrix.name }}.tar.gz gpkg
-          sha256sum ../gpkg-${{ matrix.name }}.tar.gz > ../gpkg-${{ matrix.name }}.tar.gz.sha256
+          tar -czf ../gitpkg-${{ steps.version.outputs.version }}-${{ matrix.name }}.tar.gz gitpkg
 
       - name: Package (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
           cd publish
-          Compress-Archive -Path gpkg.exe -DestinationPath ../gpkg-${{ matrix.name }}.zip
-          $hash = (Get-FileHash ../gpkg-${{ matrix.name }}.zip -Algorithm SHA256).Hash.ToLower()
-          "$hash  gpkg-${{ matrix.name }}.zip" | Out-File ../gpkg-${{ matrix.name }}.zip.sha256
+          Compress-Archive -Path gitpkg.exe -DestinationPath ../gitpkg-${{ steps.version.outputs.version }}-${{ matrix.name }}.zip
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
-          name: gpkg-${{ matrix.name }}
+          name: gitpkg-${{ steps.version.outputs.version }}-${{ matrix.name }}
           path: |
-            gpkg-${{ matrix.name }}.*
+            gitpkg-${{ steps.version.outputs.version }}-${{ matrix.name }}.*
             !publish/
 
   release:
@@ -82,7 +85,7 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           path: artifacts
 
@@ -98,7 +101,7 @@ jobs:
           sha256sum *.tar.gz *.zip > checksums.txt
 
       - name: Create Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           files: dist/*
           generate_release_notes: true

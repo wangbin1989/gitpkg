@@ -84,6 +84,6 @@ public static class OutdatedCommand
         }
 
         AnsiConsole.Write(table);
-        AnsiConsole.MarkupLine($"[grey]共 {outdatedCount} 个工具可更新，使用 gpkg update 更新[/]");
+        AnsiConsole.MarkupLine($"[grey]共 {outdatedCount} 个工具可更新，使用 gitpkg update 更新[/]");
     }
 }
