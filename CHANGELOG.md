@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.1.4] - 2026-06-17
+
+### Changed
+- 程序集名称由 `gpkg` 变更为 `gitpkg`
+- 发布包名称增加版本号（`gitpkg-v1.1.4-darwin-arm64.tar.gz`）
+- 移除单独 `.sha256` 文件，保留 `checksums.txt`
+- 升级 GitHub Actions 到最新稳定版（checkout@v6, setup-dotnet@v5, upload-artifact@v7, download-artifact@v8, action-gh-release@v3）
+
 ## [1.1.3] - 2026-06-13
 
 ### Changed
