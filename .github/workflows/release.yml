@@ -57,24 +57,24 @@ jobs:
         if: runner.os != 'Windows'
         run: |
           cd publish
-          tar -czf ../gpkg-${{ matrix.name }}.tar.gz gpkg
-          sha256sum ../gpkg-${{ matrix.name }}.tar.gz > ../gpkg-${{ matrix.name }}.tar.gz.sha256
+          tar -czf ../gitpkg-${{ matrix.name }}.tar.gz gitpkg
+          sha256sum ../gitpkg-${{ matrix.name }}.tar.gz > ../gitpkg-${{ matrix.name }}.tar.gz.sha256
 
       - name: Package (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
           cd publish
-          Compress-Archive -Path gpkg.exe -DestinationPath ../gpkg-${{ matrix.name }}.zip
-          $hash = (Get-FileHash ../gpkg-${{ matrix.name }}.zip -Algorithm SHA256).Hash.ToLower()
-          "$hash  gpkg-${{ matrix.name }}.zip" | Out-File ../gpkg-${{ matrix.name }}.zip.sha256
+          Compress-Archive -Path gitpkg.exe -DestinationPath ../gitpkg-${{ matrix.name }}.zip
+          $hash = (Get-FileHash ../gitpkg-${{ matrix.name }}.zip -Algorithm SHA256).Hash.ToLower()
+          "$hash  gitpkg-${{ matrix.name }}.zip" | Out-File ../gitpkg-${{ matrix.name }}.zip.sha256
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: gpkg-${{ matrix.name }}
+          name: gitpkg-${{ matrix.name }}
           path: |
-            gpkg-${{ matrix.name }}.*
+            gitpkg-${{ matrix.name }}.*
             !publish/
 
   release:
