@@ -64,7 +64,6 @@ jobs:
         run: |
           cd publish
           tar -czf ../gitpkg-${{ steps.version.outputs.version }}-${{ matrix.name }}.tar.gz gitpkg
-          sha256sum ../gitpkg-${{ steps.version.outputs.version }}-${{ matrix.name }}.tar.gz > ../gitpkg-${{ steps.version.outputs.version }}-${{ matrix.name }}.tar.gz.sha256
 
       - name: Package (Windows)
         if: runner.os == 'Windows'
@@ -72,8 +71,6 @@ jobs:
         run: |
           cd publish
           Compress-Archive -Path gitpkg.exe -DestinationPath ../gitpkg-${{ steps.version.outputs.version }}-${{ matrix.name }}.zip
-          $hash = (Get-FileHash ../gitpkg-${{ steps.version.outputs.version }}-${{ matrix.name }}.zip -Algorithm SHA256).Hash.ToLower()
-          "$hash  gitpkg-${{ steps.version.outputs.version }}-${{ matrix.name }}.zip" | Out-File ../gitpkg-${{ steps.version.outputs.version }}-${{ matrix.name }}.zip.sha256
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
