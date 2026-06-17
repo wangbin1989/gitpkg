@@ -20,7 +20,7 @@
 
 ```bash
 # macOS / Linux
-tar -xzf gitpkg-darwin-arm64.tar.gz
+tar -xzf gitpkg-v1.1.3-darwin-arm64.tar.gz
 sudo mv gitpkg /usr/local/bin/
 
 # 或放入用户目录

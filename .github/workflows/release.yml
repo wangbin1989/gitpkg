@@ -50,6 +50,12 @@ jobs:
         with:
           dotnet-version: '10.0.x'
 
+      - name: Get version
+        id: version
+        run: |
+          VERSION=$(grep -oP '<Version>\K[^<]+' src/GitPkg/GitPkg.csproj)
+          echo "version=v${VERSION}" >> $GITHUB_OUTPUT
+
       - name: Publish
         run: dotnet publish src/GitPkg -c Release -r ${{ matrix.rid }} -o publish
 
@@ -57,24 +63,24 @@ jobs:
         if: runner.os != 'Windows'
         run: |
           cd publish
-          tar -czf ../gitpkg-${{ matrix.name }}.tar.gz gitpkg
-          sha256sum ../gitpkg-${{ matrix.name }}.tar.gz > ../gitpkg-${{ matrix.name }}.tar.gz.sha256
+          tar -czf ../gitpkg-${{ steps.version.outputs.version }}-${{ matrix.name }}.tar.gz gitpkg
+          sha256sum ../gitpkg-${{ steps.version.outputs.version }}-${{ matrix.name }}.tar.gz > ../gitpkg-${{ steps.version.outputs.version }}-${{ matrix.name }}.tar.gz.sha256
 
       - name: Package (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
           cd publish
-          Compress-Archive -Path gitpkg.exe -DestinationPath ../gitpkg-${{ matrix.name }}.zip
-          $hash = (Get-FileHash ../gitpkg-${{ matrix.name }}.zip -Algorithm SHA256).Hash.ToLower()
-          "$hash  gitpkg-${{ matrix.name }}.zip" | Out-File ../gitpkg-${{ matrix.name }}.zip.sha256
+          Compress-Archive -Path gitpkg.exe -DestinationPath ../gitpkg-${{ steps.version.outputs.version }}-${{ matrix.name }}.zip
+          $hash = (Get-FileHash ../gitpkg-${{ steps.version.outputs.version }}-${{ matrix.name }}.zip -Algorithm SHA256).Hash.ToLower()
+          "$hash  gitpkg-${{ steps.version.outputs.version }}-${{ matrix.name }}.zip" | Out-File ../gitpkg-${{ steps.version.outputs.version }}-${{ matrix.name }}.zip.sha256
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: gitpkg-${{ matrix.name }}
+          name: gitpkg-${{ steps.version.outputs.version }}-${{ matrix.name }}
           path: |
-            gitpkg-${{ matrix.name }}.*
+            gitpkg-${{ steps.version.outputs.version }}-${{ matrix.name }}.*
             !publish/
 
   release:
