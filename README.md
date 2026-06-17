@@ -16,15 +16,33 @@
 
 ### 安装 GitPkg
 
-从 [GitHub Releases](https://github.com/ggml-org/gitpkg/releases) 下载对应平台的归档文件，解压后将 `gitpkg` 放入 PATH 目录即可。
+**一键安装（推荐）：**
+
+```bash
+# macOS / Linux
+curl -fsSL https://raw.githubusercontent.com/wangbin1989/gitpkg/main/install.sh | bash
+
+# 指定版本
+curl -fsSL https://raw.githubusercontent.com/wangbin1989/gitpkg/main/install.sh | bash -s v1.1.4
+
+# Windows (PowerShell)
+Invoke-Expression (Invoke-RestMethod https://raw.githubusercontent.com/wangbin1989/gitpkg/main/install.ps1)
+```
+
+脚本会自动检测平台，下载最新版本并安装到 `~/.gitpkg/bin`。
+
+**手动安装：**
+
+从 [GitHub Releases](https://github.com/wangbin1989/gitpkg/releases) 下载对应平台的归档文件，解压后将 `gitpkg` 放入 PATH 目录即可。
 
 ```bash
 # macOS / Linux
 tar -xzf gitpkg-v1.1.4-darwin-arm64.tar.gz
-sudo mv gitpkg /usr/local/bin/
+chmod +x gitpkg
+mv gitpkg ~/.gitpkg/bin/   # 或其他 PATH 目录
 
-# 或放入用户目录
-mv gitpkg ~/.local/bin/
+# Windows
+# 解压 gitpkg-v1.1.4-windows-x86_64.zip，将 gitpkg.exe 放入 PATH 目录
 ```
 
 ### 基本用法
