@@ -98,7 +98,7 @@ download_and_install() {
     info "下载: ${archive_name}"
     local tmp_dir
     tmp_dir=$(mktemp -d)
-    trap 'rm -rf "${tmp_dir}"' EXIT
+    trap "rm -rf '${tmp_dir}'" EXIT
 
     curl -fSL --progress-bar "${download_url}" -o "${tmp_dir}/${archive_name}"
 
