@@ -99,7 +99,7 @@ download_and_install() {
     local tmp_dir
     tmp_dir=$(mktemp -d)
     # 使用函数封装 trap，避免路径中特殊字符（如单引号）导致命令注入或中断
-    cleanup() { rm -rf "${tmp_dir}"; }
+    cleanup() { rm -rf "${tmp_dir:-}"; }
     trap cleanup EXIT
 
     curl -fSL --progress-bar "${download_url}" -o "${tmp_dir}/${archive_name}"
