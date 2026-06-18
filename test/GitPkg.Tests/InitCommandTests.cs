@@ -5,8 +5,8 @@ namespace GitPkg.Tests;
 
 /// <summary>
 /// init 命令单元测试。
-/// 验证各 Shell（zsh/bash/fish/powershell）的初始化脚本输出格式和错误处理。
-/// 与 CliIntegrationTests 共享 "ConsoleCapture" 集合，避免并行 Console 重定向冲突。
+/// 验证各 Shell 的初始化脚本包含 PATH 设置和自动补全两部分。
+/// 与 CliIntegrationTests 共享 "ConsoleCapture" 集合。
 /// </summary>
 [Collection("ConsoleCapture")]
 public class InitCommandTests
@@ -37,7 +37,7 @@ public class InitCommandTests
         }
     }
 
-    /// <summary>zsh 应输出含 export PATH 的初始化脚本。</summary>
+    /// <summary>zsh：PATH 设置 + compdef 补全注册。</summary>
     [Fact]
     public async Task Init_Zsh_WritesExportPath()
     {
@@ -46,9 +46,11 @@ public class InitCommandTests
         Assert.Equal(0, exitCode);
         Assert.StartsWith("# gitpkg shell init for zsh", stdout);
         Assert.Contains("export PATH=", stdout);
+        Assert.Contains("#compdef gitpkg", stdout);
+        Assert.Contains("[suggest]", stdout);
     }
 
-    /// <summary>bash 应输出含 export PATH 的初始化脚本。</summary>
+    /// <summary>bash：PATH 设置 + complete -F 补全注册。</summary>
     [Fact]
     public async Task Init_Bash_WritesExportPath()
     {
@@ -57,9 +59,11 @@ public class InitCommandTests
         Assert.Equal(0, exitCode);
         Assert.StartsWith("# gitpkg shell init for bash", stdout);
         Assert.Contains("export PATH=", stdout);
+        Assert.Contains("complete -F", stdout);
+        Assert.Contains("[suggest]", stdout);
     }
 
-    /// <summary>fish 应输出含 fish_add_path 的初始化脚本。</summary>
+    /// <summary>fish：PATH 设置 + complete -c 补全注册。</summary>
     [Fact]
     public async Task Init_Fish_WritesFishAddPath()
     {
@@ -68,9 +72,11 @@ public class InitCommandTests
         Assert.Equal(0, exitCode);
         Assert.StartsWith("# gitpkg shell init for fish", stdout);
         Assert.Contains("fish_add_path", stdout);
+        Assert.Contains("complete -c", stdout);
+        Assert.Contains("[suggest]", stdout);
     }
 
-    /// <summary>powershell 应输出含 $env:Path 的初始化脚本。</summary>
+    /// <summary>powershell：PATH 设置 + Register-ArgumentCompleter 注册。</summary>
     [Fact]
     public async Task Init_Powershell_WritesEnvPath()
     {
@@ -79,9 +85,11 @@ public class InitCommandTests
         Assert.Equal(0, exitCode);
         Assert.StartsWith("# gitpkg shell init for powershell", stdout);
         Assert.Contains("$env:Path", stdout);
+        Assert.Contains("Register-ArgumentCompleter", stdout);
+        Assert.Contains("[suggest]", stdout);
     }
 
-    /// <summary>pwsh 别名应输出与 powershell 相同的初始化脚本。</summary>
+    /// <summary>pwsh 别名输出应与 powershell 一致。</summary>
     [Fact]
     public async Task Init_Pwsh_Alias_WritesEnvPath()
     {
@@ -90,6 +98,7 @@ public class InitCommandTests
         Assert.Equal(0, exitCode);
         Assert.StartsWith("# gitpkg shell init for powershell", stdout);
         Assert.Contains("$env:Path", stdout);
+        Assert.Contains("Register-ArgumentCompleter", stdout);
     }
 
     /// <summary>非法 shell 名应返回退出码 1 并将错误信息输出到 stderr。</summary>

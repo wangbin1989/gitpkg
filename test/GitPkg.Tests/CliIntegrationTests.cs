@@ -107,7 +107,7 @@ public class CliIntegrationTests
         Assert.NotEqual(0, exitCode);
     }
 
-    /// <summary>init zsh 应返回退出码 0 并输出初始化脚本。</summary>
+    /// <summary>init zsh 应返回退出码 0，输出 PATH 设置和补全脚本。</summary>
     [Fact]
     public async Task Init_Zsh_ReturnsScript()
     {
@@ -115,6 +115,8 @@ public class CliIntegrationTests
 
         Assert.Equal(0, exitCode);
         Assert.Contains("export PATH=", stdout);
+        Assert.Contains("#compdef gitpkg", stdout);
+        Assert.Contains("[suggest]", stdout);
     }
 
     /// <summary>init 对非法 shell 名应返回错误并输出到 stderr。</summary>
