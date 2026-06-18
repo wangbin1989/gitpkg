@@ -249,4 +249,35 @@ public class CliIntegrationTests
         Assert.Empty(stdout);
         Assert.Contains("不支持的 shell", stderr);
     }
+
+    /// <summary>install 缺少 repo 参数且无 --from 时应返回非零退出码。</summary>
+    [Fact]
+    public async Task Install_MissingArgument_ReturnsError()
+    {
+        var (exitCode, _, _) = await InvokeAsync(["install"]);
+
+        Assert.NotEqual(0, exitCode);
+    }
+
+    /// <summary>install --help 不应包含已移除的 --add-path 选项。</summary>
+    [Fact]
+    public async Task Install_Help_NoAddPath()
+    {
+        var (exitCode, stdout, _) = await InvokeAsync(["install", "--help"]);
+
+        Assert.Equal(0, exitCode);
+        Assert.DoesNotContain("add-path", stdout);
+    }
+
+    /// <summary>update --help 应显示命令说明。</summary>
+    [Fact]
+    public async Task Update_Help_ShowsDescription()
+    {
+        var (exitCode, stdout, _) = await InvokeAsync(["update", "--help"]);
+
+        Assert.Equal(0, exitCode);
+        Assert.Contains("update", stdout.ToLowerInvariant());
+        Assert.True(stdout.Length > 20);
+    }
+
 }

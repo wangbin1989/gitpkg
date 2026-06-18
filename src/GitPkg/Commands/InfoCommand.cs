@@ -24,7 +24,7 @@ public static class InfoCommand
 
             try
             {
-                await HandleAsync(name, ct);
+                await HandleAsync(name!, ct);
                 return 0;
             }
             catch (HttpRequestException ex) when (ex.Message.Contains("Not Found") || ex.Message.Contains("资源不存在"))

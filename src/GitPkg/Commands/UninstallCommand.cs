@@ -23,7 +23,7 @@ public static class UninstallCommand
 
             try
             {
-                await HandleAsync(name, ct);
+                await HandleAsync(name!, ct);
                 return 0;
             }
             catch (Exception ex)
