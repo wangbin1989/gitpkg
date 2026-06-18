@@ -146,16 +146,28 @@ check_path() {
     esac
 
     if [[ -n "${rc_file}" ]]; then
+        # 使用 gitpkg init <shell> 生成初始化脚本
+        local init_script
+        init_script=$("${INSTALL_DIR}/${BINARY_NAME}" init "${shell_name}" 2>/dev/null) || true
+
+        if [[ -z "${init_script}" ]]; then
+            # 兜底：手动构造 export PATH
+            case "${shell_name}" in
+                fish) init_script="fish_add_path \"${INSTALL_DIR}\"" ;;
+                *)    init_script="export PATH=\"${INSTALL_DIR}:\$PATH\"" ;;
+            esac
+        fi
+
         echo ""
-        echo "  将以下行添加到 ${rc_file} 后重新打开终端:"
+        echo "  将以下内容追加到 ${rc_file}:"
         echo ""
-        printf "  ${CYAN}export PATH=\"%s:\$PATH\"${NC}\n" "${INSTALL_DIR}"
+        printf "  ${CYAN}%s${NC}\n" "${init_script}"
         echo ""
         read -r -p "  是否自动添加? [Y/n] " answer
         if [[ -z "${answer}" || "${answer}" =~ ^[Yy] ]]; then
             echo "" >> "${rc_file}"
             echo "# GitPkg" >> "${rc_file}"
-            echo "export PATH=\"${INSTALL_DIR}:\$PATH\"" >> "${rc_file}"
+            echo "${init_script}" >> "${rc_file}"
             info "已添加到 ${rc_file}，运行 'source ${rc_file}' 或重新打开终端使其生效"
         fi
     else

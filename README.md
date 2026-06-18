@@ -29,9 +29,9 @@ curl -fsSL https://raw.githubusercontent.com/wangbin1989/gitpkg/main/install.sh 
 Invoke-Expression (Invoke-RestMethod https://raw.githubusercontent.com/wangbin1989/gitpkg/main/install.ps1)
 ```
 
-脚本会自动检测平台，下载最新版本并安装到 `~/.gitpkg/bin`。
+脚本会自动检测平台，下载最新版本并安装到 `~/.gitpkg/bin`，安装完成后会提示通过 `gitpkg init` 将目录加入 PATH。
 
-安装完成后，将 gitpkg 加入 PATH：
+如果跳过了自动配置，可以手动执行：
 
 ```bash
 # zsh
@@ -64,6 +64,9 @@ mv gitpkg ~/.gitpkg/bin/   # 或其他 PATH 目录
 ### 基本用法
 
 ```bash
+# 初始化 Shell 环境（将 gitpkg 加入 PATH）
+eval "$(gitpkg init zsh)"
+
 # 安装工具（自动匹配当前平台）
 gitpkg install BurntSushi/ripgrep
 
@@ -112,6 +115,8 @@ gitpkg install --from tools.json             # 安装
 
 ```
 ~/.gitpkg/
+├── bin/                   # gitpkg 自身安装目录
+│   └── gitpkg
 ├── manifest.json          # 已安装工具清单
 ├── tools/                 # 工具安装目录
 │   ├── ripgrep/

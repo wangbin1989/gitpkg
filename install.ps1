@@ -90,22 +90,28 @@ function Install-GitPkg {
 
     Remove-Item -Recurse -Force $tmpDir
 
-    # PATH 检查 — 追加到 $PROFILE
+    # PATH 检查 — 使用 gitpkg init 生成初始化脚本并追加到 $PROFILE
     $profileDir = Split-Path $PROFILE -Parent
     if (-not (Test-Path $profileDir)) {
         New-Item -ItemType Directory -Force -Path $profileDir | Out-Null
     }
 
-    $profileLine = "`$env:Path = `"$InstallDir;`$env:Path`""
+    $destPath = Join-Path $InstallDir $BinaryName
+    $initScript = try {
+        & $destPath init powershell 2>$null
+    } catch {
+        # 兜底：手动构造
+        "`$env:Path = `"$InstallDir;`$env:Path`""
+    }
 
     if (Test-Path $PROFILE) {
         $profileContent = Get-Content $PROFILE -Raw
         if ($profileContent -notmatch [regex]::Escape($InstallDir)) {
-            Add-Content $PROFILE "`n# GitPkg`n$profileLine"
+            Add-Content $PROFILE "`n# GitPkg`n$initScript"
             Write-Host "已添加到 `$PROFILE，重新打开终端使其生效" -ForegroundColor Green
         }
     } else {
-        Set-Content $PROFILE "# GitPkg`n$profileLine"
+        Set-Content $PROFILE "# GitPkg`n$initScript"
         Write-Host "已创建 `$PROFILE 并添加 PATH，重新打开终端使其生效" -ForegroundColor Green
     }
 }
