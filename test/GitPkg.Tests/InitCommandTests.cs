@@ -111,4 +111,63 @@ public class InitCommandTests
         Assert.Empty(stdout);
         Assert.Contains("不支持的 shell", stderr);
     }
+
+    /// <summary>POSIX 转义：普通路径保持不变。</summary>
+    [Fact]
+    public void EscapeForPosixShell_NormalPath_Unchanged()
+    {
+        var result = InitCommand.EscapeForPosixShell("/usr/local/bin");
+        Assert.Equal("'/usr/local/bin'", result);
+    }
+
+    /// <summary>POSIX 转义：含单引号的路径应正确转义为 '\'' 模式。</summary>
+    [Fact]
+    public void EscapeForPosixShell_WithSingleQuote_EscapesCorrectly()
+    {
+        var result = InitCommand.EscapeForPosixShell("/path/it's here");
+        Assert.Equal("'/path/it'\\''s here'", result);
+    }
+
+    /// <summary>POSIX 转义：含 $ 的路径不应被 shell 展开。</summary>
+    [Fact]
+    public void EscapeForPosixShell_WithDollarSign_PreventsExpansion()
+    {
+        var result = InitCommand.EscapeForPosixShell("/path/$foo");
+        // 单引号内 $ 是字面量，不会被展开
+        Assert.Equal("'/path/$foo'", result);
+    }
+
+    /// <summary>POSIX 转义：含反引号的路径不应被 shell 执行。</summary>
+    [Fact]
+    public void EscapeForPosixShell_WithBacktick_PreventsExecution()
+    {
+        var result = InitCommand.EscapeForPosixShell("/path/`id`");
+        // 单引号内反引号是字面量，不会被当作命令替换
+        Assert.Equal("'/path/`id`'", result);
+    }
+
+    /// <summary>PowerShell 转义：普通路径保持不变。</summary>
+    [Fact]
+    public void EscapeForPowershell_NormalPath_Unchanged()
+    {
+        var result = InitCommand.EscapeForPowershell("C:\\Program Files\\GitPkg");
+        Assert.Equal("C:\\Program Files\\GitPkg", result);
+    }
+
+    /// <summary>PowerShell 转义：含单引号的路径应双写单引号。</summary>
+    [Fact]
+    public void EscapeForPowershell_WithSingleQuote_Doubles()
+    {
+        var result = InitCommand.EscapeForPowershell("C:\\it's here");
+        Assert.Equal("C:\\it''s here", result);
+    }
+
+    /// <summary>PowerShell 转义：含 $ 的路径不应被展开。</summary>
+    [Fact]
+    public void EscapeForPowershell_WithDollar_PreventsExpansion()
+    {
+        var result = InitCommand.EscapeForPowershell("C:\\path\\$foo");
+        // $ 在 PowerShell 单引号内是字面量
+        Assert.Equal("C:\\path\\$foo", result);
+    }
 }
