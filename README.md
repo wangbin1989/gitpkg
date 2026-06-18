@@ -31,6 +31,22 @@ Invoke-Expression (Invoke-RestMethod https://raw.githubusercontent.com/wangbin19
 
 脚本会自动检测平台，下载最新版本并安装到 `~/.gitpkg/bin`。
 
+安装完成后，将 gitpkg 加入 PATH：
+
+```bash
+# zsh
+eval "$(~/.gitpkg/bin/gitpkg init zsh)" >> ~/.zshrc
+source ~/.zshrc
+
+# bash
+eval "$(~/.gitpkg/bin/gitpkg init bash)" >> ~/.bashrc
+source ~/.bashrc
+
+# fish
+~/.gitpkg/bin/gitpkg init fish >> ~/.config/fish/config.fish
+source ~/.config/fish/config.fish
+```
+
 **手动安装：**
 
 从 [GitHub Releases](https://github.com/wangbin1989/gitpkg/releases) 下载对应平台的归档文件，解压后将 `gitpkg` 放入 PATH 目录即可。
@@ -107,6 +123,7 @@ gitpkg install --from tools.json             # 安装
 
 | 命令 | 说明 |
 |------|------|
+| `gitpkg init <shell>` | 输出 shell 初始化脚本 |
 | `gitpkg install <owner/repo>[@version]` | 安装工具 |
 | `gitpkg update [name]` | 更新工具 |
 | `gitpkg outdated` | 检查更新 |

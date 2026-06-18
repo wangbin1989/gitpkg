@@ -6,6 +6,7 @@ GitPkgApp.Initialize();
 
 var root = new RootCommand("gitpkg — GitHub Release 自动更新工具");
 
+root.Add(InitCommand.Create());
 root.Add(InstallCommand.Create());
 root.Add(UpdateCommand.Create());
 root.Add(OutdatedCommand.Create());
