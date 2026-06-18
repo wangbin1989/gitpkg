@@ -170,4 +170,12 @@ public class ManifestServiceTests
         Assert.Equal("repo", ManifestService.GetRepoName("owner/repo"));
         Assert.Equal("repo", ManifestService.GetRepoName("repo"));
     }
+
+    /// <summary>bin 目录路径应以 .gitpkg/bin 结尾。</summary>
+    [Fact]
+    public void GetBinDir_ReturnsCorrectPath()
+    {
+        var dir = ManifestService.GetBinDir();
+        Assert.EndsWith(Path.Combine(".gitpkg", "bin"), dir);
+    }
 }

@@ -8,7 +8,7 @@ namespace GitPkg.Commands;
 
 /// <summary>
 /// install 命令：从 GitHub Release 下载并安装工具。
-/// 核心流程：解析仓库 → 获取 Release → 匹配资产 → 下载 → 校验 → 解压 → 记录清单 → 配置 PATH。
+/// 核心流程：解析仓库 → 获取 Release → 匹配资产 → 下载 → 校验 → 解压 → 链接到 bin → 记录清单。
 /// </summary>
 public static class InstallCommand
 {
@@ -23,9 +23,6 @@ public static class InstallCommand
         var dirOpt = new Option<string?>("--dir", "-d") { Description = "自定义安装目录" };
         cmd.Add(dirOpt);
 
-        var addPathOpt = new Option<bool>("--add-path") { Description = "将工具目录加入 PATH 环境变量" };
-        cmd.Add(addPathOpt);
-
         var gpgOpt = new Option<string?>("--verify-gpg") { Description = "GPG 密钥 ID，用于签名校验" };
         cmd.Add(gpgOpt);
 
@@ -39,7 +36,6 @@ public static class InstallCommand
         {
             var repo = parseResult.GetValue(repoArg);
             var dir = parseResult.GetValue(dirOpt);
-            var addPath = parseResult.GetValue(addPathOpt);
             var gpgKey = parseResult.GetValue(gpgOpt);
             var fromFile = parseResult.GetValue(fromOpt);
             var dryRun = parseResult.GetValue(dryRunOpt);
@@ -47,9 +43,9 @@ public static class InstallCommand
             try
             {
                 if (fromFile != null)
-                    await HandleBatchAsync(fromFile, dryRun, addPath, ct);
+                    await HandleBatchAsync(fromFile, dryRun, ct);
                 else if (repo != null)
-                    await HandleSingleAsync(repo, dir, addPath, gpgKey, ct);
+                    await HandleSingleAsync(repo, dir, gpgKey, ct);
                 else
                     throw new ArgumentException("请指定 owner/repo 或使用 --from <file>");
                 return 0;
@@ -79,7 +75,7 @@ public static class InstallCommand
         return cmd;
     }
 
-    private static async Task HandleBatchAsync(string fromFile, bool dryRun, bool addPath, CancellationToken ct)
+    private static async Task HandleBatchAsync(string fromFile, bool dryRun, CancellationToken ct)
     {
         if (!File.Exists(fromFile))
             throw new FileNotFoundException($"清单文件不存在: {fromFile}");
@@ -114,7 +110,7 @@ public static class InstallCommand
             {
                 try
                 {
-                    await InstallSingleAsync(repo, null, addPath, null, ct);
+                    await InstallSingleAsync(repo, null, null, ct);
                     success++;
                 }
                 catch (Exception ex)
@@ -131,9 +127,9 @@ public static class InstallCommand
         AnsiConsole.MarkupLine($"[bold]{summary}[/]");
     }
 
-    private static async Task HandleSingleAsync(string repo, string? dir, bool addPath, string? gpgKey, CancellationToken ct)
+    private static async Task HandleSingleAsync(string repo, string? dir, string? gpgKey, CancellationToken ct)
     {
-        await InstallSingleAsync(repo, dir, addPath, gpgKey, ct);
+        await InstallSingleAsync(repo, dir, gpgKey, ct);
     }
 
     /// <summary>
@@ -144,10 +140,10 @@ public static class InstallCommand
     /// 4. 下载归档文件
     /// 5. 可选的 GPG / SHA256 校验
     /// 6. 解压到安装目录
-    /// 7. 更新 manifest.json
-    /// 8. 可选：自动加入 PATH
+    /// 7. 链接可执行文件到 ~/.gitpkg/bin/
+    /// 8. 更新 manifest.json
     /// </summary>
-    private static async Task InstallSingleAsync(string repo, string? dir, bool addPath, string? gpgKey, CancellationToken ct)
+    private static async Task InstallSingleAsync(string repo, string? dir, string? gpgKey, CancellationToken ct)
     {
         var gitHub = new GitHubService(GitPkgApp.Http);
         var matcher = new AssetMatcher();
@@ -272,7 +268,7 @@ public static class InstallCommand
             File.Delete(archivePath);
 
         // 9. Handle nested directory
-        var bins = FindExecutables(installDir);
+        var bins = ExecutableFinder.FindExecutables(installDir);
         if (bins.Count == 0)
         {
             var subDirs = Directory.GetDirectories(installDir);
@@ -287,7 +283,10 @@ public static class InstallCommand
             }
         }
 
-        // 10. Update manifest
+        // 10. Link executables to ~/.gitpkg/bin/
+        LinkToBinDir(installDir);
+
+        // 11. Update manifest
         await manifest.AddToolAsync(new ToolEntry
         {
             Name = toolName,
@@ -296,32 +295,6 @@ public static class InstallCommand
             InstallPath = installDir,
             InstalledAt = DateTime.UtcNow
         }, ct);
-
-        // 11. PATH setup
-        if (addPath)
-        {
-            var pathDir = FindExecutableDir(installDir);
-            var shell = PathService.DetectShell() ?? "bash";
-            var added = PathService.AddToPath(pathDir, shell);
-            if (added)
-            {
-                var configFile = PathService.GetConfigFilePath(shell);
-                var reloadCmd = shell switch
-                {
-                    "powershell" => $". $PROFILE",
-                    "cmd" => null,
-                    _ => $"source {configFile}"
-                };
-                var hint = reloadCmd != null
-                    ? $"请执行 {reloadCmd} 或重新打开终端"
-                    : "请重新打开终端";
-                AnsiConsole.MarkupLine($"[blue]ℹ PATH 已更新，{hint}[/]");
-            }
-            else
-            {
-                AnsiConsole.MarkupLine("[grey]  PATH 中已存在该目录，跳过[/]");
-            }
-        }
 
         // 12. Success
         var versionDisplay = release.Name ?? release.TagName;
@@ -391,49 +364,29 @@ public static class InstallCommand
         AnsiConsole.MarkupLine("[green] ✓[/]");
     }
 
-    /// <summary>在目录中查找可执行文件（排除文档类文件如 LICENSE、README）。</summary>
-    private static List<string> FindExecutables(string dir)
+    /// <summary>将安装目录中的可执行文件链接到 ~/.gitpkg/bin/。</summary>
+    internal static void LinkToBinDir(string installDir)
     {
-        if (!Directory.Exists(dir)) return [];
+        var binDir = ManifestService.GetBinDir();
+        Directory.CreateDirectory(binDir);
 
-        var bins = new List<string>();
-        foreach (var file in Directory.GetFiles(dir, "*", SearchOption.TopDirectoryOnly))
+        var exeDir = ExecutableFinder.FindExecutableDir(installDir);
+        var executables = ExecutableFinder.FindExecutables(exeDir);
+
+        foreach (var exe in executables)
         {
-            var name = Path.GetFileNameWithoutExtension(file).ToLowerInvariant();
-            if (name is "license" or "readme" or "changelog" or "copying")
-                continue;
+            var fileName = Path.GetFileName(exe);
+            var linkPath = Path.Combine(binDir, fileName);
 
-            if (OperatingSystem.IsWindows())
-            {
-                var ext = Path.GetExtension(file).ToLowerInvariant();
-                if (ext is ".exe" or ".bat" or ".cmd")
-                    bins.Add(file);
-            }
-            else
-            {
-                var ext = Path.GetExtension(file).ToLowerInvariant();
-                if (ext == "" || ext == ".sh")
-                    bins.Add(file);
-            }
+            // 移除已存在的同名链接/文件（覆盖安装场景）
+            if (File.Exists(linkPath))
+                File.Delete(linkPath);
+
+            File.CreateSymbolicLink(linkPath, exe);
         }
 
-        return bins;
-    }
-
-    /// <summary>查找包含可执行文件的目录（优先 bin 子目录）。</summary>
-    private static string FindExecutableDir(string installDir)
-    {
-        if (FindExecutables(installDir).Count > 0)
-            return installDir;
-
-        foreach (var sub in new[] { "bin" })
-        {
-            var path = Path.Combine(installDir, sub);
-            if (Directory.Exists(path) && FindExecutables(path).Count > 0)
-                return path;
-        }
-
-        return installDir;
+        if (executables.Count > 0)
+            AnsiConsole.MarkupLine($"[grey]  已链接 {executables.Count} 个可执行文件到 {binDir}[/]");
     }
 
 }

@@ -39,7 +39,7 @@ public static class UpdateCommand
     }
 
     /// <summary>
-    /// 执行更新流程：检查版本 → 下载新版本 → 备份旧版本 → 解压替换 → 更新清单。
+    /// 执行更新流程：检查版本 → 下载新版本 → 备份旧版本 → 解压替换 → 链接到 bin → 更新清单。
     /// 解压失败时自动恢复备份。
     /// </summary>
     private static async Task HandleAsync(string? name, CancellationToken ct)
@@ -186,6 +186,9 @@ public static class UpdateCommand
                 // Clean up archive
                 if (File.Exists(archivePath))
                     File.Delete(archivePath);
+
+                // Re-link executables to ~/.gitpkg/bin/
+                InstallCommand.LinkToBinDir(tool.InstallPath);
 
                 // Update manifest
                 await manifest.AddToolAsync(tool with

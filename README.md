@@ -98,9 +98,6 @@ gitpkg uninstall ripgrep
 # 指定安装目录
 gitpkg install junegunn/fzf --dir /opt/tools
 
-# 自动加入 PATH
-gitpkg install BurntSushi/ripgrep --add-path
-
 # 开启 GPG 签名校验
 gitpkg install sharkdp/fd --verify-gpg <key-id>
 
@@ -114,7 +111,9 @@ gitpkg install --from tools.json             # 安装
 
 ```
 ~/.gitpkg/
-├── bin/                   # gitpkg 自身安装目录
+├── bin/                   # 可执行文件符号链接目录（所有已安装工具）
+│   ├── rg -> ../tools/ripgrep/rg
+│   ├── fd -> ../tools/fd/fd
 │   └── gitpkg
 ├── manifest.json          # 已安装工具清单
 ├── tools/                 # 工具安装目录
