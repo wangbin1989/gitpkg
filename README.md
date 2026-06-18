@@ -67,6 +67,9 @@ mv gitpkg ~/.gitpkg/bin/   # 或其他 PATH 目录
 # 初始化 Shell 环境（将 gitpkg 加入 PATH）
 eval "$(gitpkg init zsh)"
 
+# 启用 Shell 自动补全
+eval "$(gitpkg completion zsh)"
+
 # 安装工具（自动匹配当前平台）
 gitpkg install BurntSushi/ripgrep
 
@@ -129,6 +132,7 @@ gitpkg install --from tools.json             # 安装
 | 命令 | 说明 |
 |------|------|
 | `gitpkg init <shell>` | 输出 shell 初始化脚本 |
+| `gitpkg completion <shell>` | 输出 shell 自动补全脚本 |
 | `gitpkg install <owner/repo>[@version]` | 安装工具 |
 | `gitpkg update [name]` | 更新工具 |
 | `gitpkg outdated` | 检查更新 |

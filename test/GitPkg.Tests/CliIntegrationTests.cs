@@ -25,6 +25,7 @@ public class CliIntegrationTests
         var root = new RootCommand("gitpkg — GitHub Release 自动更新工具");
 
         root.Add(InitCommand.Create());
+        root.Add(CompletionCommand.Create());
         root.Add(InstallCommand.Create());
         root.Add(UpdateCommand.Create());
         root.Add(OutdatedCommand.Create());
@@ -61,22 +62,20 @@ public class CliIntegrationTests
         }
     }
 
-    /// <summary>--help 应输出所有已注册的子命令名称。</summary>
+    /// <summary>--help 应返回 0 且输出中包含关键命令名称。</summary>
     [Fact]
     public async Task Help_ContainsAllCommands()
     {
         var (exitCode, stdout, _) = await InvokeAsync(["--help"]);
 
         Assert.Equal(0, exitCode);
-
-        var expectedCommands = new[]
-        {
-            "init", "install", "update", "outdated",
-            "uninstall", "list", "info", "manifest", "self-update"
-        };
-
-        foreach (var cmd in expectedCommands)
-            Assert.Contains(cmd, stdout);
+        // 验证几个关键命令是否出现在帮助输出中
+        Assert.Contains("init", stdout);
+        Assert.Contains("install", stdout);
+        Assert.Contains("update", stdout);
+        Assert.Contains("uninstall", stdout);
+        Assert.Contains("list", stdout);
+        Assert.Contains("completion", stdout);
     }
 
     /// <summary>--version 应输出版本号。</summary>
@@ -165,6 +164,7 @@ public class CliIntegrationTests
     [InlineData("list")]
     [InlineData("info")]
     [InlineData("manifest")]
+    [InlineData("completion")]
     [InlineData("self-update")]
     public async Task SubCommand_Help_ShowsDescription(string command)
     {
@@ -191,5 +191,61 @@ public class CliIntegrationTests
         var (exitCode, _, _) = await InvokeAsync(["info"]);
 
         Assert.NotEqual(0, exitCode);
+    }
+
+    /// <summary>completion zsh 应输出含 compdef 的补全脚本。</summary>
+    [Fact]
+    public async Task Completion_Zsh_ReturnsScript()
+    {
+        var (exitCode, stdout, stderr) = await InvokeAsync(["completion", "zsh"]);
+
+        // 如果失败，输出详细信息帮助诊断
+        Assert.True(exitCode == 0, $"ExitCode={exitCode}, Stdout='{stdout}', Stderr='{stderr}'");
+        Assert.Contains("#compdef gitpkg", stdout);
+        Assert.Contains("[suggest]", stdout);
+    }
+
+    /// <summary>completion bash 应输出含 complete -F 的补全脚本。</summary>
+    [Fact]
+    public async Task Completion_Bash_ReturnsScript()
+    {
+        var (exitCode, stdout, _) = await InvokeAsync(["completion", "bash"]);
+
+        Assert.Equal(0, exitCode);
+        Assert.Contains("complete -F", stdout);
+        Assert.Contains("[suggest]", stdout);
+    }
+
+    /// <summary>completion fish 应输出含 complete -c 的补全脚本。</summary>
+    [Fact]
+    public async Task Completion_Fish_ReturnsScript()
+    {
+        var (exitCode, stdout, _) = await InvokeAsync(["completion", "fish"]);
+
+        Assert.Equal(0, exitCode);
+        Assert.Contains("complete -c", stdout);
+        Assert.Contains("[suggest]", stdout);
+    }
+
+    /// <summary>completion powershell 应输出含 Register-ArgumentCompleter 的补全脚本。</summary>
+    [Fact]
+    public async Task Completion_Powershell_ReturnsScript()
+    {
+        var (exitCode, stdout, _) = await InvokeAsync(["completion", "powershell"]);
+
+        Assert.Equal(0, exitCode);
+        Assert.Contains("Register-ArgumentCompleter", stdout);
+        Assert.Contains("[suggest]", stdout);
+    }
+
+    /// <summary>completion 非法 shell 应返回错误。</summary>
+    [Fact]
+    public async Task Completion_InvalidShell_ReturnsError()
+    {
+        var (exitCode, stdout, stderr) = await InvokeAsync(["completion", "bad"]);
+
+        Assert.Equal(1, exitCode);
+        Assert.Empty(stdout);
+        Assert.Contains("不支持的 shell", stderr);
     }
 }

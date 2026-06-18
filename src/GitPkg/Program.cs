@@ -9,6 +9,7 @@ var root = new RootCommand("gitpkg — GitHub Release 自动更新工具");
 
 // 注册所有子命令
 root.Add(InitCommand.Create());
+root.Add(CompletionCommand.Create());
 root.Add(InstallCommand.Create());
 root.Add(UpdateCommand.Create());
 root.Add(OutdatedCommand.Create());
