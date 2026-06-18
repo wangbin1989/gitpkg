@@ -6,7 +6,9 @@ namespace GitPkg.Tests;
 /// <summary>
 /// init 命令单元测试。
 /// 验证各 Shell（zsh/bash/fish/powershell）的初始化脚本输出格式和错误处理。
+/// 与 CliIntegrationTests 共享 "ConsoleCapture" 集合，避免并行 Console 重定向冲突。
 /// </summary>
+[Collection("ConsoleCapture")]
 public class InitCommandTests
 {
     /// <summary>构建 init 命令并捕获 stdout/stderr 和退出码。</summary>
