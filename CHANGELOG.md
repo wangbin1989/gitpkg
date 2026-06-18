@@ -1,5 +1,25 @@
 # Changelog
 
+## [1.2.0] - 2026-06-18
+
+### Added
+- 新增 `init <shell>` 命令：输出 shell 初始化脚本，用于 eval 集成（`eval "$(gitpkg init zsh)"`）
+- 新增 `completion <shell>` 命令：输出 shell 自动补全脚本，利用 System.CommandLine 内置 `[suggest]` 指令
+- 新增 CLI 集成测试（`CliIntegrationTests`），覆盖 --help、--version、命令分发、退出码等端到端场景
+- 单元测试按类别拆分为独立文件（AssetMatcher / Sha256Verifier / ManifestService 等 7 个文件）
+
+### Changed
+- 安装脚本（install.sh / install.ps1）改用 `gitpkg init` 生成 PATH 配置，带兜底逻辑
+- 更新 README：补充 init / completion 命令用法和命令速查表
+
+### Fixed
+- `InitCommand`: binDir 路径使用单引号包裹并转义单引号（`'\\''`），防止 eval 命令注入
+- `install.sh`: trap 改用函数封装（`cleanup() { rm -rf "${tmp_dir}"; }`），避免路径中单引号导致引号错乱
+- `install.sh`: 兜底路径使用 sed 单引号转义，防止 `$`、`` ` ``、`"`、`\` 被 shell 展开
+
+### Security
+- 路径转义策略：POSIX Shell 用 `'\\''` 模式，PowerShell 用 `''` 双写，消除 eval 注入面
+
 ## [1.1.4] - 2026-06-17
 
 ### Changed
