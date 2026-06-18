@@ -98,7 +98,9 @@ download_and_install() {
     info "下载: ${archive_name}"
     local tmp_dir
     tmp_dir=$(mktemp -d)
-    trap "rm -rf '${tmp_dir}'" EXIT
+    # 使用函数封装 trap，避免路径中特殊字符（如单引号）导致命令注入或中断
+    cleanup() { rm -rf "${tmp_dir}"; }
+    trap cleanup EXIT
 
     curl -fSL --progress-bar "${download_url}" -o "${tmp_dir}/${archive_name}"
 
@@ -146,16 +148,31 @@ check_path() {
     esac
 
     if [[ -n "${rc_file}" ]]; then
+        # 使用 gitpkg init <shell> 生成初始化脚本
+        local init_script
+        init_script=$("${INSTALL_DIR}/${BINARY_NAME}" init "${shell_name}" 2>/dev/null) || true
+
+        if [[ -z "${init_script}" ]]; then
+            # 兜底：手动构造（用单引号包裹路径，防止 $ ` " \ 等 shell 特殊字符被展开）
+            #       使用 sed 将路径中的 ' 替换为 '\''（结束引号→转义单引号→恢复引号）
+            local escaped_dir
+            escaped_dir=$(printf '%s' "${INSTALL_DIR}" | sed "s/'/'\\\\''/g")
+            case "${shell_name}" in
+                fish) init_script="fish_add_path '${escaped_dir}'" ;;
+                *)    init_script="export PATH='${escaped_dir}':\$PATH" ;;
+            esac
+        fi
+
         echo ""
-        echo "  将以下行添加到 ${rc_file} 后重新打开终端:"
+        echo "  将以下内容追加到 ${rc_file}:"
         echo ""
-        printf "  ${CYAN}export PATH=\"%s:\$PATH\"${NC}\n" "${INSTALL_DIR}"
+        printf "  ${CYAN}%s${NC}\n" "${init_script}"
         echo ""
         read -r -p "  是否自动添加? [Y/n] " answer
         if [[ -z "${answer}" || "${answer}" =~ ^[Yy] ]]; then
             echo "" >> "${rc_file}"
             echo "# GitPkg" >> "${rc_file}"
-            echo "export PATH=\"${INSTALL_DIR}:\$PATH\"" >> "${rc_file}"
+            echo "${init_script}" >> "${rc_file}"
             info "已添加到 ${rc_file}，运行 'source ${rc_file}' 或重新打开终端使其生效"
         fi
     else

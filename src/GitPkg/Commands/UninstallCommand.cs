@@ -4,8 +4,12 @@ using GitPkg.Services;
 
 namespace GitPkg.Commands;
 
+/// <summary>
+/// uninstall 命令：删除已安装工具的文件并从清单中移除。
+/// </summary>
 public static class UninstallCommand
 {
+    /// <summary>创建 uninstall 命令。</summary>
     public static Command Create()
     {
         var cmd = new Command("uninstall", "卸载已安装的工具");

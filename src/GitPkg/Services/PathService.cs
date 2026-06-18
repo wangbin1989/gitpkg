@@ -1,7 +1,15 @@
 namespace GitPkg.Services;
 
+/// <summary>
+/// Shell 环境和 PATH 管理工具，负责检测当前 Shell 类型、获取配置文件路径、写入 PATH 条目。
+/// </summary>
 public static class PathService
 {
+    /// <summary>
+    /// 检测当前终端使用的 Shell 类型。
+    /// macOS/Linux 通过 $SHELL 环境变量，Windows 通过 $PSModulePath。
+    /// </summary>
+    /// <returns>Shell 标识符（zsh / bash / fish / powershell / cmd），默认为 bash。</returns>
     public static string? DetectShell()
     {
         // Check SHELL environment variable (macOS/Linux)
@@ -25,6 +33,7 @@ public static class PathService
         return "bash"; // default fallback
     }
 
+    /// <summary>获取指定 Shell 的配置文件路径（~/.zshrc、~/.bashrc 等）。</summary>
     public static string GetConfigFilePath(string shell)
     {
         var home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
@@ -39,6 +48,10 @@ public static class PathService
         };
     }
 
+    /// <summary>
+    /// 将目录追加到 Shell 配置文件的 PATH 中。
+    /// </summary>
+    /// <returns>true 表示已添加；false 表示 PATH 中已存在该目录。</returns>
     public static bool AddToPath(string installDir, string shell)
     {
         var configFile = GetConfigFilePath(shell);

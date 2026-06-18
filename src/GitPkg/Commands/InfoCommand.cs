@@ -4,8 +4,13 @@ using GitPkg.Services;
 
 namespace GitPkg.Commands;
 
+/// <summary>
+/// info 命令：查看工具的详细信息。
+/// 优先按已安装工具名查找，其次按 owner/repo 格式远程查询。
+/// </summary>
 public static class InfoCommand
 {
+    /// <summary>创建 info 命令。</summary>
     public static Command Create()
     {
         var cmd = new Command("info", "查看工具详情");
@@ -37,6 +42,10 @@ public static class InfoCommand
         return cmd;
     }
 
+    /// <summary>
+    /// 解析输入参数，支持已安装工具名和 owner/repo 两种格式。
+    /// 展示仓库描述、已安装版本、最新版本和可用资产列表。
+    /// </summary>
     private static async Task HandleAsync(string input, CancellationToken ct)
     {
         var gitHub = new GitHubService(GitPkgApp.Http);

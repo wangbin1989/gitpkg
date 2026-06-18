@@ -29,7 +29,22 @@ curl -fsSL https://raw.githubusercontent.com/wangbin1989/gitpkg/main/install.sh 
 Invoke-Expression (Invoke-RestMethod https://raw.githubusercontent.com/wangbin1989/gitpkg/main/install.ps1)
 ```
 
-脚本会自动检测平台，下载最新版本并安装到 `~/.gitpkg/bin`。
+脚本会自动检测平台，下载最新版本并安装到 `~/.gitpkg/bin`，安装完成后会提示通过 `gitpkg init` 将目录加入 PATH 并启用自动补全。
+
+如果跳过了自动配置，可以手动执行：
+
+```bash
+# zsh / bash（一句话搞定 PATH + 补全）
+eval "$(~/.gitpkg/bin/gitpkg init zsh)" >> ~/.zshrc
+source ~/.zshrc
+
+# fish
+~/.gitpkg/bin/gitpkg init fish >> ~/.config/fish/config.fish
+source ~/.config/fish/config.fish
+
+# 如果只需要单独配置补全
+eval "$(gitpkg completion zsh)"
+```
 
 **手动安装：**
 
@@ -48,6 +63,9 @@ mv gitpkg ~/.gitpkg/bin/   # 或其他 PATH 目录
 ### 基本用法
 
 ```bash
+# 初始化 Shell 环境（一键配置 PATH + 自动补全）
+eval "$(gitpkg init zsh)"
+
 # 安装工具（自动匹配当前平台）
 gitpkg install BurntSushi/ripgrep
 
@@ -96,6 +114,8 @@ gitpkg install --from tools.json             # 安装
 
 ```
 ~/.gitpkg/
+├── bin/                   # gitpkg 自身安装目录
+│   └── gitpkg
 ├── manifest.json          # 已安装工具清单
 ├── tools/                 # 工具安装目录
 │   ├── ripgrep/
@@ -107,6 +127,8 @@ gitpkg install --from tools.json             # 安装
 
 | 命令 | 说明 |
 |------|------|
+| `gitpkg init <shell>` | 输出 shell 初始化脚本 |
+| `gitpkg completion <shell>` | 输出 shell 自动补全脚本 |
 | `gitpkg install <owner/repo>[@version]` | 安装工具 |
 | `gitpkg update [name]` | 更新工具 |
 | `gitpkg outdated` | 检查更新 |

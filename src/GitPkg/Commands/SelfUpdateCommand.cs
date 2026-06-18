@@ -8,11 +8,19 @@ using GitPkg.Services;
 
 namespace GitPkg.Commands;
 
+/// <summary>
+/// self-update 命令：将 GitPkg 自身更新到最新版本。
+/// 下载新版本二进制文件，替换当前运行的可执行文件。
+/// 在 Unix 上通过文件重命名原地替换；在 Windows 上通过批处理脚本延迟替换。
+/// </summary>
 public static class SelfUpdateCommand
 {
+    /// <summary>GitPkg 仓库的 owner。</summary>
     private const string Owner = "wangbin1989";
+    /// <summary>GitPkg 仓库名。</summary>
     private const string Repo = "gitpkg";
 
+    /// <summary>创建 self-update 命令。</summary>
     public static Command Create()
     {
         var cmd = new Command("self-update", "更新 GitPkg 自身到最新版本");
@@ -184,6 +192,7 @@ public static class SelfUpdateCommand
         AnsiConsole.MarkupLine($"[green]✓ GitPkg 已更新到 {latestVersion}[/]");
     }
 
+    /// <summary>从程序集元数据中提取当前版本号，失败时返回 v0.0.0。</summary>
     private static string GetCurrentVersion()
     {
         var attr = Assembly.GetExecutingAssembly()
@@ -203,6 +212,7 @@ public static class SelfUpdateCommand
         return "v0.0.0";
     }
 
+    /// <summary>按语义化版本号比较，判断 latest 是否比 current 更新。</summary>
     private static bool IsNewer(string latest, string current)
     {
         var l = ParseVersion(latest);
@@ -218,6 +228,7 @@ public static class SelfUpdateCommand
         return l.Length > c.Length;
     }
 
+    /// <summary>解析版本字符串为整数数组，失败返回 null。</summary>
     private static int[]? ParseVersion(string v)
     {
         if (v.StartsWith('v') || v.StartsWith('V'))
@@ -235,6 +246,7 @@ public static class SelfUpdateCommand
         return result;
     }
 
+    /// <summary>在解压目录中递归查找指定名称的二进制文件。</summary>
     private static string? FindBinary(string extractDir, string exeName)
     {
         var direct = Path.Combine(extractDir, exeName);
@@ -249,6 +261,7 @@ public static class SelfUpdateCommand
         return null;
     }
 
+    /// <summary>Unix 平台：设置可执行权限后，通过文件重命名原地替换当前二进制。</summary>
     private static void ReplaceOnUnix(string newBinary, string currentPath)
     {
         if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
@@ -269,6 +282,7 @@ public static class SelfUpdateCommand
         try { File.Delete(oldPath); } catch { /* best effort cleanup */ }
     }
 
+    /// <summary>Windows 平台：通过批处理脚本延迟 2 秒替换（绕过运行中 exe 的文件锁）。</summary>
     private static void ReplaceOnWindows(string newBinary, string currentPath)
     {
         var dir = Path.GetDirectoryName(currentPath)!;

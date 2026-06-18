@@ -6,8 +6,12 @@ using GitPkg.Services;
 
 namespace GitPkg.Commands;
 
+/// <summary>
+/// manifest 命令组：清单管理（导出等），将 manifest.json 内容序列化为 JSON 输出。
+/// </summary>
 public static class ManifestCommand
 {
+    /// <summary>创建 manifest 命令组。</summary>
     public static Command Create()
     {
         var cmd = new Command("manifest", "清单管理");

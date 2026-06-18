@@ -5,8 +5,13 @@ using GitPkg.Services;
 
 namespace GitPkg.Commands;
 
+/// <summary>
+/// update 命令：将已安装的工具更新到最新版本。
+/// 支持更新全部工具或指定单个工具，更新过程包含备份和回滚机制。
+/// </summary>
 public static class UpdateCommand
 {
+    /// <summary>创建 update 命令。</summary>
     public static Command Create()
     {
         var cmd = new Command("update", "更新已安装的工具");
@@ -33,6 +38,10 @@ public static class UpdateCommand
         return cmd;
     }
 
+    /// <summary>
+    /// 执行更新流程：检查版本 → 下载新版本 → 备份旧版本 → 解压替换 → 更新清单。
+    /// 解压失败时自动恢复备份。
+    /// </summary>
     private static async Task HandleAsync(string? name, CancellationToken ct)
     {
         var gitHub = new GitHubService(GitPkgApp.Http);
