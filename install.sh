@@ -153,10 +153,13 @@ check_path() {
         init_script=$("${INSTALL_DIR}/${BINARY_NAME}" init "${shell_name}" 2>/dev/null) || true
 
         if [[ -z "${init_script}" ]]; then
-            # 兜底：手动构造 export PATH
+            # 兜底：手动构造（用单引号包裹路径，防止 $ ` " \ 等 shell 特殊字符被展开）
+            #       使用 sed 将路径中的 ' 替换为 '\''（结束引号→转义单引号→恢复引号）
+            local escaped_dir
+            escaped_dir=$(printf '%s' "${INSTALL_DIR}" | sed "s/'/'\\\\''/g")
             case "${shell_name}" in
-                fish) init_script="fish_add_path \"${INSTALL_DIR}\"" ;;
-                *)    init_script="export PATH=\"${INSTALL_DIR}:\$PATH\"" ;;
+                fish) init_script="fish_add_path '${escaped_dir}'" ;;
+                *)    init_script="export PATH='${escaped_dir}':\$PATH" ;;
             esac
         fi
 
