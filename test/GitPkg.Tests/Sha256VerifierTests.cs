@@ -2,8 +2,13 @@ using GitPkg.Services;
 
 namespace GitPkg.Tests;
 
+/// <summary>
+/// SHA256 校验器单元测试。
+/// 覆盖校验文件解析、哈希计算和结果验证。
+/// </summary>
 public class Sha256VerifierTests
 {
+    /// <summary>标准格式 "hash  filename" 应正确解析。</summary>
     [Fact]
     public void ParseChecksum_StandardFormat_ReturnsHash()
     {
@@ -17,6 +22,7 @@ public class Sha256VerifierTests
         Assert.Equal("2e3c6b6f5acbe576b6e6cae68044d75a6be3d67c3f4bfdff4f1b172e3549d1e0", hash);
     }
 
+    /// <summary>二进制标记格式 "hash *filename" 应正确解析。</summary>
     [Fact]
     public void ParseChecksum_BinaryFormat_ReturnsHash()
     {
@@ -27,6 +33,7 @@ public class Sha256VerifierTests
         Assert.Equal("a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2", hash);
     }
 
+    /// <summary>目标文件名不在校验文件中时应返回 null。</summary>
     [Fact]
     public void ParseChecksum_NotFound_ReturnsNull()
     {
@@ -37,6 +44,7 @@ public class Sha256VerifierTests
         Assert.Null(hash);
     }
 
+    /// <summary>计算 "hello world" 的 SHA256 应与已知值一致。</summary>
     [Fact]
     public async Task ComputeHash_ReturnsValidHexString()
     {

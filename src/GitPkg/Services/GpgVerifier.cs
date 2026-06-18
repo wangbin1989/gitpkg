@@ -3,8 +3,19 @@ using GitPkg.Models;
 
 namespace GitPkg.Services;
 
+/// <summary>
+/// GPG 签名验证器，通过调用系统 gpg 命令行工具验证文件的 GPG 签名。
+/// </summary>
 public class GpgVerifier
 {
+    /// <summary>
+    /// 使用 GPG 验证归档文件的签名。
+    /// </summary>
+    /// <param name="archivePath">待验证的归档文件路径。</param>
+    /// <param name="signaturePath">签名文件路径（.asc / .sig）。</param>
+    /// <param name="keyId">可选的 GPG 密钥 ID。</param>
+    /// <returns>验证通过返回 true。</returns>
+    /// <exception cref="InvalidOperationException">系统中未安装 gpg 命令。</exception>
     public async Task<bool> VerifyAsync(
         string archivePath, string signaturePath,
         string? keyId = null, CancellationToken ct = default)
@@ -43,6 +54,10 @@ public class GpgVerifier
         }
     }
 
+    /// <summary>
+    /// 在 Release 资产列表中查找与目标文件配套的签名文件（.asc / .sig / .gpg）。
+    /// </summary>
+    /// <returns>匹配的签名资产，未找到则返回 null。</returns>
     public static GitHubAsset? FindSignatureAsset(List<GitHubAsset> assets, string targetFileName)
     {
         var sigNames = new[]

@@ -2,17 +2,17 @@ using System.Runtime.InteropServices;
 
 namespace GitPkg.Models;
 
-public record PlatformInfo
+/// <summary>
+/// 当前运行平台的操作系统和架构信息，用于匹配 GitHub Release 中对应平台的资产。
+/// </summary>
+/// <param name="os">操作系统标识符（macos / windows / linux）</param>
+/// <param name="arch">CPU 架构标识符（x64 / arm64）</param>
+public record PlatformInfo(string os, string arch)
 {
-    public string OS { get; init; }
-    public string Arch { get; init; }
+    public string OS { get; init; } = os;
+    public string Arch { get; init; } = arch;
 
-    public PlatformInfo(string os, string arch)
-    {
-        OS = os;
-        Arch = arch;
-    }
-
+    /// <summary>获取当前运行时的平台信息。</summary>
     public static PlatformInfo Current()
     {
         var os = GetOS();
@@ -20,6 +20,7 @@ public record PlatformInfo
         return new PlatformInfo(os, arch);
     }
 
+    /// <summary>通过 <see cref="RuntimeInformation"/> 检测操作系统。</summary>
     private static string GetOS()
     {
         if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX)) return "macos";
@@ -28,6 +29,7 @@ public record PlatformInfo
         return RuntimeInformation.OSDescription.ToLowerInvariant();
     }
 
+    /// <summary>通过 <see cref="RuntimeInformation.ProcessArchitecture"/> 检测 CPU 架构。</summary>
     private static string GetArch()
     {
         return RuntimeInformation.ProcessArchitecture switch

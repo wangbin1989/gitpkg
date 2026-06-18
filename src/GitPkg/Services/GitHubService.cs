@@ -4,39 +4,49 @@ using GitPkg.Models;
 
 namespace GitPkg.Services;
 
+/// <summary>
+/// GitHub API 客户端，封装 Release 查询、仓库信息获取和文件下载。
+/// 使用 AOT 友好的源生成 JSON 反序列化。
+/// </summary>
 public class GitHubService
 {
     private readonly HttpClient _http;
     private readonly AppJsonContext _jsonContext = new();
 
+    /// <summary>使用共享的 <see cref="HttpClient"/> 实例创建客户端。</summary>
     public GitHubService(HttpClient http)
     {
         _http = http;
     }
 
+    /// <summary>获取仓库的最新 Release。</summary>
     public async Task<GitHubRelease> GetLatestReleaseAsync(string owner, string repo, CancellationToken ct = default)
     {
         var url = $"https://api.github.com/repos/{owner}/{repo}/releases/latest";
         return await GetAsync(url, _jsonContext.GitHubRelease, ct);
     }
 
+    /// <summary>按版本标签获取指定 Release。</summary>
     public async Task<GitHubRelease> GetReleaseByTagAsync(string owner, string repo, string tag, CancellationToken ct = default)
     {
         var url = $"https://api.github.com/repos/{owner}/{repo}/releases/tags/{tag}";
         return await GetAsync(url, _jsonContext.GitHubRelease, ct);
     }
 
+    /// <summary>获取仓库基本信息。</summary>
     public async Task<GitHubRepo> GetRepoAsync(string owner, string repo, CancellationToken ct = default)
     {
         var url = $"https://api.github.com/repos/{owner}/{repo}";
         return await GetAsync(url, _jsonContext.GitHubRepo, ct);
     }
 
+    /// <summary>下载文本内容（如校验和文件）。</summary>
     public async Task<string> DownloadStringAsync(string url, CancellationToken ct = default)
     {
         return await _http.GetStringAsync(url, ct);
     }
 
+    /// <summary>以流形式获取远程文件。</summary>
     public async Task<Stream> GetStreamAsync(string url, CancellationToken ct = default)
     {
         var response = await _http.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, ct);
@@ -44,6 +54,7 @@ public class GitHubService
         return await response.Content.ReadAsStreamAsync(ct);
     }
 
+    /// <summary>下载文件到本地，支持进度回调。</summary>
     public async Task DownloadFileAsync(string url, string destPath, Action<long, long>? onProgress = null, CancellationToken ct = default)
     {
         using var response = await _http.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, ct);

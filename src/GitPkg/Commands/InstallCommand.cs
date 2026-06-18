@@ -6,8 +6,13 @@ using GitPkg.Services;
 
 namespace GitPkg.Commands;
 
+/// <summary>
+/// install 命令：从 GitHub Release 下载并安装工具。
+/// 核心流程：解析仓库 → 获取 Release → 匹配资产 → 下载 → 校验 → 解压 → 记录清单 → 配置 PATH。
+/// </summary>
 public static class InstallCommand
 {
+    /// <summary>创建 install 命令，支持单工具安装和批量清单安装。</summary>
     public static Command Create()
     {
         var cmd = new Command("install", "从 GitHub Release 安装工具");
@@ -131,6 +136,17 @@ public static class InstallCommand
         await InstallSingleAsync(repo, dir, addPath, gpgKey, ct);
     }
 
+    /// <summary>
+    /// 安装单个工具的完整流程：
+    /// 1. 解析 owner/repo[@version]
+    /// 2. 获取 Release 信息
+    /// 3. 平台匹配并选择资产
+    /// 4. 下载归档文件
+    /// 5. 可选的 GPG / SHA256 校验
+    /// 6. 解压到安装目录
+    /// 7. 更新 manifest.json
+    /// 8. 可选：自动加入 PATH
+    /// </summary>
     private static async Task InstallSingleAsync(string repo, string? dir, bool addPath, string? gpgKey, CancellationToken ct)
     {
         var gitHub = new GitHubService(GitPkgApp.Http);
@@ -312,6 +328,9 @@ public static class InstallCommand
         AnsiConsole.MarkupLine($"[green]✓ {toolName} {versionDisplay} 已安装到 {installDir}[/]");
     }
 
+    /// <summary>
+    /// 解析仓库输入字符串，支持 owner/repo 和 owner/repo@version 两种格式。
+    /// </summary>
     private static (string owner, string repo, string? version) ParseRepo(string input)
     {
         string? version = null;
@@ -372,6 +391,7 @@ public static class InstallCommand
         AnsiConsole.MarkupLine("[green] ✓[/]");
     }
 
+    /// <summary>在目录中查找可执行文件（排除文档类文件如 LICENSE、README）。</summary>
     private static List<string> FindExecutables(string dir)
     {
         if (!Directory.Exists(dir)) return [];
@@ -400,6 +420,7 @@ public static class InstallCommand
         return bins;
     }
 
+    /// <summary>查找包含可执行文件的目录（优先 bin 子目录）。</summary>
     private static string FindExecutableDir(string installDir)
     {
         if (FindExecutables(installDir).Count > 0)

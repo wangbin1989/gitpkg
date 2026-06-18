@@ -3,8 +3,13 @@ using GitPkg.Commands;
 
 namespace GitPkg.Tests;
 
+/// <summary>
+/// init 命令单元测试。
+/// 验证各 Shell（zsh/bash/fish/powershell）的初始化脚本输出格式和错误处理。
+/// </summary>
 public class InitCommandTests
 {
+    /// <summary>构建 init 命令并捕获 stdout/stderr 和退出码。</summary>
     private static async Task<(int ExitCode, string Stdout, string Stderr)> InvokeInitAsync(string shell)
     {
         var cmd = InitCommand.Create();
@@ -30,6 +35,7 @@ public class InitCommandTests
         }
     }
 
+    /// <summary>zsh 应输出含 export PATH 的初始化脚本。</summary>
     [Fact]
     public async Task Init_Zsh_WritesExportPath()
     {
@@ -40,6 +46,7 @@ public class InitCommandTests
         Assert.Contains("export PATH=", stdout);
     }
 
+    /// <summary>bash 应输出含 export PATH 的初始化脚本。</summary>
     [Fact]
     public async Task Init_Bash_WritesExportPath()
     {
@@ -50,6 +57,7 @@ public class InitCommandTests
         Assert.Contains("export PATH=", stdout);
     }
 
+    /// <summary>fish 应输出含 fish_add_path 的初始化脚本。</summary>
     [Fact]
     public async Task Init_Fish_WritesFishAddPath()
     {
@@ -60,6 +68,7 @@ public class InitCommandTests
         Assert.Contains("fish_add_path", stdout);
     }
 
+    /// <summary>powershell 应输出含 $env:Path 的初始化脚本。</summary>
     [Fact]
     public async Task Init_Powershell_WritesEnvPath()
     {
@@ -70,6 +79,7 @@ public class InitCommandTests
         Assert.Contains("$env:Path", stdout);
     }
 
+    /// <summary>pwsh 别名应输出与 powershell 相同的初始化脚本。</summary>
     [Fact]
     public async Task Init_Pwsh_Alias_WritesEnvPath()
     {
@@ -80,6 +90,7 @@ public class InitCommandTests
         Assert.Contains("$env:Path", stdout);
     }
 
+    /// <summary>非法 shell 名应返回退出码 1 并将错误信息输出到 stderr。</summary>
     [Fact]
     public async Task Init_InvalidShell_WritesError()
     {

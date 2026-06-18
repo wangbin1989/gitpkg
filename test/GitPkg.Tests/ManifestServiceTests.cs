@@ -3,8 +3,13 @@ using GitPkg.Services;
 
 namespace GitPkg.Tests;
 
+/// <summary>
+/// 清单服务单元测试。
+/// 覆盖 manifest.json 的增/删/查操作及路径计算。
+/// </summary>
 public class ManifestServiceTests
 {
+    /// <summary>创建临时隔离目录用于测试。</summary>
     private static string GetTempDir()
     {
         var dir = Path.Combine(Path.GetTempPath(), $"gitpkg_test_{Guid.NewGuid():N}");
@@ -12,6 +17,7 @@ public class ManifestServiceTests
         return dir;
     }
 
+    /// <summary>清单文件不存在时 LoadAsync 应返回空清单。</summary>
     [Fact]
     public async Task LoadAsync_EmptyWhenNoFile()
     {
@@ -29,6 +35,7 @@ public class ManifestServiceTests
         }
     }
 
+    /// <summary>查找不存在的工具应返回 null。</summary>
     [Fact]
     public async Task FindToolAsync_ReturnsNullWhenNotFound()
     {
@@ -45,6 +52,7 @@ public class ManifestServiceTests
         }
     }
 
+    /// <summary>添加后立即可查询到相同数据（往返测试）。</summary>
     [Fact]
     public async Task AddAndFindTool_RoundTrip()
     {
@@ -75,6 +83,7 @@ public class ManifestServiceTests
         }
     }
 
+    /// <summary>重复添加同名工具应更新版本而非新增条目。</summary>
     [Fact]
     public async Task AddTool_UpdatesExisting()
     {
@@ -103,6 +112,7 @@ public class ManifestServiceTests
         }
     }
 
+    /// <summary>移除已存在的工具应返回 true 且无法再查到。</summary>
     [Fact]
     public async Task RemoveTool_RemovesFromManifest()
     {
@@ -128,6 +138,7 @@ public class ManifestServiceTests
         }
     }
 
+    /// <summary>移除不存在的工具应返回 false。</summary>
     [Fact]
     public async Task RemoveTool_Nonexistent_ReturnsFalse()
     {
@@ -144,6 +155,7 @@ public class ManifestServiceTests
         }
     }
 
+    /// <summary>工具目录路径应以 .gitpkg/tools/{name} 结尾。</summary>
     [Fact]
     public void GetToolDir_ReturnsCorrectPath()
     {
@@ -151,6 +163,7 @@ public class ManifestServiceTests
         Assert.EndsWith(Path.Combine(".gitpkg", "tools", "mytool"), dir);
     }
 
+    /// <summary>owner/repo 应正确提取 repo 部分。</summary>
     [Fact]
     public void GetRepoName_ParsesOwnerRepo()
     {
