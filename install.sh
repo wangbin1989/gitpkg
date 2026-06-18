@@ -173,7 +173,20 @@ check_path() {
             echo "" >> "${rc_file}"
             echo "# GitPkg" >> "${rc_file}"
             echo "${init_script}" >> "${rc_file}"
-            info "已添加到 ${rc_file}，运行 'source ${rc_file}' 或重新打开终端使其生效"
+            info "已添加 PATH 到 ${rc_file}"
+
+            # 添加自动补全
+            if [[ "${shell_name}" == "fish" ]]; then
+                local fish_completions="${HOME}/.config/fish/completions"
+                mkdir -p "${fish_completions}"
+                "${INSTALL_DIR}/${BINARY_NAME}" completion fish > "${fish_completions}/${BINARY_NAME}.fish"
+                info "已添加 fish 自动补全到 ${fish_completions}/${BINARY_NAME}.fish"
+            elif [[ "${shell_name}" == "zsh" || "${shell_name}" == "bash" ]]; then
+                echo "eval \"\$(${INSTALL_DIR}/${BINARY_NAME} completion ${shell_name})\"" >> "${rc_file}"
+                info "已添加 ${shell_name} 自动补全到 ${rc_file}"
+            fi
+
+            info "运行 'source ${rc_file}' 或重新打开终端使其生效"
         fi
     else
         echo "  请手动将 ${INSTALL_DIR} 加入 PATH"

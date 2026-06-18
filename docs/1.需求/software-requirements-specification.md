@@ -108,7 +108,7 @@ GitPkg 作为用户和 GitHub Release 之间的中间层，负责发现版本、
 7. 下载资产到临时目录
 8. 执行 SHA256 校验（见 FR-07）
 9. 解压归档到安装目录
-10. 若使用 `--add-path`，将工具目录加入 PATH（见 FR-09）
+10. 将可执行文件链接到 `~/.gitpkg/bin/`
 11. 更新清单文件
 12. 打印安装成功信息（工具名、版本、路径）
 
@@ -313,29 +313,27 @@ GitPkg 作为用户和 GitHub Release 之间的中间层，负责发现版本、
 
 ---
 
-### FR-09: PATH 环境变量管理
+### FR-09: 统一 bin 目录与 PATH 管理
 
 **优先级**: P1 (重要)
 
-**命令**: `gpkg install owner/repo --add-path`
+**命令**: `gitpkg init <shell>`
 
-**描述**: 安装工具时自动将工具可执行目录加入 PATH。
-
-**支持的 Shell**:
-| Shell | 配置文件 |
-|-------|---------|
-| bash | `~/.bashrc` |
-| zsh | `~/.zshrc` |
-| fish | `~/.config/fish/config.fish` |
-| PowerShell | `$PROFILE` |
+**描述**: 安装工具后，可执行文件自动链接到 `~/.gitpkg/bin/`。用户通过 `gitpkg init <shell>` 将该目录加入 PATH。
 
 **处理流程**:
-1. 检测当前 Shell 类型
-2. 在对应配置文件末尾追加 `export PATH="<install-dir>:$PATH"`
-3. 若已存在相同路径，跳过
-4. 输出 `ℹ PATH 已更新，请执行 source <config-file> 或重新打开终端`
+1. 安装工具后，自动在 `~/.gitpkg/bin/` 创建指向可执行文件的符号链接
+2. 更新工具后，自动刷新对应的符号链接
+3. 卸载工具后，自动清理对应的符号链接
+4. 用户通过 `gitpkg init <shell>` 输出 shell 初始化脚本，将 `~/.gitpkg/bin` 加入 PATH
 
-**卸载时**: `gpkg uninstall` 提示用户手动检查和清理 PATH 条目（不自动编辑，避免误删）。
+**支持的 Shell**:
+| Shell | 配置文件 / 初始化方式 |
+|-------|----------------------|
+| bash | `eval "$(gitpkg init bash)"` |
+| zsh | `eval "$(gitpkg init zsh)"` |
+| fish | `gitpkg init fish` |
+| PowerShell | `gitpkg init powershell` |
 
 ---
 
@@ -403,7 +401,7 @@ GitPkg 作为用户和 GitHub Release 之间的中间层，负责发现版本、
 ### 4.3 命令行接口
 
 ```
-gpkg install <owner/repo>[@<version>] [--dir <path>] [--add-path] [--verify-gpg <key>]
+gpkg install <owner/repo>[@<version>] [--dir <path>] [--verify-gpg <key>]
 gpkg update [<name>]
 gpkg outdated
 gpkg uninstall <name>
@@ -488,7 +486,7 @@ gpkg --help | -h
 ### A. 命令速查
 
 ```
-gpkg install <owner/repo>[@<version>] [--dir <path>] [--add-path] [--verify-gpg <key>]
+gpkg install <owner/repo>[@<version>] [--dir <path>] [--verify-gpg <key>]
 gpkg update [<name>]
 gpkg outdated
 gpkg uninstall <name>

@@ -88,6 +88,10 @@ public class ManifestService
     public static string GetTmpDir()
         => Path.Combine(DefaultBaseDir, "tmp");
 
+    /// <summary>获取可执行文件链接目录路径（~/.gitpkg/bin）。</summary>
+    public static string GetBinDir()
+        => Path.Combine(DefaultBaseDir, "bin");
+
     /// <summary>从 owner/repo 中提取仓库名。</summary>
     public static string GetRepoName(string ownerRepo)
     {

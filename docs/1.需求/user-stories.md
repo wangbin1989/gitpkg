@@ -108,16 +108,16 @@ GitPkg 是一款基于 .NET 10 AOT 的 GitHub Release 自动更新 CLI 工具。
 
 ## Epic 4: 环境管理
 
-### US-09: 自动配置 PATH
+### US-09: 统一 bin 目录
 **作为** 命令行用户
-**我想** 在安装工具后自动将其可执行文件目录加入系统 PATH
-**以便** 可以在终端任意位置直接调用该工具
+**我想** 安装工具后其可执行文件自动链接到统一的 `~/.gitpkg/bin/` 目录
+**以便** 只需将该目录加入 PATH 一次，即可使用所有已安装的工具
 
 **验收标准**:
-- `gpkg install` 时通过 `--add-path` 自动修改 shell 配置文件
-- 支持 bash / zsh / fish / PowerShell
-- 给出需要重新加载 shell 的提示
-- 卸载工具时通过 `gpkg uninstall` 清理 PATH 条目
+- 安装工具后自动在 `~/.gitpkg/bin/` 创建指向可执行文件的符号链接
+- 更新工具后自动刷新对应的符号链接
+- 卸载工具后自动清理对应的符号链接
+- 通过 `gitpkg init <shell>` 可一键将 `~/.gitpkg/bin` 加入 PATH
 
 ### US-10: 卸载工具
 **作为** 命令行用户
@@ -127,7 +127,7 @@ GitPkg 是一款基于 .NET 10 AOT 的 GitHub Release 自动更新 CLI 工具。
 **验收标准**:
 - 删除工具的安装目录
 - 从清单文件中移除记录
-- 提示检查 PATH 是否需要手动清理
+- 自动清理 `~/.gitpkg/bin/` 中对应的符号链接
 
 ---
 

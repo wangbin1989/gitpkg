@@ -49,15 +49,32 @@ public static class UninstallCommand
 
         AnsiConsole.MarkupLine($"[grey]卸载 {name} {tool.Version} ({tool.InstallPath})...[/]");
 
+        // 在删除目录之前，找出已链接到 bin 的可执行文件名称
+        var linkedNames = new List<string>();
         if (Directory.Exists(tool.InstallPath))
         {
+            var exeDir = ExecutableFinder.FindExecutableDir(tool.InstallPath);
+            var executables = ExecutableFinder.FindExecutables(exeDir);
+            linkedNames.AddRange(executables.Select(f => Path.GetFileName(f)!));
+
             Directory.Delete(tool.InstallPath, recursive: true);
+        }
+
+        // 清理 ~/.gitpkg/bin/ 中的符号链接
+        var binDir = ManifestService.GetBinDir();
+        if (Directory.Exists(binDir))
+        {
+            foreach (var name2 in linkedNames)
+            {
+                var linkPath = Path.Combine(binDir, name2);
+                if (File.Exists(linkPath))
+                    File.Delete(linkPath);
+            }
         }
 
         // Remove from manifest
         await manifest.RemoveToolAsync(name, ct);
 
         AnsiConsole.MarkupLine($"[green]✓ {name} 已卸载[/]");
-        AnsiConsole.MarkupLine("[grey]  提示: 请手动检查 shell 配置文件中的 PATH 条目是否需要清理[/]");
     }
 }

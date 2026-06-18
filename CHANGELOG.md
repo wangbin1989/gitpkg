@@ -1,5 +1,21 @@
 # Changelog
 
+## [2.0.0] - 2026-06-18
+
+### Added
+- 安装后将可执行文件自动链接到 `~/.gitpkg/bin/`，用户只需将该目录加入 PATH 一次即可使用所有已安装工具
+- 新增 `ExecutableFinder` 共享辅助类，提供跨平台可执行文件查找与目录探针
+- 新增 `ManifestService.GetBinDir()` 方法
+
+### Changed
+- **移除 `--add-path` 选项**：安装时不再直接修改 shell 配置文件，改为统一 bin 目录方案
+- `update` 命令在更新完成后自动刷新 `~/.gitpkg/bin/` 中的符号链接
+- `uninstall` 命令自动清理 `~/.gitpkg/bin/` 中对应的符号链接
+- `FindExecutables` / `FindExecutableDir` 从 `InstallCommand` 提取到共享 `ExecutableFinder` 类
+
+### Removed
+- 移除 `PathService` 及其测试（仅服务于已移除的 `--add-path` 功能）
+
 ## [1.2.0] - 2026-06-18
 
 ### Added

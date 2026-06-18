@@ -108,12 +108,25 @@ function Install-GitPkg {
         $profileContent = Get-Content $PROFILE -Raw
         if ($profileContent -notmatch [regex]::Escape($InstallDir)) {
             Add-Content $PROFILE "`n# GitPkg`n$initScript"
-            Write-Host "已添加到 `$PROFILE，重新打开终端使其生效" -ForegroundColor Green
+            Write-Host "已添加 PATH 到 `$PROFILE" -ForegroundColor Green
         }
     } else {
         Set-Content $PROFILE "# GitPkg`n$initScript"
-        Write-Host "已创建 `$PROFILE 并添加 PATH，重新打开终端使其生效" -ForegroundColor Green
+        Write-Host "已创建 `$PROFILE 并添加 PATH" -ForegroundColor Green
     }
+
+    # 添加自动补全
+    $completionScript = try {
+        & $destPath completion powershell 2>$null
+    } catch {
+        ""
+    }
+    if ($completionScript) {
+        Add-Content $PROFILE "`n# GitPkg completion`n$completionScript"
+        Write-Host "已添加 PowerShell 自动补全到 `$PROFILE" -ForegroundColor Green
+    }
+
+    Write-Host "重新打开终端使其生效" -ForegroundColor Green
 }
 
 Install-GitPkg
