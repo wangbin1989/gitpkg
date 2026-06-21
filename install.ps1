@@ -99,26 +99,26 @@ function Install-GitPkg {
         Write-Host ""
         Write-Host "  运行以下命令初始化 Shell 环境:" -ForegroundColor Cyan
         Write-Host ""
-        Write-Host "  Invoke-Expression (& $displayPath init powershell)" -ForegroundColor Cyan
+        Write-Host "  & $displayPath init powershell | Out-String | Invoke-Expression" -ForegroundColor Cyan
         Write-Host ""
         Write-Host "  可将上述命令追加到 `$PROFILE 中使其永久生效" -ForegroundColor Cyan
         Write-Host ""
         Write-Host "  如需启用自动补全，运行:" -ForegroundColor Cyan
         Write-Host ""
-        Write-Host "  Invoke-Expression (& $displayPath completion powershell)" -ForegroundColor Cyan
+        Write-Host "  & $displayPath completion powershell | Out-String | Invoke-Expression" -ForegroundColor Cyan
     } else {
         Write-Host ""
         Write-Host "$InstallDir 不在 PATH 中" -ForegroundColor Yellow
         Write-Host ""
         Write-Host "  运行以下命令初始化 Shell 环境:" -ForegroundColor Cyan
         Write-Host ""
-        Write-Host "  Invoke-Expression (& $displayPath init powershell)" -ForegroundColor Cyan
+        Write-Host "  & $displayPath init powershell | Out-String | Invoke-Expression" -ForegroundColor Cyan
         Write-Host ""
         Write-Host "  可将上述命令追加到 `$PROFILE 中使其永久生效" -ForegroundColor Cyan
         Write-Host ""
         Write-Host "  如需启用自动补全，运行:" -ForegroundColor Cyan
         Write-Host ""
-        Write-Host "  Invoke-Expression (& $displayPath completion powershell)" -ForegroundColor Cyan
+        Write-Host "  & $displayPath completion powershell | Out-String | Invoke-Expression" -ForegroundColor Cyan
     }
 }
 
