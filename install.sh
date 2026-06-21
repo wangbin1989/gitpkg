@@ -142,32 +142,27 @@ check_path() {
 
     if [[ ":$PATH:" == *":${INSTALL_DIR}:"* ]]; then
         echo ""
-        info "请重新打开终端或运行以下命令使新安装的 gitpkg 生效:"
+        info "~/.gitpkg/bin 已在 PATH 中"
         echo ""
-        if [[ -n "${rc_file}" ]]; then
-            printf "  ${CYAN}source %s${NC}\n" "${rc_file}"
-        else
-            echo "  请重新打开终端"
-        fi
-
-        echo ""
-        echo "  如需启用自动补全，运行:"
+        echo "  运行以下命令初始化 Shell 环境:"
         echo ""
         case "${shell_name}" in
             fish)
-                printf "  ${CYAN}%s${NC}\n" "~/.gitpkg/bin/${BINARY_NAME} completion fish > ~/.config/fish/completions/${BINARY_NAME}.fish"
+                printf "  ${CYAN}%s${NC}\n" "~/.gitpkg/bin/${BINARY_NAME} init fish | source"
                 ;;
             *)
-                printf "  ${CYAN}%s${NC}\n" "eval \"\$(~/.gitpkg/bin/${BINARY_NAME} completion ${shell_name})\""
+                printf "  ${CYAN}%s${NC}\n" "eval \"\$(~/.gitpkg/bin/${BINARY_NAME} init ${shell_name})\""
                 ;;
         esac
+        echo ""
+        echo "  可将上述命令追加到 ${rc_file} 中使其永久生效"
         return 0
     fi
 
     echo ""
     warn "~/.gitpkg/bin 不在 PATH 中"
     echo ""
-    echo "  请运行以下命令初始化 Shell 环境（PATH + 自动补全）:"
+    echo "  运行以下命令初始化 Shell 环境:"
     echo ""
 
     case "${shell_name}" in

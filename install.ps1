@@ -95,9 +95,13 @@ function Install-GitPkg {
     $currentPath = [Environment]::GetEnvironmentVariable("Path", "User")
     if ($currentPath -like "*$InstallDir*") {
         Write-Host ""
-        Write-Host "请重新打开终端或运行以下命令使新安装的 gitpkg 生效:" -ForegroundColor Green
+        Write-Host "$InstallDir 已在 PATH 中" -ForegroundColor Green
         Write-Host ""
-        Write-Host "  . `$PROFILE" -ForegroundColor Cyan
+        Write-Host "  运行以下命令初始化 Shell 环境:" -ForegroundColor Cyan
+        Write-Host ""
+        Write-Host "  Invoke-Expression (& $displayPath init powershell)" -ForegroundColor Cyan
+        Write-Host ""
+        Write-Host "  可将上述命令追加到 `$PROFILE 中使其永久生效" -ForegroundColor Cyan
         Write-Host ""
         Write-Host "  如需启用自动补全，运行:" -ForegroundColor Cyan
         Write-Host ""
@@ -106,7 +110,7 @@ function Install-GitPkg {
         Write-Host ""
         Write-Host "$InstallDir 不在 PATH 中" -ForegroundColor Yellow
         Write-Host ""
-        Write-Host "  请运行以下命令初始化 Shell 环境（PATH + 自动补全）:" -ForegroundColor Cyan
+        Write-Host "  运行以下命令初始化 Shell 环境:" -ForegroundColor Cyan
         Write-Host ""
         Write-Host "  Invoke-Expression (& $displayPath init powershell)" -ForegroundColor Cyan
         Write-Host ""
