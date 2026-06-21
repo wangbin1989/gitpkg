@@ -16,7 +16,7 @@ $ErrorActionPreference = "Stop"
 # ---- 配置 ----
 $Repo = "wangbin1989/gitpkg"
 $GitHubApi = "https://api.github.com/repos/$Repo"
-$InstallDir = "$HOME\.gitpkg\bin"
+$InstallDir = "$env:USERPROFILE\.gitpkg\bin"
 $BinaryName = "gitpkg.exe"
 
 # ---- 平台检测 ----
@@ -90,43 +90,36 @@ function Install-GitPkg {
 
     Remove-Item -Recurse -Force $tmpDir
 
-    # PATH 检查 — 使用 gitpkg init 生成初始化脚本并追加到 $PROFILE
-    $profileDir = Split-Path $PROFILE -Parent
-    if (-not (Test-Path $profileDir)) {
-        New-Item -ItemType Directory -Force -Path $profileDir | Out-Null
-    }
-
-    $destPath = Join-Path $InstallDir $BinaryName
-    $initScript = try {
-        & $destPath init powershell 2>$null
-    } catch {
-        # 兜底：手动构造
-        "`$env:Path = `"$InstallDir;`$env:Path`""
-    }
-
-    if (Test-Path $PROFILE) {
-        $profileContent = Get-Content $PROFILE -Raw
-        if ($profileContent -notmatch [regex]::Escape($InstallDir)) {
-            Add-Content $PROFILE "`n# GitPkg`n$initScript"
-            Write-Host "已添加 PATH 到 `$PROFILE" -ForegroundColor Green
-        }
+    # PATH 提示
+    $displayPath = '"$env:USERPROFILE\.gitpkg\bin\gitpkg.exe"'
+    $currentPath = [Environment]::GetEnvironmentVariable("Path", "User")
+    if ($currentPath -like "*$InstallDir*") {
+        Write-Host ""
+        Write-Host "$InstallDir 已在 PATH 中" -ForegroundColor Green
+        Write-Host ""
+        Write-Host "  运行以下命令初始化 Shell 环境:" -ForegroundColor Cyan
+        Write-Host ""
+        Write-Host "  Invoke-Expression (& $displayPath init powershell)" -ForegroundColor Cyan
+        Write-Host ""
+        Write-Host "  可将上述命令追加到 `$PROFILE 中使其永久生效" -ForegroundColor Cyan
+        Write-Host ""
+        Write-Host "  如需启用自动补全，运行:" -ForegroundColor Cyan
+        Write-Host ""
+        Write-Host "  Invoke-Expression (& $displayPath completion powershell)" -ForegroundColor Cyan
     } else {
-        Set-Content $PROFILE "# GitPkg`n$initScript"
-        Write-Host "已创建 `$PROFILE 并添加 PATH" -ForegroundColor Green
+        Write-Host ""
+        Write-Host "$InstallDir 不在 PATH 中" -ForegroundColor Yellow
+        Write-Host ""
+        Write-Host "  运行以下命令初始化 Shell 环境:" -ForegroundColor Cyan
+        Write-Host ""
+        Write-Host "  Invoke-Expression (& $displayPath init powershell)" -ForegroundColor Cyan
+        Write-Host ""
+        Write-Host "  可将上述命令追加到 `$PROFILE 中使其永久生效" -ForegroundColor Cyan
+        Write-Host ""
+        Write-Host "  如需启用自动补全，运行:" -ForegroundColor Cyan
+        Write-Host ""
+        Write-Host "  Invoke-Expression (& $displayPath completion powershell)" -ForegroundColor Cyan
     }
-
-    # 添加自动补全
-    $completionScript = try {
-        & $destPath completion powershell 2>$null
-    } catch {
-        ""
-    }
-    if ($completionScript) {
-        Add-Content $PROFILE "`n# GitPkg completion`n$completionScript"
-        Write-Host "已添加 PowerShell 自动补全到 `$PROFILE" -ForegroundColor Green
-    }
-
-    Write-Host "重新打开终端使其生效" -ForegroundColor Green
 }
 
 Install-GitPkg

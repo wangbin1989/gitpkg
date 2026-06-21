@@ -1,5 +1,16 @@
 # Changelog
 
+## [2.0.1] - 2026-06-21
+
+### Added
+- `init` 命令输出中新增 `GITPKG_HOME` 环境变量设置，PATH 基于 `GITPKG_HOME` 变量引用
+- 安装脚本（install.sh / install.ps1）安装完成后提示自动补全命令
+
+### Changed
+- 安装脚本不再自动修改 shell 配置文件，改为输出 `eval "$(gitpkg init <shell>)"` 供用户手动执行
+- 安装脚本 PATH 已配置时也建议运行 init 命令（移除 `source ~/.zshrc` / `. $PROFILE` 的建议）
+- 安装脚本提示路径使用 `${INSTALL_DIR}` / `$env:USERPROFILE` 变量替代硬编码
+
 ## [2.0.0] - 2026-06-18
 
 ### Added
