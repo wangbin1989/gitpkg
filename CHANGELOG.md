@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.0.3] - 2026-06-21
+
+### Removed
+- 移除 `--verify-gpg` 选项及 GPG 签名校验逻辑（`GpgVerifier` 类）
+- 移除 `--dir` 选项（安装目录固定为 `~/.gitpkg/tools/<name>/`）
+- 移除 `--dry-run` 选项
+
 ## [2.0.2] - 2026-06-21
 
 ### Added
