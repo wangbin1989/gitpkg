@@ -83,13 +83,13 @@ public static class SelfUpdateCommand
         var platform = PlatformInfo.Current();
         var matches = matcher.Match(release.Assets, platform);
 
+        if (release.Assets.Count == 0)
+            throw new InvalidOperationException("Release 中无可用资产");
+
         GitHubAsset selected;
 
         if (matches.Count == 0)
         {
-            if (release.Assets.Count == 0)
-                throw new InvalidOperationException("Release 中无可用资产");
-
             AnsiConsole.MarkupLine($"[yellow]⚠ 未找到匹配 {platform} 的资产，手动选择:[/]");
             selected = CommandHelpers.PromptAssetSelection(release.Assets);
         }
@@ -136,11 +136,7 @@ public static class SelfUpdateCommand
                 task.Value(task.MaxValue);
             });
 
-        var checksumAsset = release.Assets.FirstOrDefault(a =>
-        {
-            var n = a.Name.ToLowerInvariant();
-            return n.EndsWith(".sha256") || n == "checksums.txt" || n == "sha256sums" || n == "sha256sums.txt";
-        });
+        var checksumAsset = CommandHelpers.FindChecksumAsset(release.Assets);
         if (checksumAsset != null)
         {
             var content = await gitHub.DownloadStringAsync(checksumAsset.DownloadUrl, ct);

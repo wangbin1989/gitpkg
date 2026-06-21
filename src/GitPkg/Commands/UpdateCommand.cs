@@ -103,27 +103,7 @@ public static class UpdateCommand
                 var platform = PlatformInfo.Current();
                 var matches = matcher.Match(release.Assets, platform);
 
-                GitHubAsset selected;
-
-                // 优先使用上次记录的资产名称自动匹配
-                if (tool.AssetName != null)
-                {
-                    var saved = release.Assets.FirstOrDefault(a =>
-                        a.Name.Equals(tool.AssetName, StringComparison.OrdinalIgnoreCase));
-                    if (saved != null)
-                    {
-                        selected = saved;
-                        AnsiConsole.MarkupLine($"[grey]  自动选择已记录的资产: {selected.Name}[/]");
-                    }
-                    else
-                    {
-                        selected = SelectFromMatches(tool.Name, platform, release.Assets, matches);
-                    }
-                }
-                else
-                {
-                    selected = SelectFromMatches(tool.Name, platform, release.Assets, matches);
-                }
+                var selected = CommandHelpers.SelectAsset(release.Assets, matches, platform, tool.AssetName);
                 var tmpDir = ManifestService.GetTmpDir();
                 Directory.CreateDirectory(tmpDir);
                 var archivePath = Path.Combine(tmpDir, selected.Name);
@@ -132,11 +112,7 @@ public static class UpdateCommand
                 await gitHub.DownloadFileAsync(selected.DownloadUrl, archivePath, ct: ct);
 
                 // Verify
-                var checksumAsset = release.Assets.FirstOrDefault(a =>
-                {
-                    var n = a.Name.ToLowerInvariant();
-                    return n.EndsWith(".sha256") || n == "checksums.txt" || n == "sha256sums" || n == "sha256sums.txt";
-                });
+                var checksumAsset = CommandHelpers.FindChecksumAsset(release.Assets);
                 if (checksumAsset != null)
                 {
                     var content = await gitHub.DownloadStringAsync(checksumAsset.DownloadUrl, ct);
@@ -219,26 +195,6 @@ public static class UpdateCommand
         var summary = $"更新: {updated} | 已是最新: {currentCount}";
         if (failed > 0) summary += $" | 失败: {failed}";
         AnsiConsole.MarkupLine($"[bold]{summary}[/]");
-    }
-
-    /// <summary>
-    /// 从匹配结果中选择资产：单个匹配自动选中，多个匹配取第一个，
-    /// 无匹配时回退到手动选择。
-    /// </summary>
-    private static GitHubAsset SelectFromMatches(
-        string toolName, PlatformInfo platform,
-        List<GitHubAsset> allAssets, List<GitHubAsset> matches)
-    {
-        if (matches.Count == 0)
-        {
-            AnsiConsole.MarkupLine($"[yellow]⚠ {toolName}: 未找到匹配 {platform} 的资产，手动选择:[/]");
-            return CommandHelpers.PromptAssetSelection(allAssets);
-        }
-
-        if (matches.Count > 1)
-            AnsiConsole.MarkupLine($"[grey]  发现 {matches.Count} 个匹配资产，选择第一个[/]");
-
-        return matches[0];
     }
 
 }
