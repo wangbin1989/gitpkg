@@ -83,6 +83,97 @@ public class ManifestServiceTests
         }
     }
 
+    /// <summary>AssetName 应正确持久化和读取。</summary>
+    [Fact]
+    public async Task AddAndFindTool_AssetNameRoundTrip()
+    {
+        var dir = GetTempDir();
+        try
+        {
+            var service = new ManifestService(dir);
+            var entry = new ToolEntry
+            {
+                Name = "testtool",
+                Repo = "owner/testtool",
+                Version = "v1.0.0",
+                InstallPath = "/tmp/testtool",
+                InstalledAt = DateTime.UtcNow,
+                AssetName = "testtool-x86_64-apple-darwin.tar.gz"
+            };
+
+            await service.AddToolAsync(entry);
+            var found = await service.FindToolAsync("testtool");
+
+            Assert.NotNull(found);
+            Assert.Equal("testtool-x86_64-apple-darwin.tar.gz", found!.AssetName);
+        }
+        finally
+        {
+            if (Directory.Exists(dir)) Directory.Delete(dir, recursive: true);
+        }
+    }
+
+    /// <summary>未设置 AssetName 时应为 null（向后兼容）。</summary>
+    [Fact]
+    public async Task AddAndFindTool_AssetNameNullByDefault()
+    {
+        var dir = GetTempDir();
+        try
+        {
+            var service = new ManifestService(dir);
+            var entry = new ToolEntry
+            {
+                Name = "testtool",
+                Repo = "owner/testtool",
+                Version = "v1.0.0",
+                InstallPath = "/tmp/testtool",
+                InstalledAt = DateTime.UtcNow
+            };
+
+            await service.AddToolAsync(entry);
+            var found = await service.FindToolAsync("testtool");
+
+            Assert.NotNull(found);
+            Assert.Null(found!.AssetName);
+        }
+        finally
+        {
+            if (Directory.Exists(dir)) Directory.Delete(dir, recursive: true);
+        }
+    }
+
+    /// <summary>更新工具时 AssetName 应随之更新。</summary>
+    [Fact]
+    public async Task AddTool_UpdatesAssetName()
+    {
+        var dir = GetTempDir();
+        try
+        {
+            var service = new ManifestService(dir);
+            await service.AddToolAsync(new ToolEntry
+            {
+                Name = "testtool", Repo = "a/b", Version = "v1.0.0",
+                InstallPath = "/tmp", InstalledAt = DateTime.UtcNow,
+                AssetName = "testtool-v1.tar.gz"
+            });
+            await service.AddToolAsync(new ToolEntry
+            {
+                Name = "testtool", Repo = "a/b", Version = "v2.0.0",
+                InstallPath = "/tmp", InstalledAt = DateTime.UtcNow,
+                AssetName = "testtool-v2.tar.gz"
+            });
+
+            var found = await service.FindToolAsync("testtool");
+            Assert.NotNull(found);
+            Assert.Equal("v2.0.0", found!.Version);
+            Assert.Equal("testtool-v2.tar.gz", found.AssetName);
+        }
+        finally
+        {
+            if (Directory.Exists(dir)) Directory.Delete(dir, recursive: true);
+        }
+    }
+
     /// <summary>重复添加同名工具应更新版本而非新增条目。</summary>
     [Fact]
     public async Task AddTool_UpdatesExisting()

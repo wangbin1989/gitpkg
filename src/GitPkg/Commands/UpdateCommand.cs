@@ -93,30 +93,36 @@ public static class UpdateCommand
                     continue;
                 }
 
+                if (release.Assets.Count == 0)
+                {
+                    AnsiConsole.MarkupLine($"[yellow]= {tool.Name}: 新版本 {release.TagName} 无可用资产，跳过[/]");
+                    currentCount++;
+                    continue;
+                }
+
                 var platform = PlatformInfo.Current();
                 var matches = matcher.Match(release.Assets, platform);
 
                 GitHubAsset selected;
 
-                if (matches.Count == 0)
+                // 优先使用上次记录的资产名称自动匹配
+                if (tool.AssetName != null)
                 {
-                    if (release.Assets.Count == 0)
+                    var saved = release.Assets.FirstOrDefault(a =>
+                        a.Name.Equals(tool.AssetName, StringComparison.OrdinalIgnoreCase));
+                    if (saved != null)
                     {
-                        AnsiConsole.MarkupLine($"[yellow]= {tool.Name}: 新版本 {release.TagName} 无可用资产，跳过[/]");
-                        currentCount++;
-                        continue;
+                        selected = saved;
+                        AnsiConsole.MarkupLine($"[grey]  自动选择已记录的资产: {selected.Name}[/]");
                     }
-
-                    AnsiConsole.MarkupLine($"[yellow]⚠ {tool.Name}: 未找到匹配 {platform} 的资产，手动选择:[/]");
-                    selected = CommandHelpers.PromptAssetSelection(release.Assets);
-                }
-                else if (matches.Count == 1)
-                {
-                    selected = matches[0];
+                    else
+                    {
+                        selected = SelectFromMatches(tool.Name, platform, release.Assets, matches);
+                    }
                 }
                 else
                 {
-                    selected = matches[0];
+                    selected = SelectFromMatches(tool.Name, platform, release.Assets, matches);
                 }
                 var tmpDir = ManifestService.GetTmpDir();
                 Directory.CreateDirectory(tmpDir);
@@ -194,7 +200,8 @@ public static class UpdateCommand
                 await manifest.AddToolAsync(tool with
                 {
                     Version = release.TagName,
-                    InstalledAt = DateTime.UtcNow
+                    InstalledAt = DateTime.UtcNow,
+                    AssetName = selected.Name
                 }, ct);
 
                 var versionDisplay = release.Name ?? release.TagName;
@@ -212,6 +219,26 @@ public static class UpdateCommand
         var summary = $"更新: {updated} | 已是最新: {currentCount}";
         if (failed > 0) summary += $" | 失败: {failed}";
         AnsiConsole.MarkupLine($"[bold]{summary}[/]");
+    }
+
+    /// <summary>
+    /// 从匹配结果中选择资产：单个匹配自动选中，多个匹配取第一个，
+    /// 无匹配时回退到手动选择。
+    /// </summary>
+    private static GitHubAsset SelectFromMatches(
+        string toolName, PlatformInfo platform,
+        List<GitHubAsset> allAssets, List<GitHubAsset> matches)
+    {
+        if (matches.Count == 0)
+        {
+            AnsiConsole.MarkupLine($"[yellow]⚠ {toolName}: 未找到匹配 {platform} 的资产，手动选择:[/]");
+            return CommandHelpers.PromptAssetSelection(allAssets);
+        }
+
+        if (matches.Count > 1)
+            AnsiConsole.MarkupLine($"[grey]  发现 {matches.Count} 个匹配资产，选择第一个[/]");
+
+        return matches[0];
     }
 
 }

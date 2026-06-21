@@ -238,7 +238,8 @@ public static class InstallCommand
             Repo = $"{owner}/{repoName}",
             Version = release.TagName,
             InstallPath = installDir,
-            InstalledAt = DateTime.UtcNow
+            InstalledAt = DateTime.UtcNow,
+            AssetName = selected.Name
         }, ct);
 
         // 12. Success
