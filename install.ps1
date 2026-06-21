@@ -97,6 +97,10 @@ function Install-GitPkg {
         Write-Host "请重新打开终端或运行以下命令使新安装的 gitpkg 生效:" -ForegroundColor Green
         Write-Host ""
         Write-Host "  . `$PROFILE" -ForegroundColor Cyan
+        Write-Host ""
+        Write-Host "  如需启用自动补全，运行:" -ForegroundColor Cyan
+        Write-Host ""
+        Write-Host "  Invoke-Expression (& '$(Join-Path $InstallDir $BinaryName)' completion powershell)" -ForegroundColor Cyan
     } else {
         Write-Host ""
         Write-Host "$InstallDir 不在 PATH 中" -ForegroundColor Yellow
@@ -106,6 +110,10 @@ function Install-GitPkg {
         Write-Host "  Invoke-Expression (& '$(Join-Path $InstallDir $BinaryName)' init powershell)" -ForegroundColor Cyan
         Write-Host ""
         Write-Host "  可将上述命令追加到 `$PROFILE 中使其永久生效" -ForegroundColor Cyan
+        Write-Host ""
+        Write-Host "  如需启用自动补全，运行:" -ForegroundColor Cyan
+        Write-Host ""
+        Write-Host "  Invoke-Expression (& '$(Join-Path $InstallDir $BinaryName)' completion powershell)" -ForegroundColor Cyan
     }
 }
 

@@ -149,6 +149,18 @@ check_path() {
         else
             echo "  请重新打开终端"
         fi
+
+        echo ""
+        echo "  如需启用自动补全，运行:"
+        echo ""
+        case "${shell_name}" in
+            fish)
+                printf "  ${CYAN}%s${NC}\n" "${INSTALL_DIR}/${BINARY_NAME} completion fish > ${HOME}/.config/fish/completions/${BINARY_NAME}.fish"
+                ;;
+            *)
+                printf "  ${CYAN}%s${NC}\n" "eval \"\$(${INSTALL_DIR}/${BINARY_NAME} completion ${shell_name})\""
+                ;;
+        esac
         return 0
     fi
 
@@ -169,6 +181,18 @@ check_path() {
 
     echo ""
     echo "  可将上述命令追加到 ${rc_file} 中使其永久生效"
+
+    echo ""
+    echo "  如需启用自动补全，运行:"
+    echo ""
+    case "${shell_name}" in
+        fish)
+            printf "  ${CYAN}%s${NC}\n" "${INSTALL_DIR}/${BINARY_NAME} completion fish > ${HOME}/.config/fish/completions/${BINARY_NAME}.fish"
+            ;;
+        *)
+            printf "  ${CYAN}%s${NC}\n" "eval \"\$(${INSTALL_DIR}/${BINARY_NAME} completion ${shell_name})\""
+            ;;
+    esac
 }
 
 # ---- 主流程 ----
