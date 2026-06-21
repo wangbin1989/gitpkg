@@ -4,7 +4,7 @@ namespace GitPkg.Commands;
 
 /// <summary>
 /// init 命令：输出 shell 初始化脚本到标准输出，用于 eval 集成。
-/// 将 gitpkg 安装目录加入 PATH，用法：eval "$(gitpkg init zsh)"。
+/// 设置 GITPKG_HOME 环境变量并将其 bin 目录加入 PATH，用法：eval "$(gitpkg init zsh)"。
 /// 如需自动补全，请单独使用 completion 命令。
 /// </summary>
 public static class InitCommand
@@ -65,18 +65,21 @@ public static class InitCommand
     internal static string EscapeForPowershell(string path)
         => path.Replace("'", "''");
 
-    /// <summary>生成 POSIX Shell（zsh / bash）的 export PATH 命令。使用单引号包裹路径防止命令注入。</summary>
+    /// <summary>生成 POSIX Shell（zsh / bash）的初始化脚本。设置 GITPKG_HOME 环境变量并将 bin 目录加入 PATH。</summary>
     private static string PosixInit(string shell, string binDir)
         => $"# gitpkg shell init for {shell}\n"
-         + $"export PATH={EscapeForPosixShell(binDir)}:$PATH\n";
+         + $"export GITPKG_HOME={EscapeForPosixShell(Path.GetDirectoryName(binDir)!)}\n"
+         + $"export PATH=\"$GITPKG_HOME/bin\":$PATH\n";
 
-    /// <summary>生成 Fish Shell 的 fish_add_path 命令。Fish 与 POSIX Shell 共享相同的单引号转义策略。</summary>
+    /// <summary>生成 Fish Shell 的初始化脚本。设置 GITPKG_HOME 环境变量并将 bin 目录加入 PATH。</summary>
     private static string FishInit(string binDir)
         => $"# gitpkg shell init for fish\n"
-         + $"fish_add_path {EscapeForPosixShell(binDir)}\n";
+         + $"set -gx GITPKG_HOME {EscapeForPosixShell(Path.GetDirectoryName(binDir)!)}\n"
+         + $"fish_add_path \"$GITPKG_HOME/bin\"\n";
 
-    /// <summary>生成 PowerShell 的 $env:Path 设置命令。路径放入单引号，分号后拼接原 $env:Path。</summary>
+    /// <summary>生成 PowerShell 的初始化脚本。设置 GITPKG_HOME 环境变量并将 bin 目录加入 PATH。</summary>
     private static string PowershellInit(string binDir)
         => $"# gitpkg shell init for powershell\n"
-         + $"$env:Path = '{EscapeForPowershell(binDir)};' + $env:Path\n";
+         + $"$env:GITPKG_HOME = '{EscapeForPowershell(Path.GetDirectoryName(binDir)!)}'\n"
+         + $"$env:Path = \"$env:GITPKG_HOME\\bin;\" + $env:Path\n";
 }

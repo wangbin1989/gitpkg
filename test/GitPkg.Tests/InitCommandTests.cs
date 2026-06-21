@@ -36,7 +36,7 @@ public class InitCommandTests
         }
     }
 
-    /// <summary>zsh：含 export PATH 的初始化脚本。</summary>
+    /// <summary>zsh：含 GITPKG_HOME 和基于变量的 PATH 初始化脚本。</summary>
     [Fact]
     public async Task Init_Zsh_WritesExportPath()
     {
@@ -44,11 +44,12 @@ public class InitCommandTests
 
         Assert.Equal(0, exitCode);
         Assert.StartsWith("# gitpkg shell init for zsh", stdout);
-        Assert.Contains("export PATH=", stdout);
+        Assert.Contains("export GITPKG_HOME=", stdout);
+        Assert.Contains("export PATH=\"$GITPKG_HOME/bin\":$PATH", stdout);
         Assert.DoesNotContain("[suggest]", stdout); // init 不含补全
     }
 
-    /// <summary>bash：含 export PATH 的初始化脚本。</summary>
+    /// <summary>bash：含 GITPKG_HOME 和基于变量的 PATH 初始化脚本。</summary>
     [Fact]
     public async Task Init_Bash_WritesExportPath()
     {
@@ -56,10 +57,11 @@ public class InitCommandTests
 
         Assert.Equal(0, exitCode);
         Assert.StartsWith("# gitpkg shell init for bash", stdout);
-        Assert.Contains("export PATH=", stdout);
+        Assert.Contains("export GITPKG_HOME=", stdout);
+        Assert.Contains("export PATH=\"$GITPKG_HOME/bin\":$PATH", stdout);
     }
 
-    /// <summary>fish：含 fish_add_path 的初始化脚本。</summary>
+    /// <summary>fish：含 GITPKG_HOME 和基于变量的 fish_add_path 初始化脚本。</summary>
     [Fact]
     public async Task Init_Fish_WritesFishAddPath()
     {
@@ -67,10 +69,11 @@ public class InitCommandTests
 
         Assert.Equal(0, exitCode);
         Assert.StartsWith("# gitpkg shell init for fish", stdout);
-        Assert.Contains("fish_add_path", stdout);
+        Assert.Contains("set -gx GITPKG_HOME", stdout);
+        Assert.Contains("fish_add_path \"$GITPKG_HOME/bin\"", stdout);
     }
 
-    /// <summary>powershell：含 $env:Path 的初始化脚本。</summary>
+    /// <summary>powershell：含 GITPKG_HOME 和基于变量的 $env:Path 初始化脚本。</summary>
     [Fact]
     public async Task Init_Powershell_WritesEnvPath()
     {
@@ -78,7 +81,8 @@ public class InitCommandTests
 
         Assert.Equal(0, exitCode);
         Assert.StartsWith("# gitpkg shell init for powershell", stdout);
-        Assert.Contains("$env:Path", stdout);
+        Assert.Contains("$env:GITPKG_HOME", stdout);
+        Assert.Contains("$env:GITPKG_HOME\\bin", stdout);
     }
 
     /// <summary>pwsh 别名输出应与 powershell 一致。</summary>
@@ -89,7 +93,8 @@ public class InitCommandTests
 
         Assert.Equal(0, exitCode);
         Assert.StartsWith("# gitpkg shell init for powershell", stdout);
-        Assert.Contains("$env:Path", stdout);
+        Assert.Contains("$env:GITPKG_HOME", stdout);
+        Assert.Contains("$env:GITPKG_HOME\\bin", stdout);
     }
 
     /// <summary>非法 shell 名应返回退出码 1 并将错误信息输出到 stderr。</summary>
