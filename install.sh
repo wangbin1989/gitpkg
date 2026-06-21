@@ -128,15 +128,8 @@ download_and_install() {
     "${INSTALL_DIR}/${BINARY_NAME}" --version
 }
 
-# ---- PATH 检查 ----
+# ---- PATH 提示 ----
 check_path() {
-    if [[ ":$PATH:" == *":${INSTALL_DIR}:"* ]]; then
-        return 0
-    fi
-
-    echo ""
-    warn "${INSTALL_DIR} 不在 PATH 中"
-
     local shell_name
     shell_name=$(basename "${SHELL:-/bin/bash}")
 
@@ -147,50 +140,35 @@ check_path() {
         fish) rc_file="${HOME}/.config/fish/config.fish" ;;
     esac
 
-    if [[ -n "${rc_file}" ]]; then
-        # 使用 gitpkg init <shell> 生成初始化脚本
-        local init_script
-        init_script=$("${INSTALL_DIR}/${BINARY_NAME}" init "${shell_name}" 2>/dev/null) || true
-
-        if [[ -z "${init_script}" ]]; then
-            # 兜底：手动构造（用单引号包裹路径，防止 $ ` " \ 等 shell 特殊字符被展开）
-            #       使用 sed 将路径中的 ' 替换为 '\''（结束引号→转义单引号→恢复引号）
-            local escaped_dir
-            escaped_dir=$(printf '%s' "${INSTALL_DIR}" | sed "s/'/'\\\\''/g")
-            case "${shell_name}" in
-                fish) init_script="fish_add_path '${escaped_dir}'" ;;
-                *)    init_script="export PATH='${escaped_dir}':\$PATH" ;;
-            esac
+    if [[ ":$PATH:" == *":${INSTALL_DIR}:"* ]]; then
+        echo ""
+        info "请重新打开终端或运行以下命令使新安装的 gitpkg 生效:"
+        echo ""
+        if [[ -n "${rc_file}" ]]; then
+            printf "  ${CYAN}source %s${NC}\n" "${rc_file}"
+        else
+            echo "  请重新打开终端"
         fi
-
-        echo ""
-        echo "  将以下内容追加到 ${rc_file}:"
-        echo ""
-        printf "  ${CYAN}%s${NC}\n" "${init_script}"
-        echo ""
-        read -r -p "  是否自动添加? [Y/n] " answer
-        if [[ -z "${answer}" || "${answer}" =~ ^[Yy] ]]; then
-            echo "" >> "${rc_file}"
-            echo "# GitPkg" >> "${rc_file}"
-            echo "${init_script}" >> "${rc_file}"
-            info "已添加 PATH 到 ${rc_file}"
-
-            # 添加自动补全
-            if [[ "${shell_name}" == "fish" ]]; then
-                local fish_completions="${HOME}/.config/fish/completions"
-                mkdir -p "${fish_completions}"
-                "${INSTALL_DIR}/${BINARY_NAME}" completion fish > "${fish_completions}/${BINARY_NAME}.fish"
-                info "已添加 fish 自动补全到 ${fish_completions}/${BINARY_NAME}.fish"
-            elif [[ "${shell_name}" == "zsh" || "${shell_name}" == "bash" ]]; then
-                echo "eval \"\$(${INSTALL_DIR}/${BINARY_NAME} completion ${shell_name})\"" >> "${rc_file}"
-                info "已添加 ${shell_name} 自动补全到 ${rc_file}"
-            fi
-
-            info "运行 'source ${rc_file}' 或重新打开终端使其生效"
-        fi
-    else
-        echo "  请手动将 ${INSTALL_DIR} 加入 PATH"
+        return 0
     fi
+
+    echo ""
+    warn "${INSTALL_DIR} 不在 PATH 中"
+    echo ""
+    echo "  请运行以下命令初始化 Shell 环境（PATH + 自动补全）:"
+    echo ""
+
+    case "${shell_name}" in
+        fish)
+            printf "  ${CYAN}%s${NC}\n" "${INSTALL_DIR}/${BINARY_NAME} init fish | source"
+            ;;
+        *)
+            printf "  ${CYAN}%s${NC}\n" "eval \"\$(${INSTALL_DIR}/${BINARY_NAME} init ${shell_name})\""
+            ;;
+    esac
+
+    echo ""
+    echo "  可将上述命令追加到 ${rc_file} 中使其永久生效"
 }
 
 # ---- 主流程 ----
