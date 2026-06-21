@@ -52,7 +52,6 @@ public static class CompletionCommand
     private static string ZshCompletion() => """
         # gitpkg zsh completion — 添加到 ~/.zshrc 后 source 即可
         #   eval "$(gitpkg completion zsh)"
-        #compdef gitpkg
 
         _gitpkg() {
             local -a completions
@@ -60,7 +59,7 @@ public static class CompletionCommand
             _describe '' completions
         }
 
-        _gitpkg
+        compdef _gitpkg gitpkg
 
         """;
 

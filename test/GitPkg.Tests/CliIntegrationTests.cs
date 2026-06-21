@@ -202,7 +202,7 @@ public class CliIntegrationTests
 
         // 如果失败，输出详细信息帮助诊断
         Assert.True(exitCode == 0, $"ExitCode={exitCode}, Stdout='{stdout}', Stderr='{stderr}'");
-        Assert.Contains("#compdef gitpkg", stdout);
+        Assert.Contains("compdef _gitpkg gitpkg", stdout);
         Assert.Contains("[suggest]", stdout);
     }
 
