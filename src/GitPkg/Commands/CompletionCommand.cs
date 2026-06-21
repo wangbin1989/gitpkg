@@ -4,7 +4,7 @@ namespace GitPkg.Commands;
 
 /// <summary>
 /// completion 命令：输出 shell 自动补全脚本，用于 eval 集成。
-/// 底层利用 System.CommandLine 内置的 [suggest] 指令获取补全候选项。
+/// 底层使用静态定义的子命令和选项列表提供补全。
 /// </summary>
 public static class CompletionCommand
 {
@@ -47,7 +47,7 @@ public static class CompletionCommand
 
     /// <summary>
     /// zsh 补全脚本。
-    /// 使用 compdef 注册补全函数，通过 [suggest] 指令获取候选项。
+    /// 使用 compdef 注册补全函数，通过静态定义的子命令和选项列表提供补全。
     /// </summary>
     private static string ZshCompletion() => """
         # gitpkg zsh completion — 添加到 ~/.zshrc 后 source 即可
@@ -61,10 +61,7 @@ public static class CompletionCommand
 
             case "$cmd" in
                 install)
-                    case "$prev" in
-                        --dir|--verify-gpg) ;;
-                        *) completions=(--dir --verify-gpg --from --dry-run --help) ;;
-                    esac
+                    completions=(--from --help)
                     ;;
                 update|uninstall|info)
                     completions=(--help)
@@ -92,7 +89,7 @@ public static class CompletionCommand
 
     /// <summary>
     /// bash 补全脚本。
-    /// 使用 complete -F 注册补全函数，通过 [suggest] 指令获取候选项。
+    /// 使用 complete -F 注册补全函数，通过 compgen 匹配静态定义的选项列表。
     /// </summary>
     private static string BashCompletion() => """
         # gitpkg bash completion — 添加到 ~/.bashrc 后 source 即可
@@ -104,7 +101,7 @@ public static class CompletionCommand
 
             case "$cmd" in
                 install)
-                    opts="--dir --verify-gpg --from --dry-run --help"
+                    opts="--from --help"
                     ;;
                 update|uninstall|info)
                     opts="--help"
@@ -151,10 +148,7 @@ public static class CompletionCommand
         complete -c gitpkg -f -n '__fish_use_subcommand' -a 'self-update' -d '更新 gitpkg 自身'
 
         # install 子命令选项
-        complete -c gitpkg -f -n '__fish_seen_subcommand_from install' -l dir -d '自定义安装目录'
-        complete -c gitpkg -f -n '__fish_seen_subcommand_from install' -l verify-gpg -d 'GPG 签名校验'
         complete -c gitpkg -f -n '__fish_seen_subcommand_from install' -l from -d '从清单文件批量安装'
-        complete -c gitpkg -f -n '__fish_seen_subcommand_from install' -l dry-run -d '预览模式'
         complete -c gitpkg -f -n '__fish_seen_subcommand_from install' -l help -d '帮助'
 
         # manifest 子命令补全
@@ -181,7 +175,7 @@ public static class CompletionCommand
             $cmd = if ($tokens.Length -ge 2) { $tokens[1] } else { "" }
 
             $completions = switch ($cmd) {
-                "install"   { @('--dir', '--verify-gpg', '--from', '--dry-run', '--help') }
+                "install"   { @('--from', '--help') }
                 "update"    { @('--help') }
                 "uninstall" { @('--help') }
                 "info"      { @('--help') }

@@ -1,5 +1,24 @@
 # Changelog
 
+## [2.0.3] - 2026-06-21
+
+### Added
+- 新增命令设计文档 `docs/命令设计文档.md`
+
+### Changed
+- 更新使用说明书：补充 `init`、`completion`、`self-update` 命令说明，更新安装指南
+- 更新 README：补充 bash/fish/PowerShell 手动配置说明
+
+### Removed
+- 移除 `--verify-gpg` 选项及 GPG 签名校验逻辑（`GpgVerifier` 类）
+- 移除 `--dir` 选项（安装目录固定为 `~/.gitpkg/tools/<name>/`）
+- 移除 `--dry-run` 选项
+
+### Fixed
+- 补全脚本移除已废弃的 `--verify-gpg`、`--dir`、`--dry-run` 补全项
+- zsh 补全脚本 `compdef` 改为显式注册（`compdef _gitpkg gitpkg`）
+- 修正 `CompletionCommand` 中过时的 `[suggest]` 文档注释
+
 ## [2.0.2] - 2026-06-21
 
 ### Added
