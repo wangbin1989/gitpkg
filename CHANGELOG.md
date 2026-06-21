@@ -1,5 +1,14 @@
 # Changelog
 
+## [2.0.2] - 2026-06-21
+
+### Added
+- 补全脚本支持所有子命令和选项补全（替换 `[suggest]` 机制为手动补全定义）
+
+### Fixed
+- `install --from ~/.gitpkg/manifest.json` 文件占用错误：`HandleBatchAsync` 中 stream 生命周期过长，改用 `File.ReadAllTextAsync` 一次性读取
+- zsh 补全脚本 `eval` 时报 `_tags can only be called from completion function`：将 `_gitpkg` 直接调用改为 `compdef` 注册
+
 ## [2.0.1] - 2026-06-21
 
 ### Added

@@ -52,15 +52,41 @@ public static class CompletionCommand
     private static string ZshCompletion() => """
         # gitpkg zsh completion — 添加到 ~/.zshrc 后 source 即可
         #   eval "$(gitpkg completion zsh)"
-        #compdef gitpkg
 
         _gitpkg() {
             local -a completions
-            completions=("${(@f)$("${words[@]:0:1}" "[suggest]" "${words[@]:1}" 2>/dev/null)}")
+            local cur="${words[CURRENT]}"
+            local prev="${words[CURRENT-1]}"
+            local cmd="${words[2]}"
+
+            case "$cmd" in
+                install)
+                    case "$prev" in
+                        --dir|--verify-gpg) ;;
+                        *) completions=(--dir --verify-gpg --from --dry-run --help) ;;
+                    esac
+                    ;;
+                update|uninstall|info)
+                    completions=(--help)
+                    ;;
+                init|completion)
+                    completions=(zsh bash fish powershell)
+                    ;;
+                manifest)
+                    completions=(export --help)
+                    ;;
+                list|outdated|self-update)
+                    completions=(--help)
+                    ;;
+                *)
+                    completions=(install update uninstall outdated list info init completion manifest self-update --help --version)
+                    ;;
+            esac
+
             _describe '' completions
         }
 
-        _gitpkg
+        compdef _gitpkg gitpkg
 
         """;
 
@@ -72,8 +98,32 @@ public static class CompletionCommand
         # gitpkg bash completion — 添加到 ~/.bashrc 后 source 即可
         #   eval "$(gitpkg completion bash)"
         _gitpkg_completion() {
-            local IFS=$'\n'
-            COMPREPLY=($("${COMP_WORDS[0]}" "[suggest]" "${COMP_WORDS[@]:1}" 2>/dev/null))
+            local cur="${COMP_WORDS[COMP_CWORD]}"
+            local cmd="${COMP_WORDS[1]}"
+            local opts=""
+
+            case "$cmd" in
+                install)
+                    opts="--dir --verify-gpg --from --dry-run --help"
+                    ;;
+                update|uninstall|info)
+                    opts="--help"
+                    ;;
+                init|completion)
+                    opts="zsh bash fish powershell"
+                    ;;
+                manifest)
+                    opts="export --help"
+                    ;;
+                list|outdated|self-update)
+                    opts="--help"
+                    ;;
+                *)
+                    opts="install update uninstall outdated list info init completion manifest self-update --help --version"
+                    ;;
+            esac
+
+            COMPREPLY=($(compgen -W "$opts" -- "$cur"))
         }
 
         complete -F _gitpkg_completion gitpkg
@@ -87,11 +137,34 @@ public static class CompletionCommand
     private static string FishCompletion() => """
         # gitpkg fish completion — 保存到 ~/.config/fish/completions/gitpkg.fish
         #   gitpkg completion fish > ~/.config/fish/completions/gitpkg.fish
-        function _gitpkg_completion
-            command gitpkg "[suggest]" (commandline -opc)[2..-1] 2>/dev/null
-        end
 
-        complete -c gitpkg -f -a '(_gitpkg_completion)'
+        # 根命令补全
+        complete -c gitpkg -f -n '__fish_use_subcommand' -a 'install' -d '安装工具'
+        complete -c gitpkg -f -n '__fish_use_subcommand' -a 'update' -d '更新工具'
+        complete -c gitpkg -f -n '__fish_use_subcommand' -a 'uninstall' -d '卸载工具'
+        complete -c gitpkg -f -n '__fish_use_subcommand' -a 'outdated' -d '检查更新'
+        complete -c gitpkg -f -n '__fish_use_subcommand' -a 'list' -d '列出已安装工具'
+        complete -c gitpkg -f -n '__fish_use_subcommand' -a 'info' -d '查看工具详情'
+        complete -c gitpkg -f -n '__fish_use_subcommand' -a 'init' -d '输出 shell 初始化脚本'
+        complete -c gitpkg -f -n '__fish_use_subcommand' -a 'completion' -d '输出 shell 补全脚本'
+        complete -c gitpkg -f -n '__fish_use_subcommand' -a 'manifest' -d '清单管理'
+        complete -c gitpkg -f -n '__fish_use_subcommand' -a 'self-update' -d '更新 gitpkg 自身'
+
+        # install 子命令选项
+        complete -c gitpkg -f -n '__fish_seen_subcommand_from install' -l dir -d '自定义安装目录'
+        complete -c gitpkg -f -n '__fish_seen_subcommand_from install' -l verify-gpg -d 'GPG 签名校验'
+        complete -c gitpkg -f -n '__fish_seen_subcommand_from install' -l from -d '从清单文件批量安装'
+        complete -c gitpkg -f -n '__fish_seen_subcommand_from install' -l dry-run -d '预览模式'
+        complete -c gitpkg -f -n '__fish_seen_subcommand_from install' -l help -d '帮助'
+
+        # manifest 子命令补全
+        complete -c gitpkg -f -n '__fish_seen_subcommand_from manifest' -a 'export' -d '导出清单文件'
+
+        # init / completion 子命令补全
+        complete -c gitpkg -f -n '__fish_seen_subcommand_from init completion' -a 'zsh bash fish powershell'
+
+        # update / uninstall / info 子命令选项
+        complete -c gitpkg -f -n '__fish_seen_subcommand_from update uninstall info' -l help -d '帮助'
 
         """;
 
@@ -104,7 +177,24 @@ public static class CompletionCommand
         #   gitpkg completion powershell >> $PROFILE
         Register-ArgumentCompleter -Native -CommandName gitpkg -ScriptBlock {
             param($wordToComplete, $commandAst, $cursorPosition)
-            gitpkg "[suggest]" ($commandAst.ToString() -split '\s+')[1..-1] 2>$null | ForEach-Object {
+            $tokens = $commandAst.ToString() -split '\s+'
+            $cmd = if ($tokens.Length -ge 2) { $tokens[1] } else { "" }
+
+            $completions = switch ($cmd) {
+                "install"   { @('--dir', '--verify-gpg', '--from', '--dry-run', '--help') }
+                "update"    { @('--help') }
+                "uninstall" { @('--help') }
+                "info"      { @('--help') }
+                "init"      { @('zsh', 'bash', 'fish', 'powershell') }
+                "completion"{ @('zsh', 'bash', 'fish', 'powershell') }
+                "manifest"  { @('export', '--help') }
+                "list"      { @('--help') }
+                "outdated"  { @('--help') }
+                "self-update" { @('--help') }
+                default     { @('install', 'update', 'uninstall', 'outdated', 'list', 'info', 'init', 'completion', 'manifest', 'self-update', '--help', '--version') }
+            }
+
+            $completions | Where-Object { $_ -like "$wordToComplete*" } | ForEach-Object {
                 [System.Management.Automation.CompletionResult]::new($_, $_, 'ParameterValue', $_)
             }
         }

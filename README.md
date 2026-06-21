@@ -34,16 +34,41 @@ Invoke-Expression (Invoke-RestMethod https://raw.githubusercontent.com/wangbin19
 如果跳过了自动配置，可以手动执行：
 
 ```bash
-# zsh / bash（一句话搞定 PATH + 补全）
-eval "$(~/.gitpkg/bin/gitpkg init zsh)" >> ~/.zshrc
-source ~/.zshrc
+# zsh
+eval "$(~/.gitpkg/bin/gitpkg init zsh)"           # 当前会话生效
+eval "$(~/.gitpkg/bin/gitpkg init zsh)" >> ~/.zshrc  # 永久生效
+
+# bash
+eval "$(~/.gitpkg/bin/gitpkg init bash)"
+eval "$(~/.gitpkg/bin/gitpkg init bash)" >> ~/.bashrc
 
 # fish
+~/.gitpkg/bin/gitpkg init fish | source
 ~/.gitpkg/bin/gitpkg init fish >> ~/.config/fish/config.fish
-source ~/.config/fish/config.fish
+```
 
-# 如果只需要单独配置补全
+```powershell
+# PowerShell
+Invoke-Expression (& "$env:USERPROFILE\.gitpkg\bin\gitpkg.exe" init powershell)
+# 永久生效：追加到 $PROFILE
+```
+
+如果只需要单独配置自动补全：
+
+```bash
+# zsh
 eval "$(gitpkg completion zsh)"
+
+# bash
+eval "$(gitpkg completion bash)"
+
+# fish
+gitpkg completion fish > ~/.config/fish/completions/gitpkg.fish
+```
+
+```powershell
+# PowerShell
+Invoke-Expression (& "$env:USERPROFILE\.gitpkg\bin\gitpkg.exe" completion powershell)
 ```
 
 **手动安装：**

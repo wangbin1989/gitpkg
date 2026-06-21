@@ -202,8 +202,8 @@ public class CliIntegrationTests
 
         // 如果失败，输出详细信息帮助诊断
         Assert.True(exitCode == 0, $"ExitCode={exitCode}, Stdout='{stdout}', Stderr='{stderr}'");
-        Assert.Contains("#compdef gitpkg", stdout);
-        Assert.Contains("[suggest]", stdout);
+        Assert.Contains("compdef _gitpkg gitpkg", stdout);
+        Assert.Contains("install", stdout);
     }
 
     /// <summary>completion bash 应输出含 complete -F 的补全脚本。</summary>
@@ -214,7 +214,7 @@ public class CliIntegrationTests
 
         Assert.Equal(0, exitCode);
         Assert.Contains("complete -F", stdout);
-        Assert.Contains("[suggest]", stdout);
+        Assert.Contains("install", stdout);
     }
 
     /// <summary>completion fish 应输出含 complete -c 的补全脚本。</summary>
@@ -225,7 +225,7 @@ public class CliIntegrationTests
 
         Assert.Equal(0, exitCode);
         Assert.Contains("complete -c", stdout);
-        Assert.Contains("[suggest]", stdout);
+        Assert.Contains("install", stdout);
     }
 
     /// <summary>completion powershell 应输出含 Register-ArgumentCompleter 的补全脚本。</summary>
@@ -236,7 +236,7 @@ public class CliIntegrationTests
 
         Assert.Equal(0, exitCode);
         Assert.Contains("Register-ArgumentCompleter", stdout);
-        Assert.Contains("[suggest]", stdout);
+        Assert.Contains("install", stdout);
     }
 
     /// <summary>completion 非法 shell 应返回错误。</summary>
