@@ -61,10 +61,7 @@ public static class CompletionCommand
 
             case "$cmd" in
                 install)
-                    case "$prev" in
-                        --dir|--verify-gpg) ;;
-                        *) completions=(--dir --verify-gpg --from --dry-run --help) ;;
-                    esac
+                    completions=(--from --help)
                     ;;
                 update|uninstall|info)
                     completions=(--help)
@@ -104,7 +101,7 @@ public static class CompletionCommand
 
             case "$cmd" in
                 install)
-                    opts="--dir --verify-gpg --from --dry-run --help"
+                    opts="--from --help"
                     ;;
                 update|uninstall|info)
                     opts="--help"
@@ -151,10 +148,7 @@ public static class CompletionCommand
         complete -c gitpkg -f -n '__fish_use_subcommand' -a 'self-update' -d '更新 gitpkg 自身'
 
         # install 子命令选项
-        complete -c gitpkg -f -n '__fish_seen_subcommand_from install' -l dir -d '自定义安装目录'
-        complete -c gitpkg -f -n '__fish_seen_subcommand_from install' -l verify-gpg -d 'GPG 签名校验'
         complete -c gitpkg -f -n '__fish_seen_subcommand_from install' -l from -d '从清单文件批量安装'
-        complete -c gitpkg -f -n '__fish_seen_subcommand_from install' -l dry-run -d '预览模式'
         complete -c gitpkg -f -n '__fish_seen_subcommand_from install' -l help -d '帮助'
 
         # manifest 子命令补全
@@ -181,7 +175,7 @@ public static class CompletionCommand
             $cmd = if ($tokens.Length -ge 2) { $tokens[1] } else { "" }
 
             $completions = switch ($cmd) {
-                "install"   { @('--dir', '--verify-gpg', '--from', '--dry-run', '--help') }
+                "install"   { @('--from', '--help') }
                 "update"    { @('--help') }
                 "uninstall" { @('--help') }
                 "info"      { @('--help') }

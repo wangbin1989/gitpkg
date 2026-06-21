@@ -20,32 +20,20 @@ public static class InstallCommand
         var repoArg = new Argument<string?>("owner/repo") { Description = "GitHub 仓库 (owner/repo[@version])", Arity = ArgumentArity.ZeroOrOne };
         cmd.Add(repoArg);
 
-        var dirOpt = new Option<string?>("--dir", "-d") { Description = "自定义安装目录" };
-        cmd.Add(dirOpt);
-
-        var gpgOpt = new Option<string?>("--verify-gpg") { Description = "GPG 密钥 ID，用于签名校验" };
-        cmd.Add(gpgOpt);
-
         var fromOpt = new Option<string?>("--from") { Description = "从清单文件批量安装" };
         cmd.Add(fromOpt);
-
-        var dryRunOpt = new Option<bool>("--dry-run") { Description = "预览批量安装，不实际执行" };
-        cmd.Add(dryRunOpt);
 
         cmd.SetAction(async (parseResult, ct) =>
         {
             var repo = parseResult.GetValue(repoArg);
-            var dir = parseResult.GetValue(dirOpt);
-            var gpgKey = parseResult.GetValue(gpgOpt);
             var fromFile = parseResult.GetValue(fromOpt);
-            var dryRun = parseResult.GetValue(dryRunOpt);
 
             try
             {
                 if (fromFile != null)
-                    await HandleBatchAsync(fromFile, dryRun, ct);
+                    await HandleBatchAsync(fromFile, ct);
                 else if (repo != null)
-                    await HandleSingleAsync(repo, dir, gpgKey, ct);
+                    await HandleSingleAsync(repo, ct);
                 else
                     throw new ArgumentException("请指定 owner/repo 或使用 --from <file>");
                 return 0;
@@ -75,7 +63,7 @@ public static class InstallCommand
         return cmd;
     }
 
-    private static async Task HandleBatchAsync(string fromFile, bool dryRun, CancellationToken ct)
+    private static async Task HandleBatchAsync(string fromFile, CancellationToken ct)
     {
         if (!File.Exists(fromFile))
             throw new FileNotFoundException($"清单文件不存在: {fromFile}");
@@ -89,9 +77,7 @@ public static class InstallCommand
             return;
         }
 
-        AnsiConsole.MarkupLine(dryRun
-            ? $"[blue]预览模式 — 将从 {fromFile} 安装 {manifest.Tools.Count} 个工具[/]"
-            : $"[blue]将从 {fromFile} 批量安装 {manifest.Tools.Count} 个工具[/]");
+        AnsiConsole.MarkupLine($"[blue]将从 {fromFile} 批量安装 {manifest.Tools.Count} 个工具[/]");
 
         var success = 0;
         var failed = 0;
@@ -100,36 +86,24 @@ public static class InstallCommand
         {
             var repo = tool.Repo.Contains('@') ? tool.Repo : $"{tool.Repo}@{tool.Version}";
 
-            if (dryRun)
+            try
             {
-                var installDir = ManifestService.GetToolDir(tool.Name);
-                AnsiConsole.MarkupLine($"  [grey]→ {tool.Name} {tool.Version} ({tool.Repo}) → {installDir}[/]");
+                await InstallSingleAsync(repo, ct);
                 success++;
             }
-            else
+            catch (Exception ex)
             {
-                try
-                {
-                    await InstallSingleAsync(repo, null, null, ct);
-                    success++;
-                }
-                catch (Exception ex)
-                {
-                    AnsiConsole.MarkupLine($"  [red]✗ {tool.Name}: {ex.Message}[/]");
-                    failed++;
-                }
+                AnsiConsole.MarkupLine($"  [red]✗ {tool.Name}: {ex.Message}[/]");
+                failed++;
             }
         }
 
-        var summary = dryRun
-            ? $"预览: {success} 个工具"
-            : $"安装: {success} | 失败: {failed}";
-        AnsiConsole.MarkupLine($"[bold]{summary}[/]");
+        AnsiConsole.MarkupLine($"[bold]安装: {success} | 失败: {failed}[/]");
     }
 
-    private static async Task HandleSingleAsync(string repo, string? dir, string? gpgKey, CancellationToken ct)
+    private static async Task HandleSingleAsync(string repo, CancellationToken ct)
     {
-        await InstallSingleAsync(repo, dir, gpgKey, ct);
+        await InstallSingleAsync(repo, ct);
     }
 
     /// <summary>
@@ -138,12 +112,12 @@ public static class InstallCommand
     /// 2. 获取 Release 信息
     /// 3. 平台匹配并选择资产
     /// 4. 下载归档文件
-    /// 5. 可选的 GPG / SHA256 校验
+    /// 5. SHA256 校验
     /// 6. 解压到安装目录
     /// 7. 链接可执行文件到 ~/.gitpkg/bin/
     /// 8. 更新 manifest.json
     /// </summary>
-    private static async Task InstallSingleAsync(string repo, string? dir, string? gpgKey, CancellationToken ct)
+    private static async Task InstallSingleAsync(string repo, CancellationToken ct)
     {
         var gitHub = new GitHubService(GitPkgApp.Http);
         var matcher = new AssetMatcher();
@@ -189,7 +163,7 @@ public static class InstallCommand
             selected = CommandHelpers.PromptAssetSelection(matches);
         }
 
-        var installDir = dir ?? ManifestService.GetToolDir(toolName);
+        var installDir = ManifestService.GetToolDir(toolName);
         var tmpDir = ManifestService.GetTmpDir();
         Directory.CreateDirectory(tmpDir);
 
@@ -224,36 +198,7 @@ public static class InstallCommand
                 task.Value(task.MaxValue);
             });
 
-        // 6. GPG verification (optional)
-        if (gpgKey != null)
-        {
-            var sigAsset = GpgVerifier.FindSignatureAsset(release.Assets, selected.Name);
-            if (sigAsset == null)
-            {
-                AnsiConsole.MarkupLine("[yellow]⚠ 未找到 GPG 签名文件，跳过签名校验[/]");
-            }
-            else
-            {
-                var sigPath = Path.Combine(tmpDir, sigAsset.Name);
-                await gitHub.DownloadFileAsync(sigAsset.DownloadUrl, sigPath, ct: ct);
-
-                AnsiConsole.Markup("[grey]校验 GPG 签名...[/]");
-                var gpg = new GpgVerifier();
-                var valid = await gpg.VerifyAsync(archivePath, sigPath, gpgKey, ct);
-
-                File.Delete(sigPath);
-
-                if (!valid)
-                {
-                    File.Delete(archivePath);
-                    throw new InvalidOperationException("GPG 签名校验失败");
-                }
-
-                AnsiConsole.MarkupLine("[green] ✓[/]");
-            }
-        }
-
-        // 7. SHA256 verification
+        // 6. SHA256 verification
         await VerifyChecksumAsync(gitHub, verifier, release.Assets, selected.Name, archivePath, ct);
 
         // 8. Extract
