@@ -155,27 +155,27 @@ check_path() {
         echo ""
         case "${shell_name}" in
             fish)
-                printf "  ${CYAN}%s${NC}\n" "${INSTALL_DIR}/${BINARY_NAME} completion fish > ${HOME}/.config/fish/completions/${BINARY_NAME}.fish"
+                printf "  ${CYAN}%s${NC}\n" "~/.gitpkg/bin/${BINARY_NAME} completion fish > ~/.config/fish/completions/${BINARY_NAME}.fish"
                 ;;
             *)
-                printf "  ${CYAN}%s${NC}\n" "eval \"\$(${INSTALL_DIR}/${BINARY_NAME} completion ${shell_name})\""
+                printf "  ${CYAN}%s${NC}\n" "eval \"\$(~/.gitpkg/bin/${BINARY_NAME} completion ${shell_name})\""
                 ;;
         esac
         return 0
     fi
 
     echo ""
-    warn "${INSTALL_DIR} 不在 PATH 中"
+    warn "~/.gitpkg/bin 不在 PATH 中"
     echo ""
     echo "  请运行以下命令初始化 Shell 环境（PATH + 自动补全）:"
     echo ""
 
     case "${shell_name}" in
         fish)
-            printf "  ${CYAN}%s${NC}\n" "${INSTALL_DIR}/${BINARY_NAME} init fish | source"
+            printf "  ${CYAN}%s${NC}\n" "~/.gitpkg/bin/${BINARY_NAME} init fish | source"
             ;;
         *)
-            printf "  ${CYAN}%s${NC}\n" "eval \"\$(${INSTALL_DIR}/${BINARY_NAME} init ${shell_name})\""
+            printf "  ${CYAN}%s${NC}\n" "eval \"\$(~/.gitpkg/bin/${BINARY_NAME} init ${shell_name})\""
             ;;
     esac
 
@@ -187,10 +187,10 @@ check_path() {
     echo ""
     case "${shell_name}" in
         fish)
-            printf "  ${CYAN}%s${NC}\n" "${INSTALL_DIR}/${BINARY_NAME} completion fish > ${HOME}/.config/fish/completions/${BINARY_NAME}.fish"
+            printf "  ${CYAN}%s${NC}\n" "~/.gitpkg/bin/${BINARY_NAME} completion fish > ~/.config/fish/completions/${BINARY_NAME}.fish"
             ;;
         *)
-            printf "  ${CYAN}%s${NC}\n" "eval \"\$(${INSTALL_DIR}/${BINARY_NAME} completion ${shell_name})\""
+            printf "  ${CYAN}%s${NC}\n" "eval \"\$(~/.gitpkg/bin/${BINARY_NAME} completion ${shell_name})\""
             ;;
     esac
 }

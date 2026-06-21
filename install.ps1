@@ -16,7 +16,7 @@ $ErrorActionPreference = "Stop"
 # ---- 配置 ----
 $Repo = "wangbin1989/gitpkg"
 $GitHubApi = "https://api.github.com/repos/$Repo"
-$InstallDir = "$HOME\.gitpkg\bin"
+$InstallDir = "$env:USERPROFILE\.gitpkg\bin"
 $BinaryName = "gitpkg.exe"
 
 # ---- 平台检测 ----
@@ -91,6 +91,7 @@ function Install-GitPkg {
     Remove-Item -Recurse -Force $tmpDir
 
     # PATH 提示
+    $displayPath = '"$env:USERPROFILE\.gitpkg\bin\gitpkg.exe"'
     $currentPath = [Environment]::GetEnvironmentVariable("Path", "User")
     if ($currentPath -like "*$InstallDir*") {
         Write-Host ""
@@ -100,20 +101,20 @@ function Install-GitPkg {
         Write-Host ""
         Write-Host "  如需启用自动补全，运行:" -ForegroundColor Cyan
         Write-Host ""
-        Write-Host "  Invoke-Expression (& '$(Join-Path $InstallDir $BinaryName)' completion powershell)" -ForegroundColor Cyan
+        Write-Host "  Invoke-Expression (& $displayPath completion powershell)" -ForegroundColor Cyan
     } else {
         Write-Host ""
         Write-Host "$InstallDir 不在 PATH 中" -ForegroundColor Yellow
         Write-Host ""
         Write-Host "  请运行以下命令初始化 Shell 环境（PATH + 自动补全）:" -ForegroundColor Cyan
         Write-Host ""
-        Write-Host "  Invoke-Expression (& '$(Join-Path $InstallDir $BinaryName)' init powershell)" -ForegroundColor Cyan
+        Write-Host "  Invoke-Expression (& $displayPath init powershell)" -ForegroundColor Cyan
         Write-Host ""
         Write-Host "  可将上述命令追加到 `$PROFILE 中使其永久生效" -ForegroundColor Cyan
         Write-Host ""
         Write-Host "  如需启用自动补全，运行:" -ForegroundColor Cyan
         Write-Host ""
-        Write-Host "  Invoke-Expression (& '$(Join-Path $InstallDir $BinaryName)' completion powershell)" -ForegroundColor Cyan
+        Write-Host "  Invoke-Expression (& $displayPath completion powershell)" -ForegroundColor Cyan
     }
 }
 
