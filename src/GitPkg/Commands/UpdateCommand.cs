@@ -93,31 +93,17 @@ public static class UpdateCommand
                     continue;
                 }
 
+                if (release.Assets.Count == 0)
+                {
+                    AnsiConsole.MarkupLine($"[yellow]= {tool.Name}: 新版本 {release.TagName} 无可用资产，跳过[/]");
+                    currentCount++;
+                    continue;
+                }
+
                 var platform = PlatformInfo.Current();
                 var matches = matcher.Match(release.Assets, platform);
 
-                GitHubAsset selected;
-
-                if (matches.Count == 0)
-                {
-                    if (release.Assets.Count == 0)
-                    {
-                        AnsiConsole.MarkupLine($"[yellow]= {tool.Name}: 新版本 {release.TagName} 无可用资产，跳过[/]");
-                        currentCount++;
-                        continue;
-                    }
-
-                    AnsiConsole.MarkupLine($"[yellow]⚠ {tool.Name}: 未找到匹配 {platform} 的资产，手动选择:[/]");
-                    selected = CommandHelpers.PromptAssetSelection(release.Assets);
-                }
-                else if (matches.Count == 1)
-                {
-                    selected = matches[0];
-                }
-                else
-                {
-                    selected = matches[0];
-                }
+                var selected = CommandHelpers.SelectAsset(release.Assets, matches, platform, tool.AssetName);
                 var tmpDir = ManifestService.GetTmpDir();
                 Directory.CreateDirectory(tmpDir);
                 var archivePath = Path.Combine(tmpDir, selected.Name);
@@ -126,11 +112,7 @@ public static class UpdateCommand
                 await gitHub.DownloadFileAsync(selected.DownloadUrl, archivePath, ct: ct);
 
                 // Verify
-                var checksumAsset = release.Assets.FirstOrDefault(a =>
-                {
-                    var n = a.Name.ToLowerInvariant();
-                    return n.EndsWith(".sha256") || n == "checksums.txt" || n == "sha256sums" || n == "sha256sums.txt";
-                });
+                var checksumAsset = CommandHelpers.FindChecksumAsset(release.Assets);
                 if (checksumAsset != null)
                 {
                     var content = await gitHub.DownloadStringAsync(checksumAsset.DownloadUrl, ct);
@@ -194,7 +176,8 @@ public static class UpdateCommand
                 await manifest.AddToolAsync(tool with
                 {
                     Version = release.TagName,
-                    InstalledAt = DateTime.UtcNow
+                    InstalledAt = DateTime.UtcNow,
+                    AssetName = selected.Name
                 }, ct);
 
                 var versionDisplay = release.Name ?? release.TagName;

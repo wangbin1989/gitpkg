@@ -5,7 +5,7 @@
 #   Invoke-Expression (Invoke-RestMethod https://raw.githubusercontent.com/wangbin1989/gitpkg/main/install.ps1)
 #
 #   或指定版本:
-#   .\install.ps1 -Version v1.1.4
+#   .\install.ps1 -Version v2.1.0
 
 param(
     [string]$Version = "latest"

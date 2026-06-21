@@ -99,7 +99,11 @@ public static class InfoCommand
             content.Add($"描述:     {repo.Description}");
 
         if (installed != null)
+        {
             content.Add($"已安装:   {installed.Version} ({installed.InstalledAt.ToLocalTime():yyyy-MM-dd})");
+            if (installed.AssetName != null)
+                content.Add($"记录资产: {installed.AssetName}");
+        }
 
         var releaseDisplay = release.Name ?? release.TagName;
         var releaseDate = release.PublishedAt != default

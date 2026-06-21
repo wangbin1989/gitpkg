@@ -41,4 +41,8 @@ public record ToolEntry
     /// <summary>安装时间（UTC）。</summary>
     [JsonPropertyName("installedAt")]
     public DateTime InstalledAt { get; init; }
+
+    /// <summary>上次选择的资产文件名，用于更新时自动选择相同文件。</summary>
+    [JsonPropertyName("assetName")]
+    public string? AssetName { get; init; }
 }

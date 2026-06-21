@@ -145,23 +145,7 @@ public static class InstallCommand
         var matches = matcher.Match(release.Assets, platform);
 
         // 4. Select asset
-        GitHubAsset selected;
-
-        if (matches.Count == 0)
-        {
-            AnsiConsole.MarkupLine($"[yellow]⚠ 未找到自动匹配 {platform} 的资产[/]");
-            AnsiConsole.MarkupLine("[grey]以下为全部可用资产，请手动选择:[/]");
-            selected = CommandHelpers.PromptAssetSelection(release.Assets);
-        }
-        else if (matches.Count == 1)
-        {
-            selected = matches[0];
-        }
-        else
-        {
-            AnsiConsole.MarkupLine($"[yellow]发现 {matches.Count} 个匹配的资产，请选择:[/]");
-            selected = CommandHelpers.PromptAssetSelection(matches);
-        }
+        var selected = CommandHelpers.SelectAsset(release.Assets, matches, platform, null);
 
         var installDir = ManifestService.GetToolDir(toolName);
         var tmpDir = ManifestService.GetTmpDir();
@@ -238,7 +222,8 @@ public static class InstallCommand
             Repo = $"{owner}/{repoName}",
             Version = release.TagName,
             InstallPath = installDir,
-            InstalledAt = DateTime.UtcNow
+            InstalledAt = DateTime.UtcNow,
+            AssetName = selected.Name
         }, ct);
 
         // 12. Success
@@ -273,11 +258,7 @@ public static class InstallCommand
         List<GitHubAsset> assets, string targetName, string archivePath,
         CancellationToken ct)
     {
-        var checksumAsset = assets.FirstOrDefault(a =>
-        {
-            var n = a.Name.ToLowerInvariant();
-            return n.EndsWith(".sha256") || n == "checksums.txt" || n == "sha256sums" || n == "sha256sums.txt";
-        });
+        var checksumAsset = CommandHelpers.FindChecksumAsset(assets);
 
         if (checksumAsset == null)
         {
