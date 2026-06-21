@@ -4,7 +4,7 @@ namespace GitPkg.Commands;
 
 /// <summary>
 /// completion 命令：输出 shell 自动补全脚本，用于 eval 集成。
-/// 底层利用 System.CommandLine 内置的 [suggest] 指令获取补全候选项。
+/// 底层使用静态定义的子命令和选项列表提供补全。
 /// </summary>
 public static class CompletionCommand
 {
@@ -47,7 +47,7 @@ public static class CompletionCommand
 
     /// <summary>
     /// zsh 补全脚本。
-    /// 使用 compdef 注册补全函数，通过 [suggest] 指令获取候选项。
+    /// 使用 compdef 注册补全函数，通过静态定义的子命令和选项列表提供补全。
     /// </summary>
     private static string ZshCompletion() => """
         # gitpkg zsh completion — 添加到 ~/.zshrc 后 source 即可
@@ -92,7 +92,7 @@ public static class CompletionCommand
 
     /// <summary>
     /// bash 补全脚本。
-    /// 使用 complete -F 注册补全函数，通过 [suggest] 指令获取候选项。
+    /// 使用 complete -F 注册补全函数，通过 compgen 匹配静态定义的选项列表。
     /// </summary>
     private static string BashCompletion() => """
         # gitpkg bash completion — 添加到 ~/.bashrc 后 source 即可
