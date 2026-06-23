@@ -136,8 +136,8 @@ gitpkg install --from tools.json             # 安装
 
 ```
 ~/.gitpkg/
-├── bin/                   # 可执行文件符号链接目录（所有已安装工具）
-│   ├── rg -> ../tools/ripgrep/rg
+├── bin/                   # 可执行文件符号链接目录（链接名优先使用仓库名称）
+│   ├── ripgrep -> ../tools/ripgrep/rg
 │   ├── fd -> ../tools/fd/fd
 │   └── gitpkg
 ├── manifest.json          # 已安装工具清单
