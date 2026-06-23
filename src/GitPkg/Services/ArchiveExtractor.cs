@@ -11,6 +11,7 @@ public class ArchiveExtractor
     /// <summary>
     /// 将归档文件解压到目标目录，自动根据扩展名选择解压方式。
     /// 非归档文件（裸二进制）将被直接复制到目标目录。
+    /// 在 Unix 系统上，自动为解压/复制的文件添加可执行权限。
     /// </summary>
     /// <param name="archivePath">归档文件路径。</param>
     /// <param name="destDir">目标目录（自动创建）。</param>
@@ -24,6 +25,7 @@ public class ArchiveExtractor
         if (ext == ".zip")
         {
             ZipFile.ExtractToDirectory(archivePath, destDir, overwriteFiles: true);
+            EnsureExecutablePermissions(destDir);
         }
         else if (ext == ".gz" && name.EndsWith(".tar"))
         {
@@ -38,6 +40,28 @@ public class ArchiveExtractor
             // 非归档文件视为裸二进制，直接复制到目标目录
             var destPath = Path.Combine(destDir, Path.GetFileName(archivePath));
             File.Copy(archivePath, destPath, overwrite: true);
+            EnsureExecutablePermission(destPath);
+        }
+    }
+
+    /// <summary>在 Unix 系统上为文件添加可执行权限（chmod +x）。</summary>
+    private static void EnsureExecutablePermission(string filePath)
+    {
+        if (!OperatingSystem.IsWindows())
+        {
+            File.SetUnixFileMode(filePath, File.GetUnixFileMode(filePath) | UnixFileMode.UserExecute | UnixFileMode.GroupExecute | UnixFileMode.OtherExecute);
+        }
+    }
+
+    /// <summary>在 Unix 系统上为目录中的所有文件添加可执行权限。</summary>
+    private static void EnsureExecutablePermissions(string dirPath)
+    {
+        if (!OperatingSystem.IsWindows())
+        {
+            foreach (var file in Directory.GetFiles(dirPath, "*", SearchOption.AllDirectories))
+            {
+                EnsureExecutablePermission(file);
+            }
         }
     }
 
