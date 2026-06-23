@@ -4,16 +4,16 @@ using System.IO.Compression;
 namespace GitPkg.Services;
 
 /// <summary>
-/// 归档文件解压器，支持 .tar.gz、.tar 和 .zip 格式。
+/// 归档文件解压器，支持 .tar.gz、.tar、.zip 格式以及裸二进制文件。
 /// </summary>
 public class ArchiveExtractor
 {
     /// <summary>
     /// 将归档文件解压到目标目录，自动根据扩展名选择解压方式。
+    /// 非归档文件（裸二进制）将被直接复制到目标目录。
     /// </summary>
     /// <param name="archivePath">归档文件路径。</param>
     /// <param name="destDir">目标目录（自动创建）。</param>
-    /// <exception cref="NotSupportedException">不支持的归档格式。</exception>
     public async Task ExtractAsync(string archivePath, string destDir, CancellationToken ct = default)
     {
         Directory.CreateDirectory(destDir);
@@ -35,7 +35,9 @@ public class ArchiveExtractor
         }
         else
         {
-            throw new NotSupportedException($"不支持的归档格式: {ext}");
+            // 非归档文件视为裸二进制，直接复制到目标目录
+            var destPath = Path.Combine(destDir, Path.GetFileName(archivePath));
+            File.Copy(archivePath, destPath, overwrite: true);
         }
     }
 
