@@ -213,7 +213,7 @@ public static class InstallCommand
         }
 
         // 10. Link executables to ~/.gitpkg/bin/
-        LinkToBinDir(installDir);
+        LinkToBinDir(installDir, toolName);
 
         // 11. Update manifest
         await manifest.AddToolAsync(new ToolEntry
@@ -291,7 +291,9 @@ public static class InstallCommand
     }
 
     /// <summary>将安装目录中的可执行文件链接到 ~/.gitpkg/bin/。</summary>
-    internal static void LinkToBinDir(string installDir)
+    /// <param name="installDir">工具安装目录。</param>
+    /// <param name="toolName">工具名称，单个可执行文件时用作链接名。</param>
+    internal static void LinkToBinDir(string installDir, string toolName)
     {
         var binDir = ManifestService.GetBinDir();
         Directory.CreateDirectory(binDir);
@@ -301,8 +303,9 @@ public static class InstallCommand
 
         foreach (var exe in executables)
         {
-            var fileName = Path.GetFileName(exe);
-            var linkPath = Path.Combine(binDir, fileName);
+            // 单个可执行文件时使用仓库名称作为链接名，多个时保留原文件名
+            var linkName = executables.Count == 1 ? toolName : Path.GetFileName(exe);
+            var linkPath = Path.Combine(binDir, linkName);
 
             // 移除已存在的同名链接/文件（覆盖安装场景）
             if (File.Exists(linkPath))
