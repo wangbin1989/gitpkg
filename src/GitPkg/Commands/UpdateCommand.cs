@@ -170,7 +170,7 @@ public static class UpdateCommand
                     File.Delete(archivePath);
 
                 // Re-link executables to ~/.gitpkg/bin/
-                InstallCommand.LinkToBinDir(tool.InstallPath);
+                InstallCommand.LinkToBinDir(tool.InstallPath, tool.Name);
 
                 // Update manifest
                 await manifest.AddToolAsync(tool with
