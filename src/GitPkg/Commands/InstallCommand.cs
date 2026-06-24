@@ -298,6 +298,28 @@ public static class InstallCommand
         var binDir = ManifestService.GetBinDir();
         Directory.CreateDirectory(binDir);
 
+        // 移除所有指向该工具安装目录的旧链接（处理可执行文件列表变化的场景）
+        var toolDirPrefix = Path.GetFullPath(installDir)
+            + Path.DirectorySeparatorChar;
+        foreach (var existing in Directory.GetFiles(binDir))
+        {
+            try
+            {
+                var linkTarget = File.ResolveLinkTarget(existing, returnFinalTarget: true);
+                if (linkTarget != null &&
+                    Path.GetFullPath(linkTarget.FullName).StartsWith(toolDirPrefix,
+                        StringComparison.OrdinalIgnoreCase))
+                {
+                    File.Delete(existing);
+                }
+            }
+            catch (IOException)
+            {
+                // 悬空链接（目标已删除），也移除
+                File.Delete(existing);
+            }
+        }
+
         var exeDir = ExecutableFinder.FindExecutableDir(installDir);
         var executables = ExecutableFinder.FindExecutables(exeDir);
 
