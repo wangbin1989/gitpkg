@@ -92,4 +92,86 @@ public static class CommandHelpers
                 || n == "sha256sums" || n == "sha256sums.txt";
         });
     }
+
+    /// <summary>去除文件名中的平台和架构信息，保留基础名称和扩展名。</summary>
+    /// <remarks>
+    /// 示例：my-tool-windows-amd64.exe → my-tool.exe，my-tool_linux_arm64 → my-tool
+    /// </remarks>
+    public static string StripPlatformSuffix(string fileName)
+    {
+        // 提取已知扩展名，避免版本号中的点号被误识别为扩展名分隔符
+        var ext = GetKnownExtension(fileName);
+        var nameWithoutExt = ext.Length > 0
+            ? fileName[..^ext.Length]
+            : fileName;
+
+        // 常见平台和架构关键词（全小写匹配，长变体在前避免子串误匹配）
+        var tokens = new[]
+        {
+            // 平台
+            "windows", "win32", "win64", "linux", "darwin", "macos", "osx", "freebsd", "android",
+            // 架构（长变体优先：x86_64 > x86, aarch64 > arm64 > arm, i686 > i386 > 386）
+            "x86_64", "amd64", "aarch64", "arm64", "arm", "x64", "i686", "i386", "386", "x86",
+            // 变体
+            "musl", "gnu", "static", "portable"
+        };
+
+        // 匹配分隔符 + 关键词的模式，从右向左逐步裁剪
+        var result = nameWithoutExt;
+        var lowered = result.ToLowerInvariant();
+
+        foreach (var token in tokens)
+        {
+            // 尝试匹配 -token 或 _token
+            var patterns = new[] { $"-{token}", $"_{token}" };
+            foreach (var pattern in patterns)
+            {
+                int idx;
+                while ((idx = lowered.LastIndexOf(pattern, StringComparison.Ordinal)) >= 0)
+                {
+                    // 裁剪到该位置
+                    result = result[..idx];
+                    lowered = lowered[..idx];
+                }
+            }
+
+            // 文件名以 token 开头的情况（如 amd64-my-tool）
+            if (lowered.StartsWith(token + "-") || lowered.StartsWith(token + "_"))
+            {
+                result = result[(token.Length + 1)..];
+                lowered = lowered[(token.Length + 1)..];
+            }
+        }
+
+        // 避免返回空字符串
+        if (string.IsNullOrWhiteSpace(result))
+            return fileName;
+
+        return result + ext;
+    }
+
+    /// <summary>提取已知文件扩展名，避免将版本号中的点号误识别为扩展名分隔符。</summary>
+    private static string GetKnownExtension(string fileName)
+    {
+        var knownExtensions = new[]
+        {
+            ".tar.gz", ".tar.xz", ".tar.bz2", ".tar.zst",
+            ".exe", ".msi", ".bat", ".cmd", ".ps1",
+            ".zip", ".gz", ".xz", ".bz2", ".zst", ".7z", ".rar",
+            ".sh", ".bash", ".zsh", ".fish",
+            ".deb", ".rpm", ".apk", ".dmg", ".pkg", ".appimage",
+            ".dll", ".so", ".dylib", ".bin",
+            ".txt", ".md", ".json", ".yaml", ".yml", ".toml", ".xml",
+            ".sha256", ".sha512"
+        };
+
+        var lowered = fileName.ToLowerInvariant();
+        foreach (var ext in knownExtensions)
+        {
+            if (lowered.EndsWith(ext))
+                return fileName[^ext.Length..];
+        }
+
+        return "";
+    }
 }

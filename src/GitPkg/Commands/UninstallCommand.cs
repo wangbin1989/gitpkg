@@ -55,7 +55,11 @@ public static class UninstallCommand
         {
             var exeDir = ExecutableFinder.FindExecutableDir(tool.InstallPath);
             var executables = ExecutableFinder.FindExecutables(exeDir);
-            linkedNames.AddRange(executables.Select(f => Path.GetFileName(f)!));
+            // 单个可执行文件时使用去平台后缀的名称（与 LinkToBinDir 一致）
+            linkedNames.AddRange(executables.Select(f =>
+                executables.Count == 1
+                    ? CommandHelpers.StripPlatformSuffix(Path.GetFileName(f)!)
+                    : Path.GetFileName(f)!));
 
             Directory.Delete(tool.InstallPath, recursive: true);
         }

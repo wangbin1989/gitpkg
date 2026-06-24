@@ -322,4 +322,196 @@ public class CommandHelpersTests : IDisposable
 
         Assert.Null(result);
     }
+
+    // ---- StripPlatformSuffix 测试 ----
+
+    /// <summary>Windows 平台 + amd64 架构 + .exe 扩展名。</summary>
+    [Fact]
+    public void StripPlatformSuffix_WindowsAmd64Exe_PreservesExtension()
+    {
+        Assert.Equal("my-tool.exe", CommandHelpers.StripPlatformSuffix("my-tool-windows-amd64.exe"));
+    }
+
+    /// <summary>Linux 平台 + amd64 架构，无扩展名。</summary>
+    [Fact]
+    public void StripPlatformSuffix_LinuxAmd64_NoExtension()
+    {
+        Assert.Equal("my-tool", CommandHelpers.StripPlatformSuffix("my-tool-linux-amd64"));
+    }
+
+    /// <summary>Darwin 平台 + arm64 架构。</summary>
+    [Fact]
+    public void StripPlatformSuffix_DarwinArm64()
+    {
+        Assert.Equal("my-tool", CommandHelpers.StripPlatformSuffix("my-tool-darwin-arm64"));
+    }
+
+    /// <summary>下划线分隔符。</summary>
+    [Fact]
+    public void StripPlatformSuffix_UnderscoreSeparator()
+    {
+        Assert.Equal("my-tool", CommandHelpers.StripPlatformSuffix("my-tool_linux_arm64"));
+    }
+
+    /// <summary>混合分隔符（连字符和下划线）。</summary>
+    [Fact]
+    public void StripPlatformSuffix_MixedSeparators()
+    {
+        Assert.Equal("my-tool", CommandHelpers.StripPlatformSuffix("my-tool-linux_amd64"));
+    }
+
+    /// <summary>无平台后缀时保持原样。</summary>
+    [Fact]
+    public void StripPlatformSuffix_NoSuffix_Unchanged()
+    {
+        Assert.Equal("my-tool", CommandHelpers.StripPlatformSuffix("my-tool"));
+    }
+
+    /// <summary>无平台后缀但有扩展名时保持原样。</summary>
+    [Fact]
+    public void StripPlatformSuffix_NoSuffixWithExt_Unchanged()
+    {
+        Assert.Equal("my-tool.exe", CommandHelpers.StripPlatformSuffix("my-tool.exe"));
+    }
+
+    /// <summary>macOS 变体。</summary>
+    [Fact]
+    public void StripPlatformSuffix_MacOS()
+    {
+        Assert.Equal("tool", CommandHelpers.StripPlatformSuffix("tool-macos-arm64"));
+    }
+
+    /// <summary>OSX 变体。</summary>
+    [Fact]
+    public void StripPlatformSuffix_OSX()
+    {
+        Assert.Equal("tool", CommandHelpers.StripPlatformSuffix("tool-osx-x64"));
+    }
+
+    /// <summary>x86_64 架构（含下划线）。</summary>
+    [Fact]
+    public void StripPlatformSuffix_X86_64()
+    {
+        Assert.Equal("tool", CommandHelpers.StripPlatformSuffix("tool-linux-x86_64"));
+    }
+
+    /// <summary>aarch64 架构。</summary>
+    [Fact]
+    public void StripPlatformSuffix_AArch64()
+    {
+        Assert.Equal("tool", CommandHelpers.StripPlatformSuffix("tool-linux-aarch64"));
+    }
+
+    /// <summary>Windows + x64 架构。</summary>
+    [Fact]
+    public void StripPlatformSuffix_WindowsX64()
+    {
+        Assert.Equal("tool", CommandHelpers.StripPlatformSuffix("tool-windows-x64"));
+    }
+
+    /// <summary>musl 变体后缀。</summary>
+    [Fact]
+    public void StripPlatformSuffix_MuslVariant()
+    {
+        Assert.Equal("tool", CommandHelpers.StripPlatformSuffix("tool-linux-amd64-musl"));
+    }
+
+    /// <summary>gnu 变体后缀。</summary>
+    [Fact]
+    public void StripPlatformSuffix_GnuVariant()
+    {
+        Assert.Equal("tool", CommandHelpers.StripPlatformSuffix("tool-linux-amd64-gnu"));
+    }
+
+    /// <summary>多个后缀组合：平台 + 架构 + 变体。</summary>
+    [Fact]
+    public void StripPlatformSuffix_PlatformArchVariant()
+    {
+        Assert.Equal("tool", CommandHelpers.StripPlatformSuffix("tool-linux-amd64-musl-static"));
+    }
+
+    /// <summary>Windows + x86 架构 + .exe。</summary>
+    [Fact]
+    public void StripPlatformSuffix_WindowsX86Exe()
+    {
+        Assert.Equal("tool.exe", CommandHelpers.StripPlatformSuffix("tool-windows-x86.exe"));
+    }
+
+    /// <summary>Win32 平台变体。</summary>
+    [Fact]
+    public void StripPlatformSuffix_Win32()
+    {
+        Assert.Equal("tool", CommandHelpers.StripPlatformSuffix("tool-win32-x64"));
+    }
+
+    /// <summary>Win64 平台变体。</summary>
+    [Fact]
+    public void StripPlatformSuffix_Win64()
+    {
+        Assert.Equal("tool", CommandHelpers.StripPlatformSuffix("tool-win64-amd64"));
+    }
+
+    /// <summary>FreeBSD 平台。</summary>
+    [Fact]
+    public void StripPlatformSuffix_FreeBSD()
+    {
+        Assert.Equal("tool", CommandHelpers.StripPlatformSuffix("tool-freebsd-amd64"));
+    }
+
+    /// <summary>Android 平台。</summary>
+    [Fact]
+    public void StripPlatformSuffix_Android()
+    {
+        Assert.Equal("tool", CommandHelpers.StripPlatformSuffix("tool-android-arm64"));
+    }
+
+    /// <summary>i686 架构。</summary>
+    [Fact]
+    public void StripPlatformSuffix_I686()
+    {
+        Assert.Equal("tool", CommandHelpers.StripPlatformSuffix("tool-linux-i686"));
+    }
+
+    /// <summary>386 架构。</summary>
+    [Fact]
+    public void StripPlatformSuffix_386()
+    {
+        Assert.Equal("tool", CommandHelpers.StripPlatformSuffix("tool-linux-386"));
+    }
+
+    /// <summary>real-world 示例：ripgrep 风格（版本号不在剥离范围）。</summary>
+    [Fact]
+    public void StripPlatformSuffix_RipgrepStyle()
+    {
+        Assert.Equal("rg-14.1.1", CommandHelpers.StripPlatformSuffix("rg-14.1.1-x86_64-linux-musl"));
+    }
+
+    /// <summary>real-world 示例：fd 风格（版本号保留，.tar.gz 作为复合扩展名保留）。</summary>
+    [Fact]
+    public void StripPlatformSuffix_FdStyle()
+    {
+        Assert.Equal("fd-v10.2.0.tar.gz", CommandHelpers.StripPlatformSuffix("fd-v10.2.0-x86_64-linux-gnu.tar.gz"));
+    }
+
+    /// <summary>real-world 示例：bat 风格 Windows（版本号不在剥离范围）。</summary>
+    [Fact]
+    public void StripPlatformSuffix_BatWindowsStyle()
+    {
+        Assert.Equal("bat-v0.25.0", CommandHelpers.StripPlatformSuffix("bat-v0.25.0-x86_64-windows-msvc"));
+    }
+
+    /// <summary>real-world 示例：带版本号的 Windows exe（版本号保留）。</summary>
+    [Fact]
+    public void StripPlatformSuffix_VersionedWindowsExe()
+    {
+        Assert.Equal("tool-1.0.0.exe", CommandHelpers.StripPlatformSuffix("tool-1.0.0-windows-amd64.exe"));
+    }
+
+    /// <summary>结果为空时应返回原始文件名。</summary>
+    [Fact]
+    public void StripPlatformSuffix_AllStripped_ReturnsOriginal()
+    {
+        // 文件名只有平台/架构信息时，避免返回空字符串
+        Assert.Equal("amd64", CommandHelpers.StripPlatformSuffix("amd64"));
+    }
 }
