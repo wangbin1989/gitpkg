@@ -42,13 +42,15 @@ public static class ListCommand
             return;
         }
 
+        var sorted = tools.Tools.OrderBy(t => t.Name, StringComparer.OrdinalIgnoreCase).ToList();
+
         var table = new Table();
         table.AddColumn("名称");
         table.AddColumn("版本");
         table.AddColumn("仓库");
         table.AddColumn("安装时间");
 
-        foreach (var tool in tools.Tools)
+        foreach (var tool in sorted)
         {
             table.AddRow(
                 $"[bold]{tool.Name}[/]",
@@ -58,6 +60,6 @@ public static class ListCommand
         }
 
         AnsiConsole.Write(table);
-        AnsiConsole.MarkupLine($"[grey]共 {tools.Tools.Count} 个工具[/]");
+        AnsiConsole.MarkupLine($"[grey]共 {sorted.Count} 个工具[/]");
     }
 }
