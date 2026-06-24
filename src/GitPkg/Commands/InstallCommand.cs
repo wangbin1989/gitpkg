@@ -325,8 +325,10 @@ public static class InstallCommand
 
         foreach (var exe in executables)
         {
-            // 单个可执行文件时使用仓库名称作为链接名，多个时保留原文件名
-            var linkName = executables.Count == 1 ? toolName : Path.GetFileName(exe);
+            // 单个可执行文件时去除平台和架构信息，多个时保留原文件名
+            var linkName = executables.Count == 1
+                ? CommandHelpers.StripPlatformSuffix(Path.GetFileName(exe))
+                : Path.GetFileName(exe);
             var linkPath = Path.Combine(binDir, linkName);
 
             // 移除已存在的同名链接/文件（覆盖安装场景）

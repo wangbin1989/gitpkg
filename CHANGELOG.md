@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.2.3] - 2026-06-24
+
+### Changed
+- 可执行文件链接名去除平台和架构信息（如 `-windows-amd64`），保留文件扩展名，修复 Windows 下链接丢失 `.exe` 后缀的问题
+- `StripPlatformSuffix` 方法从 `InstallCommand` 提取到公共 `CommandHelpers` 类
+- `uninstall` 命令清理链接时与 `LinkToBinDir` 保持一致的命名逻辑
+
 ## [2.2.2] - 2026-06-24
 
 ### Fixed

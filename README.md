@@ -136,7 +136,7 @@ gitpkg install --from tools.json             # 安装
 
 ```
 ~/.gitpkg/
-├── bin/                   # 可执行文件符号链接目录（链接名优先使用仓库名称）
+├── bin/                   # 可执行文件符号链接目录（链接名去除平台和架构信息）
 │   ├── ripgrep -> ../tools/ripgrep/rg
 │   ├── fd -> ../tools/fd/fd
 │   └── gitpkg

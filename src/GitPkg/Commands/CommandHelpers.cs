@@ -92,4 +92,58 @@ public static class CommandHelpers
                 || n == "sha256sums" || n == "sha256sums.txt";
         });
     }
+
+    /// <summary>去除文件名中的平台和架构信息，保留基础名称和扩展名。</summary>
+    /// <remarks>
+    /// 示例：my-tool-windows-amd64.exe → my-tool.exe，my-tool_linux_arm64 → my-tool
+    /// </remarks>
+    public static string StripPlatformSuffix(string fileName)
+    {
+        var nameWithoutExt = Path.GetFileNameWithoutExtension(fileName);
+        var ext = Path.GetExtension(fileName);
+
+        // 常见平台和架构关键词（全小写匹配）
+        var tokens = new[]
+        {
+            // 平台
+            "windows", "win32", "win64", "linux", "darwin", "macos", "osx", "freebsd", "android",
+            // 架构
+            "amd64", "x86_64", "x86", "x64", "arm64", "aarch64", "arm", "386", "i386", "i686",
+            // 变体
+            "musl", "gnu", "static", "portable"
+        };
+
+        // 匹配分隔符 + 关键词的模式（单词边界），从右向左逐步裁剪
+        var result = nameWithoutExt;
+        var lowered = result.ToLowerInvariant();
+
+        foreach (var token in tokens)
+        {
+            // 尝试匹配 -token、_token 或 token 在末尾的情况
+            var patterns = new[] { $"-{token}", $"_{token}", $".{token}" };
+            foreach (var pattern in patterns)
+            {
+                int idx;
+                while ((idx = lowered.LastIndexOf(pattern, StringComparison.Ordinal)) >= 0)
+                {
+                    // 裁剪到该位置
+                    result = result[..idx];
+                    lowered = lowered[..idx];
+                }
+            }
+
+            // 文件名以 token 开头的情况（如 amd64-my-tool）
+            if (lowered.StartsWith(token + "-") || lowered.StartsWith(token + "_"))
+            {
+                result = result[(token.Length + 1)..];
+                lowered = lowered[(token.Length + 1)..];
+            }
+        }
+
+        // 避免返回空字符串
+        if (string.IsNullOrWhiteSpace(result))
+            return fileName;
+
+        return result + ext;
+    }
 }
