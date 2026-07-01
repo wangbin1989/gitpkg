@@ -1,6 +1,7 @@
 using System.Text;
 using GitPkg.Commands;
 using GitPkg.Models;
+using Shouldly;
 using Spectre.Console;
 
 namespace GitPkg.Tests.Models;
@@ -45,70 +46,70 @@ public class CommandHelpersTests : IDisposable
     [Fact]
     public void FormatSize_Zero_ReturnsBytes()
     {
-        Assert.Equal("0 B", CommandHelpers.FormatSize(0));
+        CommandHelpers.FormatSize(0).ShouldBe("0 B");
     }
 
     /// <summary>小于 1KB 应显示为 B。</summary>
     [Fact]
     public void FormatSize_SmallBytes_ReturnsBytes()
     {
-        Assert.Equal("512 B", CommandHelpers.FormatSize(512));
+        CommandHelpers.FormatSize(512).ShouldBe("512 B");
     }
 
     /// <summary>1023 字节仍应显示为 B（未到 1KB）。</summary>
     [Fact]
     public void FormatSize_Below1KB_ReturnsBytes()
     {
-        Assert.Equal("1023 B", CommandHelpers.FormatSize(1023));
+        CommandHelpers.FormatSize(1023).ShouldBe("1023 B");
     }
 
     /// <summary>恰好 1KB 应显示为 1.0 KB。</summary>
     [Fact]
     public void FormatSize_Exactly1KB_ReturnsKB()
     {
-        Assert.Equal("1.0 KB", CommandHelpers.FormatSize(1024));
+        CommandHelpers.FormatSize(1024).ShouldBe("1.0 KB");
     }
 
     /// <summary>1.5 KB 边界值。</summary>
     [Fact]
     public void FormatSize_1536Bytes_ReturnsFractionalKB()
     {
-        Assert.Equal("1.5 KB", CommandHelpers.FormatSize(1536));
+        CommandHelpers.FormatSize(1536).ShouldBe("1.5 KB");
     }
 
     /// <summary>恰好 1MB 应显示为 1.0 MB。</summary>
     [Fact]
     public void FormatSize_Exactly1MB_ReturnsMB()
     {
-        Assert.Equal("1.0 MB", CommandHelpers.FormatSize(1024 * 1024));
+        CommandHelpers.FormatSize(1024 * 1024).ShouldBe("1.0 MB");
     }
 
     /// <summary>2.5 MB 边界值。</summary>
     [Fact]
     public void FormatSize_2_5MB_ReturnsMB()
     {
-        Assert.Equal("2.5 MB", CommandHelpers.FormatSize((long)(2.5 * 1024 * 1024)));
+        CommandHelpers.FormatSize((long)(2.5 * 1024 * 1024)).ShouldBe("2.5 MB");
     }
 
     /// <summary>恰好 1GB 应显示为 1.0 GB。</summary>
     [Fact]
     public void FormatSize_Exactly1GB_ReturnsGB()
     {
-        Assert.Equal("1.0 GB", CommandHelpers.FormatSize(1024L * 1024 * 1024));
+        CommandHelpers.FormatSize(1024L * 1024 * 1024).ShouldBe("1.0 GB");
     }
 
     /// <summary>大型 GB 值。</summary>
     [Fact]
     public void FormatSize_LargeGB_ReturnsGB()
     {
-        Assert.Equal("4.0 GB", CommandHelpers.FormatSize(4L * 1024 * 1024 * 1024));
+        CommandHelpers.FormatSize(4L * 1024 * 1024 * 1024).ShouldBe("4.0 GB");
     }
 
     /// <summary>空资产列表应抛出异常。</summary>
     [Fact]
     public void PromptAssetSelection_EmptyList_Throws()
     {
-        Assert.Throws<ArgumentOutOfRangeException>(() =>
+        Should.Throw<ArgumentOutOfRangeException>(() =>
             CommandHelpers.PromptAssetSelection([]));
     }
 
@@ -133,7 +134,7 @@ public class CommandHelpersTests : IDisposable
 
         var result = CommandHelpers.SelectAsset(all, matches, Platform(), "tool-darwin-arm64.tar.gz");
 
-        Assert.Equal("tool-darwin-arm64.tar.gz", result.Name);
+        result.Name.ShouldBe("tool-darwin-arm64.tar.gz");
     }
 
     /// <summary>savedAssetName 匹配但不在平台匹配列表中时，应回退到平台匹配。</summary>
@@ -150,7 +151,7 @@ public class CommandHelpersTests : IDisposable
         // saved 是 linux 资产，但平台匹配只有 darwin
         var result = CommandHelpers.SelectAsset(all, matches, Platform(), "tool-linux-amd64.tar.gz");
 
-        Assert.Equal("tool-darwin-arm64.tar.gz", result.Name);
+        result.Name.ShouldBe("tool-darwin-arm64.tar.gz");
     }
 
     /// <summary>savedAssetName 为 null 时，应回退到平台匹配（单个匹配自动选）。</summary>
@@ -166,7 +167,7 @@ public class CommandHelpersTests : IDisposable
 
         var result = CommandHelpers.SelectAsset(all, matches, Platform(), null);
 
-        Assert.Equal("tool-darwin-arm64.tar.gz", result.Name);
+        result.Name.ShouldBe("tool-darwin-arm64.tar.gz");
     }
 
     /// <summary>savedAssetName 在新版本中不存在时，应回退到平台匹配。</summary>
@@ -181,7 +182,7 @@ public class CommandHelpersTests : IDisposable
 
         var result = CommandHelpers.SelectAsset(all, matches, Platform(), "tool-darwin-arm64-v1.tar.gz");
 
-        Assert.Equal("tool-darwin-arm64-v2.tar.gz", result.Name);
+        result.Name.ShouldBe("tool-darwin-arm64-v2.tar.gz");
     }
 
     /// <summary>单个平台匹配时自动选中。</summary>
@@ -197,7 +198,7 @@ public class CommandHelpersTests : IDisposable
 
         var result = CommandHelpers.SelectAsset(all, matches, Platform(), null);
 
-        Assert.Equal("tool-darwin-arm64.tar.gz", result.Name);
+        result.Name.ShouldBe("tool-darwin-arm64.tar.gz");
     }
 
     /// <summary>多个平台匹配时，在非交互模式下自动选第一个。</summary>
@@ -214,7 +215,7 @@ public class CommandHelpersTests : IDisposable
         // 测试环境为非交互模式，PromptAssetSelection 自动选第一个
         var result = CommandHelpers.SelectAsset(all, matches, Platform(), null);
 
-        Assert.Equal("tool-darwin-arm64.tar.gz", result.Name);
+        result.Name.ShouldBe("tool-darwin-arm64.tar.gz");
     }
 
     /// <summary>无平台匹配时，在非交互模式下从全部资产中选第一个。</summary>
@@ -230,7 +231,7 @@ public class CommandHelpersTests : IDisposable
         // 测试环境为非交互模式，PromptAssetSelection 自动选第一个
         var result = CommandHelpers.SelectAsset(all, [], Platform(), null);
 
-        Assert.Equal("tool-linux-amd64.tar.gz", result.Name);
+        result.Name.ShouldBe("tool-linux-amd64.tar.gz");
     }
 
     // ---- FindChecksumAsset 测试 ----
@@ -247,8 +248,8 @@ public class CommandHelpersTests : IDisposable
 
         var result = CommandHelpers.FindChecksumAsset(assets);
 
-        Assert.NotNull(result);
-        Assert.Equal("tool.tar.gz.sha256", result.Name);
+        result.ShouldNotBeNull();
+        result!.Name.ShouldBe("tool.tar.gz.sha256");
     }
 
     /// <summary>应识别 checksums.txt 文件。</summary>
@@ -263,8 +264,8 @@ public class CommandHelpersTests : IDisposable
 
         var result = CommandHelpers.FindChecksumAsset(assets);
 
-        Assert.NotNull(result);
-        Assert.Equal("checksums.txt", result.Name);
+        result.ShouldNotBeNull();
+        result!.Name.ShouldBe("checksums.txt");
     }
 
     /// <summary>应识别 sha256sums 文件。</summary>
@@ -279,8 +280,8 @@ public class CommandHelpersTests : IDisposable
 
         var result = CommandHelpers.FindChecksumAsset(assets);
 
-        Assert.NotNull(result);
-        Assert.Equal("sha256sums", result.Name);
+        result.ShouldNotBeNull();
+        result!.Name.ShouldBe("sha256sums");
     }
 
     /// <summary>应识别 sha256sums.txt 文件。</summary>
@@ -295,8 +296,8 @@ public class CommandHelpersTests : IDisposable
 
         var result = CommandHelpers.FindChecksumAsset(assets);
 
-        Assert.NotNull(result);
-        Assert.Equal("sha256sums.txt", result.Name);
+        result.ShouldNotBeNull();
+        result!.Name.ShouldBe("sha256sums.txt");
     }
 
     /// <summary>无校验文件时应返回 null。</summary>
@@ -311,7 +312,7 @@ public class CommandHelpersTests : IDisposable
 
         var result = CommandHelpers.FindChecksumAsset(assets);
 
-        Assert.Null(result);
+        result.ShouldBeNull();
     }
 
     /// <summary>空资产列表应返回 null。</summary>
@@ -320,7 +321,7 @@ public class CommandHelpersTests : IDisposable
     {
         var result = CommandHelpers.FindChecksumAsset([]);
 
-        Assert.Null(result);
+        result.ShouldBeNull();
     }
 
     // ---- StripPlatformSuffix 测试 ----
@@ -329,182 +330,182 @@ public class CommandHelpersTests : IDisposable
     [Fact]
     public void StripPlatformSuffix_WindowsAmd64Exe_PreservesExtension()
     {
-        Assert.Equal("my-tool.exe", CommandHelpers.StripPlatformSuffix("my-tool-windows-amd64.exe"));
+        CommandHelpers.StripPlatformSuffix("my-tool-windows-amd64.exe").ShouldBe("my-tool.exe");
     }
 
     /// <summary>Linux 平台 + amd64 架构，无扩展名。</summary>
     [Fact]
     public void StripPlatformSuffix_LinuxAmd64_NoExtension()
     {
-        Assert.Equal("my-tool", CommandHelpers.StripPlatformSuffix("my-tool-linux-amd64"));
+        CommandHelpers.StripPlatformSuffix("my-tool-linux-amd64").ShouldBe("my-tool");
     }
 
     /// <summary>Darwin 平台 + arm64 架构。</summary>
     [Fact]
     public void StripPlatformSuffix_DarwinArm64()
     {
-        Assert.Equal("my-tool", CommandHelpers.StripPlatformSuffix("my-tool-darwin-arm64"));
+        CommandHelpers.StripPlatformSuffix("my-tool-darwin-arm64").ShouldBe("my-tool");
     }
 
     /// <summary>下划线分隔符。</summary>
     [Fact]
     public void StripPlatformSuffix_UnderscoreSeparator()
     {
-        Assert.Equal("my-tool", CommandHelpers.StripPlatformSuffix("my-tool_linux_arm64"));
+        CommandHelpers.StripPlatformSuffix("my-tool_linux_arm64").ShouldBe("my-tool");
     }
 
     /// <summary>混合分隔符（连字符和下划线）。</summary>
     [Fact]
     public void StripPlatformSuffix_MixedSeparators()
     {
-        Assert.Equal("my-tool", CommandHelpers.StripPlatformSuffix("my-tool-linux_amd64"));
+        CommandHelpers.StripPlatformSuffix("my-tool-linux_amd64").ShouldBe("my-tool");
     }
 
     /// <summary>无平台后缀时保持原样。</summary>
     [Fact]
     public void StripPlatformSuffix_NoSuffix_Unchanged()
     {
-        Assert.Equal("my-tool", CommandHelpers.StripPlatformSuffix("my-tool"));
+        CommandHelpers.StripPlatformSuffix("my-tool").ShouldBe("my-tool");
     }
 
     /// <summary>无平台后缀但有扩展名时保持原样。</summary>
     [Fact]
     public void StripPlatformSuffix_NoSuffixWithExt_Unchanged()
     {
-        Assert.Equal("my-tool.exe", CommandHelpers.StripPlatformSuffix("my-tool.exe"));
+        CommandHelpers.StripPlatformSuffix("my-tool.exe").ShouldBe("my-tool.exe");
     }
 
     /// <summary>macOS 变体。</summary>
     [Fact]
     public void StripPlatformSuffix_MacOS()
     {
-        Assert.Equal("tool", CommandHelpers.StripPlatformSuffix("tool-macos-arm64"));
+        CommandHelpers.StripPlatformSuffix("tool-macos-arm64").ShouldBe("tool");
     }
 
     /// <summary>OSX 变体。</summary>
     [Fact]
     public void StripPlatformSuffix_OSX()
     {
-        Assert.Equal("tool", CommandHelpers.StripPlatformSuffix("tool-osx-x64"));
+        CommandHelpers.StripPlatformSuffix("tool-osx-x64").ShouldBe("tool");
     }
 
     /// <summary>x86_64 架构（含下划线）。</summary>
     [Fact]
     public void StripPlatformSuffix_X86_64()
     {
-        Assert.Equal("tool", CommandHelpers.StripPlatformSuffix("tool-linux-x86_64"));
+        CommandHelpers.StripPlatformSuffix("tool-linux-x86_64").ShouldBe("tool");
     }
 
     /// <summary>aarch64 架构。</summary>
     [Fact]
     public void StripPlatformSuffix_AArch64()
     {
-        Assert.Equal("tool", CommandHelpers.StripPlatformSuffix("tool-linux-aarch64"));
+        CommandHelpers.StripPlatformSuffix("tool-linux-aarch64").ShouldBe("tool");
     }
 
     /// <summary>Windows + x64 架构。</summary>
     [Fact]
     public void StripPlatformSuffix_WindowsX64()
     {
-        Assert.Equal("tool", CommandHelpers.StripPlatformSuffix("tool-windows-x64"));
+        CommandHelpers.StripPlatformSuffix("tool-windows-x64").ShouldBe("tool");
     }
 
     /// <summary>musl 变体后缀。</summary>
     [Fact]
     public void StripPlatformSuffix_MuslVariant()
     {
-        Assert.Equal("tool", CommandHelpers.StripPlatformSuffix("tool-linux-amd64-musl"));
+        CommandHelpers.StripPlatformSuffix("tool-linux-amd64-musl").ShouldBe("tool");
     }
 
     /// <summary>gnu 变体后缀。</summary>
     [Fact]
     public void StripPlatformSuffix_GnuVariant()
     {
-        Assert.Equal("tool", CommandHelpers.StripPlatformSuffix("tool-linux-amd64-gnu"));
+        CommandHelpers.StripPlatformSuffix("tool-linux-amd64-gnu").ShouldBe("tool");
     }
 
     /// <summary>多个后缀组合：平台 + 架构 + 变体。</summary>
     [Fact]
     public void StripPlatformSuffix_PlatformArchVariant()
     {
-        Assert.Equal("tool", CommandHelpers.StripPlatformSuffix("tool-linux-amd64-musl-static"));
+        CommandHelpers.StripPlatformSuffix("tool-linux-amd64-musl-static").ShouldBe("tool");
     }
 
     /// <summary>Windows + x86 架构 + .exe。</summary>
     [Fact]
     public void StripPlatformSuffix_WindowsX86Exe()
     {
-        Assert.Equal("tool.exe", CommandHelpers.StripPlatformSuffix("tool-windows-x86.exe"));
+        CommandHelpers.StripPlatformSuffix("tool-windows-x86.exe").ShouldBe("tool.exe");
     }
 
     /// <summary>Win32 平台变体。</summary>
     [Fact]
     public void StripPlatformSuffix_Win32()
     {
-        Assert.Equal("tool", CommandHelpers.StripPlatformSuffix("tool-win32-x64"));
+        CommandHelpers.StripPlatformSuffix("tool-win32-x64").ShouldBe("tool");
     }
 
     /// <summary>Win64 平台变体。</summary>
     [Fact]
     public void StripPlatformSuffix_Win64()
     {
-        Assert.Equal("tool", CommandHelpers.StripPlatformSuffix("tool-win64-amd64"));
+        CommandHelpers.StripPlatformSuffix("tool-win64-amd64").ShouldBe("tool");
     }
 
     /// <summary>FreeBSD 平台。</summary>
     [Fact]
     public void StripPlatformSuffix_FreeBSD()
     {
-        Assert.Equal("tool", CommandHelpers.StripPlatformSuffix("tool-freebsd-amd64"));
+        CommandHelpers.StripPlatformSuffix("tool-freebsd-amd64").ShouldBe("tool");
     }
 
     /// <summary>Android 平台。</summary>
     [Fact]
     public void StripPlatformSuffix_Android()
     {
-        Assert.Equal("tool", CommandHelpers.StripPlatformSuffix("tool-android-arm64"));
+        CommandHelpers.StripPlatformSuffix("tool-android-arm64").ShouldBe("tool");
     }
 
     /// <summary>i686 架构。</summary>
     [Fact]
     public void StripPlatformSuffix_I686()
     {
-        Assert.Equal("tool", CommandHelpers.StripPlatformSuffix("tool-linux-i686"));
+        CommandHelpers.StripPlatformSuffix("tool-linux-i686").ShouldBe("tool");
     }
 
     /// <summary>386 架构。</summary>
     [Fact]
     public void StripPlatformSuffix_386()
     {
-        Assert.Equal("tool", CommandHelpers.StripPlatformSuffix("tool-linux-386"));
+        CommandHelpers.StripPlatformSuffix("tool-linux-386").ShouldBe("tool");
     }
 
     /// <summary>real-world 示例：ripgrep 风格（版本号不在剥离范围）。</summary>
     [Fact]
     public void StripPlatformSuffix_RipgrepStyle()
     {
-        Assert.Equal("rg-14.1.1", CommandHelpers.StripPlatformSuffix("rg-14.1.1-x86_64-linux-musl"));
+        CommandHelpers.StripPlatformSuffix("rg-14.1.1-x86_64-linux-musl").ShouldBe("rg-14.1.1");
     }
 
     /// <summary>real-world 示例：fd 风格（版本号保留，.tar.gz 作为复合扩展名保留）。</summary>
     [Fact]
     public void StripPlatformSuffix_FdStyle()
     {
-        Assert.Equal("fd-v10.2.0.tar.gz", CommandHelpers.StripPlatformSuffix("fd-v10.2.0-x86_64-linux-gnu.tar.gz"));
+        CommandHelpers.StripPlatformSuffix("fd-v10.2.0-x86_64-linux-gnu.tar.gz").ShouldBe("fd-v10.2.0.tar.gz");
     }
 
     /// <summary>real-world 示例：bat 风格 Windows（版本号不在剥离范围）。</summary>
     [Fact]
     public void StripPlatformSuffix_BatWindowsStyle()
     {
-        Assert.Equal("bat-v0.25.0", CommandHelpers.StripPlatformSuffix("bat-v0.25.0-x86_64-windows-msvc"));
+        CommandHelpers.StripPlatformSuffix("bat-v0.25.0-x86_64-windows-msvc").ShouldBe("bat-v0.25.0");
     }
 
     /// <summary>real-world 示例：带版本号的 Windows exe（版本号保留）。</summary>
     [Fact]
     public void StripPlatformSuffix_VersionedWindowsExe()
     {
-        Assert.Equal("tool-1.0.0.exe", CommandHelpers.StripPlatformSuffix("tool-1.0.0-windows-amd64.exe"));
+        CommandHelpers.StripPlatformSuffix("tool-1.0.0-windows-amd64.exe").ShouldBe("tool-1.0.0.exe");
     }
 
     /// <summary>结果为空时应返回原始文件名。</summary>
@@ -512,6 +513,6 @@ public class CommandHelpersTests : IDisposable
     public void StripPlatformSuffix_AllStripped_ReturnsOriginal()
     {
         // 文件名只有平台/架构信息时，避免返回空字符串
-        Assert.Equal("amd64", CommandHelpers.StripPlatformSuffix("amd64"));
+        CommandHelpers.StripPlatformSuffix("amd64").ShouldBe("amd64");
     }
 }

@@ -1,4 +1,5 @@
 using GitPkg.Services;
+using Shouldly;
 
 namespace GitPkg.Tests.Models;
 
@@ -26,7 +27,7 @@ public class ExecutableFinderTests
         try
         {
             var result = ExecutableFinder.FindExecutables(dir);
-            Assert.Empty(result);
+            result.ShouldBeEmpty();
         }
         finally
         {
@@ -39,7 +40,7 @@ public class ExecutableFinderTests
     public void FindExecutables_NonexistentDir_ReturnsEmpty()
     {
         var result = ExecutableFinder.FindExecutables("/nonexistent/path");
-        Assert.Empty(result);
+        result.ShouldBeEmpty();
     }
 
     /// <summary>无扩展名的文件应被识别为可执行文件（Unix）。</summary>
@@ -52,8 +53,8 @@ public class ExecutableFinderTests
             if (!OperatingSystem.IsWindows())
             {
                 var result = ExecutableFinder.FindExecutables(dir);
-                Assert.Single(result);
-                Assert.Equal("mybinary", Path.GetFileName(result[0]));
+                result.ShouldHaveSingleItem();
+                Path.GetFileName(result[0]).ShouldBe("mybinary");
             }
         }
         finally
@@ -72,7 +73,7 @@ public class ExecutableFinderTests
             if (!OperatingSystem.IsWindows())
             {
                 var result = ExecutableFinder.FindExecutables(dir);
-                Assert.Single(result);
+                result.ShouldHaveSingleItem();
             }
         }
         finally
@@ -95,7 +96,7 @@ public class ExecutableFinderTests
             if (!OperatingSystem.IsWindows())
             {
                 var result = ExecutableFinder.FindExecutables(dir);
-                Assert.Empty(result);
+                result.ShouldBeEmpty();
             }
         }
         finally
@@ -114,7 +115,7 @@ public class ExecutableFinderTests
             if (OperatingSystem.IsWindows())
             {
                 var result = ExecutableFinder.FindExecutables(dir);
-                Assert.Equal(3, result.Count);
+                result.Count.ShouldBe(3);
             }
         }
         finally
@@ -133,7 +134,7 @@ public class ExecutableFinderTests
             if (!OperatingSystem.IsWindows())
             {
                 var result = ExecutableFinder.FindExecutableDir(dir);
-                Assert.Equal(dir, result);
+                result.ShouldBe(dir);
             }
         }
         finally
@@ -156,7 +157,7 @@ public class ExecutableFinderTests
             if (!OperatingSystem.IsWindows())
             {
                 var result = ExecutableFinder.FindExecutableDir(dir);
-                Assert.Equal(binDir, result);
+                result.ShouldBe(binDir);
             }
         }
         finally
@@ -173,7 +174,7 @@ public class ExecutableFinderTests
         try
         {
             var result = ExecutableFinder.FindExecutableDir(dir);
-            Assert.Equal(dir, result);
+            result.ShouldBe(dir);
         }
         finally
         {

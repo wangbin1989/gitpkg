@@ -13,7 +13,7 @@ namespace GitPkg.Commands;
 /// 下载新版本二进制文件，替换当前运行的可执行文件。
 /// 在 Unix 上通过文件重命名原地替换；在 Windows 上通过批处理脚本延迟替换。
 /// </summary>
-public static class SelfUpdateCommand
+public class SelfUpdateCommand : Command
 {
     /// <summary>GitPkg 仓库的 owner。</summary>
     private const string Owner = "wangbin1989";
@@ -21,11 +21,9 @@ public static class SelfUpdateCommand
     private const string Repo = "gitpkg";
 
     /// <summary>创建 self-update 命令。</summary>
-    public static Command Create()
+    public SelfUpdateCommand() : base("self-update", "更新 GitPkg 自身到最新版本")
     {
-        var cmd = new Command("self-update", "更新 GitPkg 自身到最新版本");
-
-        cmd.SetAction(async (parseResult, ct) =>
+        SetAction(async (parseResult, ct) =>
         {
             try
             {
@@ -48,8 +46,6 @@ public static class SelfUpdateCommand
                 return 1;
             }
         });
-
-        return cmd;
     }
 
     private static async Task HandleAsync(CancellationToken ct)
@@ -305,5 +301,4 @@ del "{batchPath}" 2>nul
             CreateNoWindow = true
         });
     }
-
 }

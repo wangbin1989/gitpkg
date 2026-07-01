@@ -1,4 +1,5 @@
 using GitPkg.Services;
+using Shouldly;
 
 namespace GitPkg.Tests.Services;
 
@@ -19,7 +20,7 @@ public class Sha256VerifierTests
 
         var hash = Sha256Verifier.ParseChecksum(content, "tool-v1.0.0-linux-amd64.tar.gz");
 
-        Assert.Equal("2e3c6b6f5acbe576b6e6cae68044d75a6be3d67c3f4bfdff4f1b172e3549d1e0", hash);
+        hash.ShouldBe("2e3c6b6f5acbe576b6e6cae68044d75a6be3d67c3f4bfdff4f1b172e3549d1e0");
     }
 
     /// <summary>二进制标记格式 "hash *filename" 应正确解析。</summary>
@@ -30,7 +31,7 @@ public class Sha256VerifierTests
 
         var hash = Sha256Verifier.ParseChecksum(content, "tool-v1.0.0-darwin-amd64.tar.gz");
 
-        Assert.Equal("a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2", hash);
+        hash.ShouldBe("a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2");
     }
 
     /// <summary>目标文件名不在校验文件中时应返回 null。</summary>
@@ -41,7 +42,7 @@ public class Sha256VerifierTests
 
         var hash = Sha256Verifier.ParseChecksum(content, "other-tool.tar.gz");
 
-        Assert.Null(hash);
+        hash.ShouldBeNull();
     }
 
     /// <summary>计算 "hello world" 的 SHA256 应与已知值一致。</summary>
@@ -56,8 +57,8 @@ public class Sha256VerifierTests
 
             var hash = await verifier.ComputeHashAsync(tmpFile);
 
-            Assert.Equal(64, hash.Length);
-            Assert.Equal("b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9", hash);
+            hash.Length.ShouldBe(64);
+            hash.ShouldBe("b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9");
         }
         finally
         {

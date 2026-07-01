@@ -1,6 +1,7 @@
 using System.CommandLine;
 using GitPkg;
 using GitPkg.Commands;
+using Shouldly;
 
 namespace GitPkg.Tests.Integration;
 
@@ -24,16 +25,16 @@ public class CliIntegrationTests
 
         var root = new RootCommand("gitpkg — GitHub Release 自动更新工具");
 
-        root.Add(InitCommand.Create());
-        root.Add(CompletionCommand.Create());
-        root.Add(InstallCommand.Create());
-        root.Add(UpdateCommand.Create());
-        root.Add(OutdatedCommand.Create());
-        root.Add(UninstallCommand.Create());
-        root.Add(ListCommand.Create());
-        root.Add(InfoCommand.Create());
-        root.Add(ManifestCommand.Create());
-        root.Add(SelfUpdateCommand.Create());
+        root.Add(new InitCommand());
+        root.Add(new CompletionCommand());
+        root.Add(new InstallCommand());
+        root.Add(new UpdateCommand());
+        root.Add(new OutdatedCommand());
+        root.Add(new UninstallCommand());
+        root.Add(new ListCommand());
+        root.Add(new InfoCommand());
+        root.Add(new ManifestCommand());
+        root.Add(new SelfUpdateCommand());
 
         return root;
     }
@@ -68,14 +69,14 @@ public class CliIntegrationTests
     {
         var (exitCode, stdout, _) = await InvokeAsync(["--help"]);
 
-        Assert.Equal(0, exitCode);
+        exitCode.ShouldBe(0);
         // 验证几个关键命令是否出现在帮助输出中
-        Assert.Contains("init", stdout);
-        Assert.Contains("install", stdout);
-        Assert.Contains("update", stdout);
-        Assert.Contains("uninstall", stdout);
-        Assert.Contains("list", stdout);
-        Assert.Contains("completion", stdout);
+        stdout.ShouldContain("init");
+        stdout.ShouldContain("install");
+        stdout.ShouldContain("update");
+        stdout.ShouldContain("uninstall");
+        stdout.ShouldContain("list");
+        stdout.ShouldContain("completion");
     }
 
     /// <summary>--version 应输出版本号。</summary>
@@ -84,8 +85,8 @@ public class CliIntegrationTests
     {
         var (exitCode, stdout, _) = await InvokeAsync(["--version"]);
 
-        Assert.Equal(0, exitCode);
-        Assert.NotEmpty(stdout.Trim());
+        exitCode.ShouldBe(0);
+        stdout.Trim().ShouldNotBeEmpty();
     }
 
     /// <summary>未知命令应返回非零退出码。</summary>
@@ -94,8 +95,8 @@ public class CliIntegrationTests
     {
         var (exitCode, _, stderr) = await InvokeAsync(["nonexistent-command"]);
 
-        Assert.NotEqual(0, exitCode);
-        Assert.NotEmpty(stderr + Console.Out.ToString());
+        exitCode.ShouldNotBe(0);
+        (stderr + Console.Out.ToString()).ShouldNotBeEmpty();
     }
 
     /// <summary>init 命令缺少 shell 参数应报错。</summary>
@@ -104,7 +105,7 @@ public class CliIntegrationTests
     {
         var (exitCode, _, _) = await InvokeAsync(["init"]);
 
-        Assert.NotEqual(0, exitCode);
+        exitCode.ShouldNotBe(0);
     }
 
     /// <summary>init zsh 应返回退出码 0 并输出 PATH 设置脚本（不含补全）。</summary>
@@ -113,9 +114,9 @@ public class CliIntegrationTests
     {
         var (exitCode, stdout, _) = await InvokeAsync(["init", "zsh"]);
 
-        Assert.Equal(0, exitCode);
-        Assert.Contains("export PATH=", stdout);
-        Assert.DoesNotContain("[suggest]", stdout);
+        exitCode.ShouldBe(0);
+        stdout.ShouldContain("export PATH=");
+        stdout.ShouldNotContain("[suggest]");
     }
 
     /// <summary>init 对非法 shell 名应返回错误并输出到 stderr。</summary>
@@ -124,9 +125,9 @@ public class CliIntegrationTests
     {
         var (exitCode, stdout, stderr) = await InvokeAsync(["init", "invalid_shell"]);
 
-        Assert.Equal(1, exitCode);
-        Assert.Empty(stdout);
-        Assert.Contains("不支持的 shell", stderr);
+        exitCode.ShouldBe(1);
+        stdout.ShouldBeEmpty();
+        stderr.ShouldContain("不支持的 shell");
     }
 
     /// <summary>init 对所有合法 shell 均应返回退出码 0。</summary>
@@ -140,8 +141,8 @@ public class CliIntegrationTests
     {
         var (exitCode, stdout, _) = await InvokeAsync(["init", shell]);
 
-        Assert.Equal(0, exitCode);
-        Assert.NotEmpty(stdout);
+        exitCode.ShouldBe(0);
+        stdout.ShouldNotBeEmpty();
     }
 
     /// <summary>manifest export 应输出包含 version 和 tools 字段的合法 JSON。</summary>
@@ -150,9 +151,9 @@ public class CliIntegrationTests
     {
         var (exitCode, stdout, _) = await InvokeAsync(["manifest", "export"]);
 
-        Assert.Equal(0, exitCode);
-        Assert.Contains("\"version\"", stdout);
-        Assert.Contains("\"tools\"", stdout);
+        exitCode.ShouldBe(0);
+        stdout.ShouldContain("\"version\"");
+        stdout.ShouldContain("\"tools\"");
     }
 
     /// <summary>各子命令的 --help 应输出非空的帮助文本。</summary>
@@ -171,9 +172,9 @@ public class CliIntegrationTests
     {
         var (exitCode, stdout, _) = await InvokeAsync([command, "--help"]);
 
-        Assert.Equal(0, exitCode);
-        Assert.NotEmpty(stdout.Trim());
-        Assert.True(stdout.Length > 10, $"Help for '{command}' is too short: {stdout}");
+        exitCode.ShouldBe(0);
+        stdout.Trim().ShouldNotBeEmpty();
+        stdout.Length.ShouldBeGreaterThan(10, $"Help for '{command}' is too short: {stdout}");
     }
 
     /// <summary>uninstall 缺少参数时应返回非零退出码。</summary>
@@ -182,7 +183,7 @@ public class CliIntegrationTests
     {
         var (exitCode, _, _) = await InvokeAsync(["uninstall"]);
 
-        Assert.NotEqual(0, exitCode);
+        exitCode.ShouldNotBe(0);
     }
 
     /// <summary>info 缺少参数时应返回非零退出码。</summary>
@@ -191,7 +192,7 @@ public class CliIntegrationTests
     {
         var (exitCode, _, _) = await InvokeAsync(["info"]);
 
-        Assert.NotEqual(0, exitCode);
+        exitCode.ShouldNotBe(0);
     }
 
     /// <summary>install 缺少 repo 参数且无 --from 时应返回非零退出码。</summary>
@@ -200,7 +201,7 @@ public class CliIntegrationTests
     {
         var (exitCode, _, _) = await InvokeAsync(["install"]);
 
-        Assert.NotEqual(0, exitCode);
+        exitCode.ShouldNotBe(0);
     }
 
     /// <summary>install --help 不应包含已移除的 --add-path 选项。</summary>
@@ -209,8 +210,8 @@ public class CliIntegrationTests
     {
         var (exitCode, stdout, _) = await InvokeAsync(["install", "--help"]);
 
-        Assert.Equal(0, exitCode);
-        Assert.DoesNotContain("add-path", stdout);
+        exitCode.ShouldBe(0);
+        stdout.ShouldNotContain("add-path");
     }
 
     /// <summary>update --help 应显示命令说明。</summary>
@@ -219,9 +220,8 @@ public class CliIntegrationTests
     {
         var (exitCode, stdout, _) = await InvokeAsync(["update", "--help"]);
 
-        Assert.Equal(0, exitCode);
-        Assert.Contains("update", stdout.ToLowerInvariant());
-        Assert.True(stdout.Length > 20);
+        exitCode.ShouldBe(0);
+        stdout.ToLowerInvariant().ShouldContain("update");
+        stdout.Length.ShouldBeGreaterThan(20);
     }
-
 }

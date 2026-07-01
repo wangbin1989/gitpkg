@@ -1,5 +1,6 @@
 using System.CommandLine;
 using GitPkg.Commands;
+using Shouldly;
 
 namespace GitPkg.Tests.Commands;
 
@@ -13,7 +14,7 @@ public partial class CompletionCommandTests
     /// <summary>构建 completion 命令并捕获 stdout/stderr 和退出码。</summary>
     private static async Task<(int ExitCode, string Stdout, string Stderr)> InvokeCompletionAsync(string shell)
     {
-        var cmd = CompletionCommand.Create();
+        var cmd = new CompletionCommand();
         var root = new RootCommand();
         root.Add(cmd);
 
@@ -42,8 +43,8 @@ public partial class CompletionCommandTests
     {
         var (exitCode, stdout, stderr) = await InvokeCompletionAsync("invalid");
 
-        Assert.Equal(1, exitCode);
-        Assert.Empty(stdout);
-        Assert.Contains("不支持的 shell", stderr);
+        exitCode.ShouldBe(1);
+        stdout.ShouldBeEmpty();
+        stderr.ShouldContain("不支持的 shell");
     }
 }

@@ -1,3 +1,5 @@
+using Shouldly;
+
 namespace GitPkg.Tests.Commands;
 
 /// <summary>
@@ -11,10 +13,10 @@ public partial class InitCommandTests
     {
         var (exitCode, stdout, _) = await InvokeInitAsync("zsh");
 
-        Assert.Equal(0, exitCode);
-        Assert.StartsWith("# gitpkg shell init for zsh", stdout);
-        Assert.Contains("export GITPKG_HOME=", stdout);
-        Assert.Contains("export PATH=\"$GITPKG_HOME/bin\":$PATH", stdout);
-        Assert.DoesNotContain("[suggest]", stdout);
+        exitCode.ShouldBe(0);
+        stdout.ShouldStartWith("# gitpkg shell init for zsh");
+        stdout.ShouldContain("export GITPKG_HOME=");
+        stdout.ShouldContain("export PATH=\"$GITPKG_HOME/bin\":$PATH");
+        stdout.ShouldNotContain("[suggest]");
     }
 }

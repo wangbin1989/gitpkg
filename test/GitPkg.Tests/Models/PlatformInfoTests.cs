@@ -1,4 +1,5 @@
 using GitPkg.Models;
+using Shouldly;
 
 namespace GitPkg.Tests.Models;
 
@@ -14,9 +15,9 @@ public class PlatformInfoTests
     {
         var platform = PlatformInfo.Current();
 
-        Assert.NotNull(platform.OS);
-        Assert.NotNull(platform.Arch);
-        Assert.NotEmpty(platform.OS);
-        Assert.NotEmpty(platform.Arch);
+        platform.OS.ShouldNotBeNull();
+        platform.Arch.ShouldNotBeNull();
+        platform.OS.ShouldNotBeEmpty();
+        platform.Arch.ShouldNotBeEmpty();
     }
 }

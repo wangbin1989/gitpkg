@@ -1,3 +1,5 @@
+using Shouldly;
+
 namespace GitPkg.Tests.Commands;
 
 /// <summary>
@@ -11,8 +13,8 @@ public partial class CompletionCommandTests
     {
         var (exitCode, stdout, _) = await InvokeCompletionAsync("cmd");
 
-        Assert.Equal(0, exitCode);
-        Assert.Contains("clink.argmatcher", stdout);
+        exitCode.ShouldBe(0);
+        stdout.ShouldContain("clink.argmatcher");
     }
 
     /// <summary>cmd：补全脚本包含所有根命令。</summary>
@@ -22,7 +24,7 @@ public partial class CompletionCommandTests
         var (_, stdout, _) = await InvokeCompletionAsync("cmd");
 
         foreach (string cmd in new[] { "install", "update", "uninstall", "outdated", "list", "info", "init", "completion", "manifest", "self-update" })
-            Assert.Contains($"\"{cmd}\"", stdout);
+            stdout.ShouldContain($"\"{cmd}\"");
     }
 
     /// <summary>cmd：init/completion 子命令补全包含 cmd。</summary>
@@ -31,7 +33,7 @@ public partial class CompletionCommandTests
     {
         var (_, stdout, _) = await InvokeCompletionAsync("cmd");
 
-        Assert.Contains("\"zsh\", \"bash\", \"powershell\", \"cmd\"", stdout);
+        stdout.ShouldContain("\"zsh\", \"bash\", \"powershell\", \"cmd\"");
     }
 
     /// <summary>cmd：install 子命令补全包含 --from 选项。</summary>
@@ -40,7 +42,7 @@ public partial class CompletionCommandTests
     {
         var (_, stdout, _) = await InvokeCompletionAsync("cmd");
 
-        Assert.Contains("\"--from\"", stdout);
+        stdout.ShouldContain("\"--from\"");
     }
 
     /// <summary>cmd：脚本使用 addarg 函数分派子命令补全。</summary>
@@ -49,7 +51,7 @@ public partial class CompletionCommandTests
     {
         var (_, stdout, _) = await InvokeCompletionAsync("cmd");
 
-        Assert.Contains(":addarg(function", stdout);
+        stdout.ShouldContain(":addarg(function");
     }
 
     /// <summary>cmd：脚本注释包含 load(io.popen(...))() 加载方式。</summary>
@@ -58,6 +60,6 @@ public partial class CompletionCommandTests
     {
         var (_, stdout, _) = await InvokeCompletionAsync("cmd");
 
-        Assert.Contains("load(io.popen('gitpkg completion cmd'):read(\"*a\"))()", stdout);
+        stdout.ShouldContain("load(io.popen('gitpkg completion cmd'):read(\"*a\"))()");
     }
 }

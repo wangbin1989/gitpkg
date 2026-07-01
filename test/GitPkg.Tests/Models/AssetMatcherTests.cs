@@ -1,5 +1,6 @@
 using GitPkg.Models;
 using GitPkg.Services;
+using Shouldly;
 
 namespace GitPkg.Tests.Models;
 
@@ -24,8 +25,8 @@ public class AssetMatcherTests
 
         var result = matcher.Match(assets, platform);
 
-        Assert.Single(result);
-        Assert.Equal("tool-1.0.0-aarch64-apple-darwin.tar.gz", result[0].Name);
+        result.ShouldHaveSingleItem();
+        result[0].Name.ShouldBe("tool-1.0.0-aarch64-apple-darwin.tar.gz");
     }
 
     /// <summary>Linux x64 平台应匹配 x86_64-unknown-linux-gnu 文件。</summary>
@@ -43,8 +44,8 @@ public class AssetMatcherTests
 
         var result = matcher.Match(assets, platform);
 
-        Assert.Single(result);
-        Assert.Equal("tool-1.0.0-x86_64-unknown-linux-gnu.tar.gz", result[0].Name);
+        result.ShouldHaveSingleItem();
+        result[0].Name.ShouldBe("tool-1.0.0-x86_64-unknown-linux-gnu.tar.gz");
     }
 
     /// <summary>不匹配的平台应返回空列表。</summary>
@@ -60,7 +61,7 @@ public class AssetMatcherTests
 
         var result = matcher.Match(assets, platform);
 
-        Assert.Empty(result);
+        result.ShouldBeEmpty();
     }
 
     /// <summary>多个文件名同时匹配时应全部返回。</summary>
@@ -77,6 +78,6 @@ public class AssetMatcherTests
 
         var result = matcher.Match(assets, platform);
 
-        Assert.Equal(2, result.Count);
+        result.Count.ShouldBe(2);
     }
 }

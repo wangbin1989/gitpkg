@@ -1,3 +1,5 @@
+using Shouldly;
+
 namespace GitPkg.Tests.Commands;
 
 /// <summary>
@@ -11,10 +13,10 @@ public partial class InitCommandTests
     {
         var (exitCode, stdout, _) = await InvokeInitAsync("powershell");
 
-        Assert.Equal(0, exitCode);
-        Assert.StartsWith("# gitpkg shell init for powershell", stdout);
-        Assert.Contains("$env:GITPKG_HOME", stdout);
-        Assert.Contains("$env:GITPKG_HOME\\bin", stdout);
+        exitCode.ShouldBe(0);
+        stdout.ShouldStartWith("# gitpkg shell init for powershell");
+        stdout.ShouldContain("$env:GITPKG_HOME");
+        stdout.ShouldContain("$env:GITPKG_HOME\\bin");
     }
 
     /// <summary>pwsh 别名输出应与 powershell 一致。</summary>
@@ -23,9 +25,9 @@ public partial class InitCommandTests
     {
         var (exitCode, stdout, _) = await InvokeInitAsync("pwsh");
 
-        Assert.Equal(0, exitCode);
-        Assert.StartsWith("# gitpkg shell init for powershell", stdout);
-        Assert.Contains("$env:GITPKG_HOME", stdout);
-        Assert.Contains("$env:GITPKG_HOME\\bin", stdout);
+        exitCode.ShouldBe(0);
+        stdout.ShouldStartWith("# gitpkg shell init for powershell");
+        stdout.ShouldContain("$env:GITPKG_HOME");
+        stdout.ShouldContain("$env:GITPKG_HOME\\bin");
     }
 }

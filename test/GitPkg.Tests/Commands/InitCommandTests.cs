@@ -1,5 +1,6 @@
 using System.CommandLine;
 using GitPkg.Commands;
+using Shouldly;
 
 namespace GitPkg.Tests.Commands;
 
@@ -13,7 +14,7 @@ public partial class InitCommandTests
     /// <summary>构建 init 命令并捕获 stdout/stderr 和退出码。</summary>
     private static async Task<(int ExitCode, string Stdout, string Stderr)> InvokeInitAsync(string shell)
     {
-        var cmd = InitCommand.Create();
+        var cmd = new InitCommand();
         var root = new RootCommand();
         root.Add(cmd);
 
@@ -42,9 +43,9 @@ public partial class InitCommandTests
     {
         var (exitCode, stdout, stderr) = await InvokeInitAsync("invalid");
 
-        Assert.Equal(1, exitCode);
-        Assert.Empty(stdout);
-        Assert.Contains("不支持的 shell", stderr);
+        exitCode.ShouldBe(1);
+        stdout.ShouldBeEmpty();
+        stderr.ShouldContain("不支持的 shell");
     }
 
     /// <summary>POSIX 转义：普通路径保持不变。</summary>
@@ -52,7 +53,7 @@ public partial class InitCommandTests
     public void EscapeForPosixShell_NormalPath_Unchanged()
     {
         var result = InitCommand.EscapeForPosixShell("/usr/local/bin");
-        Assert.Equal("'/usr/local/bin'", result);
+        result.ShouldBe("'/usr/local/bin'");
     }
 
     /// <summary>POSIX 转义：含单引号的路径应正确转义为 '\'' 模式。</summary>
@@ -60,7 +61,7 @@ public partial class InitCommandTests
     public void EscapeForPosixShell_WithSingleQuote_EscapesCorrectly()
     {
         var result = InitCommand.EscapeForPosixShell("/path/it's here");
-        Assert.Equal("'/path/it'\\''s here'", result);
+        result.ShouldBe("'/path/it'\\''s here'");
     }
 
     /// <summary>POSIX 转义：含 $ 的路径不应被 shell 展开。</summary>
@@ -68,7 +69,7 @@ public partial class InitCommandTests
     public void EscapeForPosixShell_WithDollarSign_PreventsExpansion()
     {
         var result = InitCommand.EscapeForPosixShell("/path/$foo");
-        Assert.Equal("'/path/$foo'", result);
+        result.ShouldBe("'/path/$foo'");
     }
 
     /// <summary>POSIX 转义：含反引号的路径不应被 shell 执行。</summary>
@@ -76,7 +77,7 @@ public partial class InitCommandTests
     public void EscapeForPosixShell_WithBacktick_PreventsExecution()
     {
         var result = InitCommand.EscapeForPosixShell("/path/`id`");
-        Assert.Equal("'/path/`id`'", result);
+        result.ShouldBe("'/path/`id`'");
     }
 
     /// <summary>PowerShell 转义：普通路径保持不变。</summary>
@@ -84,7 +85,7 @@ public partial class InitCommandTests
     public void EscapeForPowershell_NormalPath_Unchanged()
     {
         var result = InitCommand.EscapeForPowershell("C:\\Program Files\\GitPkg");
-        Assert.Equal("C:\\Program Files\\GitPkg", result);
+        result.ShouldBe("C:\\Program Files\\GitPkg");
     }
 
     /// <summary>PowerShell 转义：含单引号的路径应双写单引号。</summary>
@@ -92,7 +93,7 @@ public partial class InitCommandTests
     public void EscapeForPowershell_WithSingleQuote_Doubles()
     {
         var result = InitCommand.EscapeForPowershell("C:\\it's here");
-        Assert.Equal("C:\\it''s here", result);
+        result.ShouldBe("C:\\it''s here");
     }
 
     /// <summary>PowerShell 转义：含 $ 的路径不应被展开。</summary>
@@ -100,6 +101,6 @@ public partial class InitCommandTests
     public void EscapeForPowershell_WithDollar_PreventsExpansion()
     {
         var result = InitCommand.EscapeForPowershell("C:\\path\\$foo");
-        Assert.Equal("C:\\path\\$foo", result);
+        result.ShouldBe("C:\\path\\$foo");
     }
 }

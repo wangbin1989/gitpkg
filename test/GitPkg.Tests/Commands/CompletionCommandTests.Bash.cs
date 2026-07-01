@@ -1,3 +1,5 @@
+using Shouldly;
+
 namespace GitPkg.Tests.Commands;
 
 /// <summary>
@@ -11,8 +13,8 @@ public partial class CompletionCommandTests
     {
         var (exitCode, stdout, _) = await InvokeCompletionAsync("bash");
 
-        Assert.Equal(0, exitCode);
-        Assert.Contains("complete -F _gitpkg_completion gitpkg", stdout);
+        exitCode.ShouldBe(0);
+        stdout.ShouldContain("complete -F _gitpkg_completion gitpkg");
     }
 
     /// <summary>bash：补全脚本包含所有根命令。</summary>
@@ -22,7 +24,7 @@ public partial class CompletionCommandTests
         var (_, stdout, _) = await InvokeCompletionAsync("bash");
 
         foreach (string cmd in new[] { "install", "update", "uninstall", "outdated", "list", "info", "init", "completion", "manifest", "self-update" })
-            Assert.Contains(cmd, stdout);
+            stdout.ShouldContain(cmd);
     }
 
     /// <summary>bash：init/completion 子命令补全包含 cmd。</summary>
@@ -31,7 +33,7 @@ public partial class CompletionCommandTests
     {
         var (_, stdout, _) = await InvokeCompletionAsync("bash");
 
-        Assert.Contains("zsh bash powershell cmd", stdout);
+        stdout.ShouldContain("zsh bash powershell cmd");
     }
 
     /// <summary>bash：install 子命令补全包含 --from 选项。</summary>
@@ -40,6 +42,6 @@ public partial class CompletionCommandTests
     {
         var (_, stdout, _) = await InvokeCompletionAsync("bash");
 
-        Assert.Contains("--from", stdout);
+        stdout.ShouldContain("--from");
     }
 }
