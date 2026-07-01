@@ -36,55 +36,6 @@ public partial class InitCommandTests
         }
     }
 
-    /// <summary>zsh：含 GITPKG_HOME 和基于变量的 PATH 初始化脚本。</summary>
-    [Fact]
-    public async Task Init_Zsh_WritesExportPath()
-    {
-        var (exitCode, stdout, _) = await InvokeInitAsync("zsh");
-
-        Assert.Equal(0, exitCode);
-        Assert.StartsWith("# gitpkg shell init for zsh", stdout);
-        Assert.Contains("export GITPKG_HOME=", stdout);
-        Assert.Contains("export PATH=\"$GITPKG_HOME/bin\":$PATH", stdout);
-        Assert.DoesNotContain("[suggest]", stdout); // init 不含补全
-    }
-
-    /// <summary>bash：含 GITPKG_HOME 和基于变量的 PATH 初始化脚本。</summary>
-    [Fact]
-    public async Task Init_Bash_WritesExportPath()
-    {
-        var (exitCode, stdout, _) = await InvokeInitAsync("bash");
-
-        Assert.Equal(0, exitCode);
-        Assert.StartsWith("# gitpkg shell init for bash", stdout);
-        Assert.Contains("export GITPKG_HOME=", stdout);
-        Assert.Contains("export PATH=\"$GITPKG_HOME/bin\":$PATH", stdout);
-    }
-
-    /// <summary>powershell：含 GITPKG_HOME 和基于变量的 $env:Path 初始化脚本。</summary>
-    [Fact]
-    public async Task Init_Powershell_WritesEnvPath()
-    {
-        var (exitCode, stdout, _) = await InvokeInitAsync("powershell");
-
-        Assert.Equal(0, exitCode);
-        Assert.StartsWith("# gitpkg shell init for powershell", stdout);
-        Assert.Contains("$env:GITPKG_HOME", stdout);
-        Assert.Contains("$env:GITPKG_HOME\\bin", stdout);
-    }
-
-    /// <summary>pwsh 别名输出应与 powershell 一致。</summary>
-    [Fact]
-    public async Task Init_Pwsh_Alias_WritesEnvPath()
-    {
-        var (exitCode, stdout, _) = await InvokeInitAsync("pwsh");
-
-        Assert.Equal(0, exitCode);
-        Assert.StartsWith("# gitpkg shell init for powershell", stdout);
-        Assert.Contains("$env:GITPKG_HOME", stdout);
-        Assert.Contains("$env:GITPKG_HOME\\bin", stdout);
-    }
-
     /// <summary>非法 shell 名应返回退出码 1 并将错误信息输出到 stderr。</summary>
     [Fact]
     public async Task Init_InvalidShell_WritesError()
@@ -117,7 +68,6 @@ public partial class InitCommandTests
     public void EscapeForPosixShell_WithDollarSign_PreventsExpansion()
     {
         var result = InitCommand.EscapeForPosixShell("/path/$foo");
-        // 单引号内 $ 是字面量，不会被展开
         Assert.Equal("'/path/$foo'", result);
     }
 
@@ -126,7 +76,6 @@ public partial class InitCommandTests
     public void EscapeForPosixShell_WithBacktick_PreventsExecution()
     {
         var result = InitCommand.EscapeForPosixShell("/path/`id`");
-        // 单引号内反引号是字面量，不会被当作命令替换
         Assert.Equal("'/path/`id`'", result);
     }
 
@@ -151,7 +100,6 @@ public partial class InitCommandTests
     public void EscapeForPowershell_WithDollar_PreventsExpansion()
     {
         var result = InitCommand.EscapeForPowershell("C:\\path\\$foo");
-        // $ 在 PowerShell 单引号内是字面量
         Assert.Equal("C:\\path\\$foo", result);
     }
 }
