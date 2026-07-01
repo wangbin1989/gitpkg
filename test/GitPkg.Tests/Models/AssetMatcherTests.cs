@@ -1,7 +1,7 @@
 using GitPkg.Models;
 using GitPkg.Services;
 
-namespace GitPkg.Tests;
+namespace GitPkg.Tests.Models;
 
 /// <summary>
 /// 资产匹配器单元测试。

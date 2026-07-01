@@ -1,6 +1,6 @@
 using GitPkg.Services;
 
-namespace GitPkg.Tests;
+namespace GitPkg.Tests.Services;
 
 /// <summary>
 /// SHA256 校验器单元测试。

@@ -2,7 +2,7 @@ using System.CommandLine;
 using GitPkg;
 using GitPkg.Commands;
 
-namespace GitPkg.Tests;
+namespace GitPkg.Tests.Integration;
 
 /// <summary>
 /// 与 InitCommandTests 共享同一集合，避免并行执行时的 Console 重定向冲突。

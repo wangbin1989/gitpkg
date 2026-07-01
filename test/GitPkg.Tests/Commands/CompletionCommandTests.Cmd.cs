@@ -1,4 +1,4 @@
-namespace GitPkg.Tests;
+namespace GitPkg.Tests.Commands;
 
 /// <summary>
 /// completion 命令的 CMD / clink 补全测试。

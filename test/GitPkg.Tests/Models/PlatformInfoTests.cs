@@ -1,6 +1,6 @@
 using GitPkg.Models;
 
-namespace GitPkg.Tests;
+namespace GitPkg.Tests.Models;
 
 /// <summary>
 /// 平台信息检测单元测试。

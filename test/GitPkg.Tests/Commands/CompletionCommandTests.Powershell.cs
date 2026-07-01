@@ -1,4 +1,4 @@
-namespace GitPkg.Tests;
+namespace GitPkg.Tests.Commands;
 
 /// <summary>
 /// completion 命令的 PowerShell 补全测试。

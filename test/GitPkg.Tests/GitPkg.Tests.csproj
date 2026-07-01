@@ -27,10 +27,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="InitCommandTests.*.cs">
+    <Compile Update="Commands\InitCommandTests.*.cs">
       <DependentUpon>InitCommandTests.cs</DependentUpon>
     </Compile>
-    <Compile Update="CompletionCommandTests.*.cs">
+    <Compile Update="Commands\CompletionCommandTests.*.cs">
       <DependentUpon>CompletionCommandTests.cs</DependentUpon>
     </Compile>
   </ItemGroup>

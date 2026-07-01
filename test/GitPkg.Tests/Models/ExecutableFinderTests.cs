@@ -1,6 +1,6 @@
 using GitPkg.Services;
 
-namespace GitPkg.Tests;
+namespace GitPkg.Tests.Models;
 
 /// <summary>
 /// 可执行文件查找器单元测试。

@@ -1,4 +1,4 @@
-namespace GitPkg.Tests;
+namespace GitPkg.Tests.Commands;
 
 /// <summary>
 /// init 命令的 zsh 初始化测试。

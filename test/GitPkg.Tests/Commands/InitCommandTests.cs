@@ -1,7 +1,7 @@
 using System.CommandLine;
 using GitPkg.Commands;
 
-namespace GitPkg.Tests;
+namespace GitPkg.Tests.Commands;
 
 /// <summary>
 /// init 命令单元测试。

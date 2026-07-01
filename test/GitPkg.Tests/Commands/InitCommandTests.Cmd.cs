@@ -1,6 +1,6 @@
 using GitPkg.Commands;
 
-namespace GitPkg.Tests;
+namespace GitPkg.Tests.Commands;
 
 /// <summary>
 /// init 命令的 CMD / clink 相关测试。

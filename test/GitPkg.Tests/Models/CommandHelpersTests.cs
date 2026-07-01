@@ -3,7 +3,7 @@ using GitPkg.Commands;
 using GitPkg.Models;
 using Spectre.Console;
 
-namespace GitPkg.Tests;
+namespace GitPkg.Tests.Models;
 
 /// <summary>
 /// 命令辅助方法单元测试。
