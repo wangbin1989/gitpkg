@@ -8,7 +8,7 @@ namespace GitPkg.Tests;
 /// 验证各 Shell 的 PATH 初始化脚本输出、路径转义和错误处理。
 /// </summary>
 [Collection("ConsoleCapture")]
-public class InitCommandTests
+public partial class InitCommandTests
 {
     /// <summary>构建 init 命令并捕获 stdout/stderr 和退出码。</summary>
     private static async Task<(int ExitCode, string Stdout, string Stderr)> InvokeInitAsync(string shell)

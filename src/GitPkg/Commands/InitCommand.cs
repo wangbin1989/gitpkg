@@ -14,7 +14,7 @@ public static class InitCommand
     {
         var cmd = new Command("init", "输出 shell 初始化脚本（用于 eval）");
 
-        var shellArg = new Argument<string>("shell") { Description = "目标 shell: zsh, bash, fish, powershell" };
+        var shellArg = new Argument<string>("shell") { Description = "目标 shell: zsh, bash, fish, powershell, cmd" };
         cmd.Add(shellArg);
 
         cmd.SetAction((parseResult, ct) =>
@@ -32,8 +32,9 @@ public static class InitCommand
                     "bash" => PosixInit("bash", binDir),
                     "fish" => FishInit(binDir),
                     "powershell" or "pwsh" => PowershellInit(binDir),
+                    "cmd" => CmdInit(binDir),
                     _ => throw new ArgumentException(
-                        $"不支持的 shell: '{shell}'。支持: zsh, bash, fish, powershell")
+                        $"不支持的 shell: '{shell}'。支持: zsh, bash, fish, powershell, cmd")
                 };
 
                 Console.Write(script);
@@ -82,4 +83,25 @@ public static class InitCommand
         => $"# gitpkg shell init for powershell\n"
          + $"$env:GITPKG_HOME = '{EscapeForPowershell(Path.GetDirectoryName(binDir)!)}'\n"
          + $"$env:Path = \"$env:GITPKG_HOME\\bin;\" + $env:Path\n";
+
+    /// <summary>
+    /// 生成 cmd.exe 的初始化脚本。设置 GITPKG_HOME 环境变量并将 bin 目录加入 PATH。
+    /// 使用 setx 永久设置 GITPKG_HOME，用 set 临时设置 PATH。
+    /// </summary>
+    private static string CmdInit(string binDir)
+    {
+        string gitpkgHome = Path.GetDirectoryName(binDir)!;
+        string escapedHome = EscapeForCmd(gitpkgHome);
+        return $"@echo off\n"
+             + $"REM gitpkg shell init for cmd\n"
+             + $"set GITPKG_HOME={escapedHome}\n"
+             + $"set PATH=%GITPKG_HOME%\\bin;%PATH%\n";
+    }
+
+    /// <summary>
+    /// 对路径进行 cmd.exe 转义。
+    /// cmd.exe 的 set 命令中，% 需要转义为 %%。
+    /// </summary>
+    internal static string EscapeForCmd(string path)
+        => path.Replace("%", "%%");
 }
