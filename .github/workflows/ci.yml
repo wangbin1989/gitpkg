@@ -15,7 +15,7 @@ jobs:
           # Linux
           - os: ubuntu-latest
             rid: linux-x64
-          - os: ubuntu-24.04-arm
+          - os: ubuntu-latest-arm
             rid: linux-arm64
           # macOS
           - os: macos-latest
@@ -23,7 +23,7 @@ jobs:
           # Windows
           - os: windows-latest
             rid: win-x64
-          - os: windows-11-arm
+          - os: windows-latest-arm
             rid: win-arm64
     runs-on: ${{ matrix.os }}
     steps:
