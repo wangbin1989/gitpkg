@@ -7,14 +7,12 @@ namespace GitPkg.Commands;
 /// <summary>
 /// list 命令：以表格形式列出所有已安装的工具及其版本、仓库和安装时间。
 /// </summary>
-public static class ListCommand
+public class ListCommand : Command
 {
     /// <summary>创建 list 命令。</summary>
-    public static Command Create()
+    public ListCommand() : base("list", "列出已安装的工具")
     {
-        var cmd = new Command("list", "列出已安装的工具");
-
-        cmd.SetAction(async (parseResult, ct) =>
+        SetAction(async (parseResult, ct) =>
         {
             try
             {
@@ -27,8 +25,6 @@ public static class ListCommand
                 return 1;
             }
         });
-
-        return cmd;
     }
 
     private static async Task HandleAsync(CancellationToken ct)

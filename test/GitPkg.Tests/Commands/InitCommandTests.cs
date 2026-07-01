@@ -13,7 +13,7 @@ public partial class InitCommandTests
     /// <summary>构建 init 命令并捕获 stdout/stderr 和退出码。</summary>
     private static async Task<(int ExitCode, string Stdout, string Stderr)> InvokeInitAsync(string shell)
     {
-        var cmd = InitCommand.Create();
+        var cmd = new InitCommand();
         var root = new RootCommand();
         root.Add(cmd);
 

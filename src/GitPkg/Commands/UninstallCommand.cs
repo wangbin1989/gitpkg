@@ -7,17 +7,15 @@ namespace GitPkg.Commands;
 /// <summary>
 /// uninstall 命令：删除已安装工具的文件并从清单中移除。
 /// </summary>
-public static class UninstallCommand
+public class UninstallCommand : Command
 {
     /// <summary>创建 uninstall 命令。</summary>
-    public static Command Create()
+    public UninstallCommand() : base("uninstall", "卸载已安装的工具")
     {
-        var cmd = new Command("uninstall", "卸载已安装的工具");
-
         var nameArg = new Argument<string>("name") { Description = "工具名称" };
-        cmd.Add(nameArg);
+        Add(nameArg);
 
-        cmd.SetAction(async (parseResult, ct) =>
+        SetAction(async (parseResult, ct) =>
         {
             var name = parseResult.GetValue(nameArg);
 
@@ -32,8 +30,6 @@ public static class UninstallCommand
                 return 1;
             }
         });
-
-        return cmd;
     }
 
     private static async Task HandleAsync(string name, CancellationToken ct)

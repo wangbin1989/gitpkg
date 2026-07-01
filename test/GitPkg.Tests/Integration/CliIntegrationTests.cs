@@ -24,16 +24,16 @@ public class CliIntegrationTests
 
         var root = new RootCommand("gitpkg — GitHub Release 自动更新工具");
 
-        root.Add(InitCommand.Create());
-        root.Add(CompletionCommand.Create());
-        root.Add(InstallCommand.Create());
-        root.Add(UpdateCommand.Create());
-        root.Add(OutdatedCommand.Create());
-        root.Add(UninstallCommand.Create());
-        root.Add(ListCommand.Create());
-        root.Add(InfoCommand.Create());
-        root.Add(ManifestCommand.Create());
-        root.Add(SelfUpdateCommand.Create());
+        root.Add(new InitCommand());
+        root.Add(new CompletionCommand());
+        root.Add(new InstallCommand());
+        root.Add(new UpdateCommand());
+        root.Add(new OutdatedCommand());
+        root.Add(new UninstallCommand());
+        root.Add(new ListCommand());
+        root.Add(new InfoCommand());
+        root.Add(new ManifestCommand());
+        root.Add(new SelfUpdateCommand());
 
         return root;
     }

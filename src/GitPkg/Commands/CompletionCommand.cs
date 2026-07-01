@@ -6,17 +6,15 @@ namespace GitPkg.Commands;
 /// completion 命令：输出 shell 自动补全脚本。
 /// 底层使用静态定义的子命令和选项列表提供补全。
 /// </summary>
-public static class CompletionCommand
+public class CompletionCommand : Command
 {
     /// <summary>创建 completion 命令。</summary>
-    public static Command Create()
+    public CompletionCommand() : base("completion", "输出 shell 自动补全脚本")
     {
-        var cmd = new Command("completion", "输出 shell 自动补全脚本");
-
         var shellArg = new Argument<string>("shell") { Description = "目标 shell: zsh, bash, powershell (pwsh), cmd" };
-        cmd.Add(shellArg);
+        Add(shellArg);
 
-        cmd.SetAction((parseResult, ct) =>
+        SetAction((parseResult, ct) =>
         {
             try
             {
@@ -41,8 +39,6 @@ public static class CompletionCommand
                 return Task.FromResult(1);
             }
         });
-
-        return cmd;
     }
 
     /// <summary>

@@ -10,20 +10,18 @@ namespace GitPkg.Commands;
 /// install 命令：从 GitHub Release 下载并安装工具。
 /// 核心流程：解析仓库 → 获取 Release → 匹配资产 → 下载 → 校验 → 解压 → 链接到 bin → 记录清单。
 /// </summary>
-public static class InstallCommand
+public class InstallCommand : Command
 {
     /// <summary>创建 install 命令，支持单工具安装和批量清单安装。</summary>
-    public static Command Create()
+    public InstallCommand() : base("install", "从 GitHub Release 安装工具")
     {
-        var cmd = new Command("install", "从 GitHub Release 安装工具");
-
         var repoArg = new Argument<string?>("owner/repo") { Description = "GitHub 仓库 (owner/repo[@version])", Arity = ArgumentArity.ZeroOrOne };
-        cmd.Add(repoArg);
+        Add(repoArg);
 
         var fromOpt = new Option<string?>("--from") { Description = "从清单文件批量安装" };
-        cmd.Add(fromOpt);
+        Add(fromOpt);
 
-        cmd.SetAction(async (parseResult, ct) =>
+        SetAction(async (parseResult, ct) =>
         {
             var repo = parseResult.GetValue(repoArg);
             var fromFile = parseResult.GetValue(fromOpt);
@@ -59,8 +57,6 @@ public static class InstallCommand
                 return 1;
             }
         });
-
-        return cmd;
     }
 
     private static async Task HandleBatchAsync(string fromFile, CancellationToken ct)
@@ -341,5 +337,4 @@ public static class InstallCommand
         if (executables.Count > 0)
             AnsiConsole.MarkupLine($"[grey]  已链接 {executables.Count} 个可执行文件到 {binDir}[/]");
     }
-
 }

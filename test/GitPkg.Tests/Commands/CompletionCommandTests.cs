@@ -13,7 +13,7 @@ public partial class CompletionCommandTests
     /// <summary>构建 completion 命令并捕获 stdout/stderr 和退出码。</summary>
     private static async Task<(int ExitCode, string Stdout, string Stderr)> InvokeCompletionAsync(string shell)
     {
-        var cmd = CompletionCommand.Create();
+        var cmd = new CompletionCommand();
         var root = new RootCommand();
         root.Add(cmd);
 

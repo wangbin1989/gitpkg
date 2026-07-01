@@ -8,17 +8,15 @@ namespace GitPkg.Commands;
 /// info 命令：查看工具的详细信息。
 /// 优先按已安装工具名查找，其次按 owner/repo 格式远程查询。
 /// </summary>
-public static class InfoCommand
+public class InfoCommand : Command
 {
     /// <summary>创建 info 命令。</summary>
-    public static Command Create()
+    public InfoCommand() : base("info", "查看工具详情")
     {
-        var cmd = new Command("info", "查看工具详情");
-
         var nameArg = new Argument<string>("name") { Description = "工具名称或 owner/repo" };
-        cmd.Add(nameArg);
+        Add(nameArg);
 
-        cmd.SetAction(async (parseResult, ct) =>
+        SetAction(async (parseResult, ct) =>
         {
             var name = parseResult.GetValue(nameArg);
 
@@ -38,8 +36,6 @@ public static class InfoCommand
                 return 1;
             }
         });
-
-        return cmd;
     }
 
     /// <summary>
@@ -126,5 +122,4 @@ public static class InfoCommand
 
         AnsiConsole.Write(panel);
     }
-
 }

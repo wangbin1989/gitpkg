@@ -9,17 +9,15 @@ namespace GitPkg.Commands;
 /// update 命令：将已安装的工具更新到最新版本。
 /// 支持更新全部工具或指定单个工具，更新过程包含备份和回滚机制。
 /// </summary>
-public static class UpdateCommand
+public class UpdateCommand : Command
 {
     /// <summary>创建 update 命令。</summary>
-    public static Command Create()
+    public UpdateCommand() : base("update", "更新已安装的工具")
     {
-        var cmd = new Command("update", "更新已安装的工具");
-
         var nameArg = new Argument<string?>("name") { Description = "工具名称（不指定则更新全部）", Arity = ArgumentArity.ZeroOrOne };
-        cmd.Add(nameArg);
+        Add(nameArg);
 
-        cmd.SetAction(async (parseResult, ct) =>
+        SetAction(async (parseResult, ct) =>
         {
             var name = parseResult.GetValue(nameArg);
 
@@ -34,8 +32,6 @@ public static class UpdateCommand
                 return 1;
             }
         });
-
-        return cmd;
     }
 
     /// <summary>
@@ -196,5 +192,4 @@ public static class UpdateCommand
         if (failed > 0) summary += $" | 失败: {failed}";
         AnsiConsole.MarkupLine($"[bold]{summary}[/]");
     }
-
 }
