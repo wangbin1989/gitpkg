@@ -1,0 +1,7 @@
+{
+  "explorer.fileNesting.enabled": true,
+  "explorer.fileNesting.patterns": {
+    "InitCommandTests.cs": "InitCommandTests.*.cs",
+    "CompletionCommandTests.cs": "CompletionCommandTests.*.cs"
+  }
+}
