@@ -171,40 +171,31 @@ public static class CompletionCommand
         --   load(io.popen('gitpkg completion cmd'):read("*a"))()
         -- clink 脚本目录可通过 clink info 查看（scripts 路径）
 
-        local sub_parsers = {
-            install = clink.argmatcher("gitpkg install")
-                :addflags("--from", "--help"),
-            update = clink.argmatcher("gitpkg update")
-                :addflags("--help"),
-            uninstall = clink.argmatcher("gitpkg uninstall")
-                :addflags("--help"),
-            info = clink.argmatcher("gitpkg info")
-                :addflags("--help"),
-            init = clink.argmatcher("gitpkg init")
-                :addarg({"zsh", "bash", "powershell", "cmd"}),
-            completion = clink.argmatcher("gitpkg completion")
-                :addarg({"zsh", "bash", "powershell", "cmd"}),
-            manifest = clink.argmatcher("gitpkg manifest")
-                :addarg({"export"})
-                :addflags("--help"),
-            list = clink.argmatcher("gitpkg list")
-                :addflags("--help"),
-            outdated = clink.argmatcher("gitpkg outdated")
-                :addflags("--help"),
-            ["self-update"] = clink.argmatcher("gitpkg self-update")
-                :addflags("--help"),
+        local sub_completions = {
+            install = {"--from", "--help"},
+            update = {"--help"},
+            uninstall = {"--help"},
+            info = {"--help"},
+            init = {"zsh", "bash", "powershell", "cmd"},
+            completion = {"zsh", "bash", "powershell", "cmd"},
+            manifest = {"export", "--help"},
+            list = {"--help"},
+            outdated = {"--help"},
+            ["self-update"] = {"--help"},
+        }
+
+        local commands = {
+            "install", "update", "uninstall", "outdated", "list", "info",
+            "init", "completion", "manifest", "self-update",
+            "--help", "--version"
         }
 
         clink.argmatcher("gitpkg")
-            :addarg({
-                "install", "update", "uninstall", "outdated", "list", "info",
-                "init", "completion", "manifest", "self-update",
-                "--help", "--version"
-            })
-            :loop(function (arg_index, word, word_count, line)
-                local cmd = line[2]
-                if cmd and sub_parsers[cmd] then
-                    return sub_parsers[cmd]
+            :addarg(commands)
+            :addarg(function (arg_index, word, word_count, line_state)
+                local cmd = line_state:getword(2)
+                if cmd and sub_completions[cmd] then
+                    return sub_completions[cmd]
                 end
             end)
 

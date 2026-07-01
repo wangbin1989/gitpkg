@@ -43,13 +43,13 @@ public partial class CompletionCommandTests
         Assert.Contains("\"--from\"", stdout);
     }
 
-    /// <summary>cmd：脚本使用 .loop 分派子命令补全。</summary>
+    /// <summary>cmd：脚本使用 addarg 函数分派子命令补全。</summary>
     [Fact]
-    public async Task Completion_Cmd_HasLoopDispatcher()
+    public async Task Completion_Cmd_HasSubcommandDispatcher()
     {
         var (_, stdout, _) = await InvokeCompletionAsync("cmd");
 
-        Assert.Contains(":loop(function", stdout);
+        Assert.Contains(":addarg(function", stdout);
     }
 
     /// <summary>cmd：脚本注释包含 load(io.popen(...))() 加载方式。</summary>
