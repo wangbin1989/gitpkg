@@ -78,23 +78,27 @@ public static class InitCommand
          + $"$env:Path = \"$env:GITPKG_HOME\\bin;\" + $env:Path\n";
 
     /// <summary>
-    /// 生成 cmd.exe 的初始化脚本。设置 GITPKG_HOME 环境变量并将 bin 目录加入 PATH。
-    /// 使用 setx 永久设置 GITPKG_HOME，用 set 临时设置 PATH。
+    /// 生成 Clink (cmd.exe) 的初始化 Lua 脚本。
+    /// 通过 clink 的 load(io.popen(...)) 模式动态加载，设置 GITPKG_HOME 环境变量并将 bin 目录加入 PATH。
     /// </summary>
     private static string CmdInit(string binDir)
     {
         string gitpkgHome = Path.GetDirectoryName(binDir)!;
-        string escapedHome = EscapeForCmd(gitpkgHome);
-        return $"@echo off\n"
-             + $"REM gitpkg shell init for cmd\n"
-             + $"set GITPKG_HOME={escapedHome}\n"
-             + $"set PATH=%GITPKG_HOME%\\bin;%PATH%\n";
+        string escapedHome = EscapeForLua(gitpkgHome);
+        string escapedBin = EscapeForLua(binDir);
+        return $"-- gitpkg shell init for cmd (requires clink)\n"
+             + $"-- 在 clink 中加载:\n"
+             + $"--   load(io.popen('gitpkg init cmd'):read(\"*a\"))()\n"
+             + $"-- clink 脚本目录可通过 clink info 查看（scripts 路径）\n\n"
+             + $"os.setenv(\"GITPKG_HOME\", \"{escapedHome}\")\n"
+             + $"local _path = os.getenv(\"PATH\") or \"\"\n"
+             + $"os.setenv(\"PATH\", \"{escapedBin};\" .. _path)\n";
     }
 
     /// <summary>
-    /// 对路径进行 cmd.exe 转义。
-    /// cmd.exe 的 set 命令中，% 需要转义为 %%。
+    /// 对路径进行 Lua 字符串转义。
+    /// 反斜杠转义为 \\，双引号转义为 \"。
     /// </summary>
-    internal static string EscapeForCmd(string path)
-        => path.Replace("%", "%%");
+    internal static string EscapeForLua(string path)
+        => path.Replace("\\", "\\\\").Replace("\"", "\\\"");
 }

@@ -7,31 +7,39 @@ namespace GitPkg.Tests.Commands;
 /// </summary>
 public partial class InitCommandTests
 {
-    /// <summary>cmd：含 GITPKG_HOME 和基于变量的 PATH 初始化脚本。</summary>
+    /// <summary>cmd：含 GITPKG_HOME 和基于变量的 PATH 初始化 Lua 脚本。</summary>
     [Fact]
-    public async Task Init_Cmd_WritesSetPath()
+    public async Task Init_Cmd_WritesLuaScript()
     {
         var (exitCode, stdout, _) = await InvokeInitAsync("cmd");
 
         Assert.Equal(0, exitCode);
-        Assert.StartsWith("@echo off", stdout);
-        Assert.Contains("set GITPKG_HOME=", stdout);
-        Assert.Contains("%GITPKG_HOME%\\bin;%PATH%", stdout);
+        Assert.Contains("-- gitpkg shell init for cmd (requires clink)", stdout);
+        Assert.Contains("os.setenv(\"GITPKG_HOME\",", stdout);
+        Assert.Contains("os.setenv(\"PATH\",", stdout);
     }
 
-    /// <summary>cmd 转义：普通路径保持不变。</summary>
+    /// <summary>Lua 转义：普通路径中的反斜杠应转义为 \\。</summary>
     [Fact]
-    public void EscapeForCmd_NormalPath_Unchanged()
+    public void EscapeForLua_NormalPath_EscapesBackslashes()
     {
-        var result = InitCommand.EscapeForCmd("C:\\Program Files\\GitPkg");
-        Assert.Equal("C:\\Program Files\\GitPkg", result);
+        var result = InitCommand.EscapeForLua("C:\\Program Files\\GitPkg");
+        Assert.Equal("C:\\\\Program Files\\\\GitPkg", result);
     }
 
-    /// <summary>cmd 转义：含 % 的路径应转义为 %%。</summary>
+    /// <summary>Lua 转义：含双引号的路径应转义为 \"。</summary>
     [Fact]
-    public void EscapeForCmd_WithPercent_Doubles()
+    public void EscapeForLua_WithQuote_Escapes()
     {
-        var result = InitCommand.EscapeForCmd("C:\\path\\%foo%");
-        Assert.Equal("C:\\path\\%%foo%%", result);
+        var result = InitCommand.EscapeForLua("C:\\path\\\"foo\"");
+        Assert.Equal("C:\\\\path\\\\\\\"foo\\\"", result);
+    }
+
+    /// <summary>Lua 转义：含反斜杠的路径应转义为 \\。</summary>
+    [Fact]
+    public void EscapeForLua_WithBackslash_Escapes()
+    {
+        var result = InitCommand.EscapeForLua("C:\\path\\to\\dir");
+        Assert.Equal("C:\\\\path\\\\to\\\\dir", result);
     }
 }
