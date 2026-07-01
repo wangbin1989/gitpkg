@@ -9,8 +9,11 @@
 
 ## 运行环境
 
-- 操作系统: macOS (Apple Silicon) / Windows (x64, ARM64) / Linux (x64, ARM64)
-- 架构: x64 / arm64
+| 操作系统 | 架构 |
+|----------|------|
+| macOS | arm64 (Apple Silicon) |
+| Windows | x64, arm64 |
+| Linux | x64, arm64 |
 
 ## 快速开始
 
