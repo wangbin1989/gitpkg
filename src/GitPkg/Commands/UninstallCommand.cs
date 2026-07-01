@@ -13,6 +13,7 @@ public class UninstallCommand : Command
     public UninstallCommand() : base("uninstall", "卸载已安装的工具")
     {
         var nameArg = new Argument<string>("name") { Description = "工具名称" };
+        nameArg.CompletionSources.Add(CompletionHelper.GetInstalledToolNames);
         Add(nameArg);
 
         SetAction(async (parseResult, ct) =>

@@ -15,6 +15,7 @@ public class UpdateCommand : Command
     public UpdateCommand() : base("update", "更新已安装的工具")
     {
         var nameArg = new Argument<string?>("name") { Description = "工具名称（不指定则更新全部）", Arity = ArgumentArity.ZeroOrOne };
+        nameArg.CompletionSources.Add(CompletionHelper.GetInstalledToolNames);
         Add(nameArg);
 
         SetAction(async (parseResult, ct) =>
