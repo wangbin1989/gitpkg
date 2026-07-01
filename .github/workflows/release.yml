@@ -54,7 +54,7 @@ jobs:
         id: version
         shell: pwsh
         run: |
-          $content = Get-Content src/GitPkg/GitPkg.csproj -Raw
+          $content = Get-Content Directory.Build.props -Raw
           $version = [regex]::Match($content, '<Version>(.+?)</Version>').Groups[1].Value
           echo "version=v$version" >> $env:GITHUB_OUTPUT
 

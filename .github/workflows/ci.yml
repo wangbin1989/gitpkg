@@ -2,15 +2,29 @@ name: CI
 
 on:
   push:
-    branches: [main, rel-**, feat-**]
+    branches: [main]
   pull_request:
+    branches: [main]
 
 jobs:
   build-and-test:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        include:
+          # Linux
+          - os: ubuntu-latest
+            rid: linux-x64
+          - os: ubuntu-24.04-arm
+            rid: linux-arm64
+          # macOS
+          - os: macos-latest
+            rid: osx-arm64
+          # Windows
+          - os: windows-latest
+            rid: win-x64
+          - os: windows-11-arm
+            rid: win-arm64
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v6
