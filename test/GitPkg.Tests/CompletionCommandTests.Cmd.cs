@@ -31,7 +31,7 @@ public partial class CompletionCommandTests
     {
         var (_, stdout, _) = await InvokeCompletionAsync("cmd");
 
-        Assert.Contains("\"zsh\", \"bash\", \"fish\", \"powershell\", \"cmd\"", stdout);
+        Assert.Contains("\"zsh\", \"bash\", \"powershell\", \"cmd\"", stdout);
     }
 
     /// <summary>cmd：install 子命令补全包含 --from 选项。</summary>

@@ -41,10 +41,6 @@ eval "$(~/.gitpkg/bin/gitpkg init zsh)" >> ~/.zshrc  # 永久生效
 # bash
 eval "$(~/.gitpkg/bin/gitpkg init bash)"
 eval "$(~/.gitpkg/bin/gitpkg init bash)" >> ~/.bashrc
-
-# fish
-~/.gitpkg/bin/gitpkg init fish | source
-~/.gitpkg/bin/gitpkg init fish >> ~/.config/fish/config.fish
 ```
 
 ```powershell
@@ -66,9 +62,6 @@ eval "$(gitpkg completion zsh)"
 
 # bash
 eval "$(gitpkg completion bash)"
-
-# fish
-gitpkg completion fish > ~/.config/fish/completions/gitpkg.fish
 ```
 
 ```powershell

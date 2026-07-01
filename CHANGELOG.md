@@ -5,9 +5,12 @@
 ### Added
 - `init` 命令新增 `cmd` shell 支持，输出 `set GITPKG_HOME` 和 `set PATH` 初始化脚本
 - `completion` 命令新增 `cmd` shell 支持，生成 clink Lua 补全脚本（需安装 clink）
-- 所有 shell 补全脚本（zsh/bash/fish/powershell）的 `init`/`completion` 子命令补全列表中增加 `cmd` 选项
+- 所有 shell 补全脚本（zsh/bash/powershell）的 `init`/`completion` 子命令补全列表中增加 `cmd` 选项
 - 新增 `EscapeForCmd` 路径转义方法（`%` → `%%`）
 - 新增 `CompletionCommandTests` 分部类（按 shell 拆分）和 `InitCommandTests.Cmd.cs`
+
+### Removed
+- 移除 fish shell 支持（init 和 completion 命令不再支持 fish）
 
 ## [2.2.3] - 2026-06-24
 

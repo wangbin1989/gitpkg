@@ -61,18 +61,6 @@ public partial class InitCommandTests
         Assert.Contains("export PATH=\"$GITPKG_HOME/bin\":$PATH", stdout);
     }
 
-    /// <summary>fish：含 GITPKG_HOME 和基于变量的 fish_add_path 初始化脚本。</summary>
-    [Fact]
-    public async Task Init_Fish_WritesFishAddPath()
-    {
-        var (exitCode, stdout, _) = await InvokeInitAsync("fish");
-
-        Assert.Equal(0, exitCode);
-        Assert.StartsWith("# gitpkg shell init for fish", stdout);
-        Assert.Contains("set -gx GITPKG_HOME", stdout);
-        Assert.Contains("fish_add_path \"$GITPKG_HOME/bin\"", stdout);
-    }
-
     /// <summary>powershell：含 GITPKG_HOME 和基于变量的 $env:Path 初始化脚本。</summary>
     [Fact]
     public async Task Init_Powershell_WritesEnvPath()

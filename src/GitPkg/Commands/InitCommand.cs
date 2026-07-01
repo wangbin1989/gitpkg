@@ -14,7 +14,7 @@ public static class InitCommand
     {
         var cmd = new Command("init", "输出 shell 初始化脚本（用于 eval）");
 
-        var shellArg = new Argument<string>("shell") { Description = "目标 shell: zsh, bash, fish, powershell, cmd" };
+        var shellArg = new Argument<string>("shell") { Description = "目标 shell: zsh, bash, powershell, cmd" };
         cmd.Add(shellArg);
 
         cmd.SetAction((parseResult, ct) =>
@@ -30,11 +30,10 @@ public static class InitCommand
                 {
                     "zsh" => PosixInit("zsh", binDir),
                     "bash" => PosixInit("bash", binDir),
-                    "fish" => FishInit(binDir),
                     "powershell" or "pwsh" => PowershellInit(binDir),
                     "cmd" => CmdInit(binDir),
                     _ => throw new ArgumentException(
-                        $"不支持的 shell: '{shell}'。支持: zsh, bash, fish, powershell, cmd")
+                        $"不支持的 shell: '{shell}'。支持: zsh, bash, powershell, cmd")
                 };
 
                 Console.Write(script);
@@ -53,7 +52,7 @@ public static class InitCommand
     /// <summary>
     /// 对路径中的单引号进行 POSIX Shell 兼容转义。
     /// 用单引号包裹全文，内部的 ' 替换为 '\''（结束引号 → 转义单引号 → 恢复引号）。
-    /// 在 zsh / bash / fish 中通用。
+    /// 在 zsh / bash 中通用。
     /// </summary>
     internal static string EscapeForPosixShell(string path)
         => $"'{path.Replace("'", "'\\''")}'";
@@ -71,12 +70,6 @@ public static class InitCommand
         => $"# gitpkg shell init for {shell}\n"
          + $"export GITPKG_HOME={EscapeForPosixShell(Path.GetDirectoryName(binDir)!)}\n"
          + $"export PATH=\"$GITPKG_HOME/bin\":$PATH\n";
-
-    /// <summary>生成 Fish Shell 的初始化脚本。设置 GITPKG_HOME 环境变量并将 bin 目录加入 PATH。</summary>
-    private static string FishInit(string binDir)
-        => $"# gitpkg shell init for fish\n"
-         + $"set -gx GITPKG_HOME {EscapeForPosixShell(Path.GetDirectoryName(binDir)!)}\n"
-         + $"fish_add_path \"$GITPKG_HOME/bin\"\n";
 
     /// <summary>生成 PowerShell 的初始化脚本。设置 GITPKG_HOME 环境变量并将 bin 目录加入 PATH。</summary>
     private static string PowershellInit(string binDir)

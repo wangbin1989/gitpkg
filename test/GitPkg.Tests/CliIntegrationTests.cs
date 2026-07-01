@@ -133,7 +133,6 @@ public class CliIntegrationTests
     [Theory]
     [InlineData("zsh")]
     [InlineData("bash")]
-    [InlineData("fish")]
     [InlineData("powershell")]
     [InlineData("pwsh")]
     [InlineData("cmd")]
