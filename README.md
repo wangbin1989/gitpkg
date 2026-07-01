@@ -9,8 +9,11 @@
 
 ## 运行环境
 
-- 操作系统: macOS (Apple Silicon) / Windows (x64, ARM64) / Linux (x64, ARM64)
-- 架构: x64 / arm64
+| 操作系统 | 架构 |
+|----------|------|
+| macOS | arm64 (Apple Silicon) |
+| Windows | x64, arm64 |
+| Linux | x64, arm64 |
 
 ## 快速开始
 
@@ -41,16 +44,17 @@ eval "$(~/.gitpkg/bin/gitpkg init zsh)" >> ~/.zshrc  # 永久生效
 # bash
 eval "$(~/.gitpkg/bin/gitpkg init bash)"
 eval "$(~/.gitpkg/bin/gitpkg init bash)" >> ~/.bashrc
-
-# fish
-~/.gitpkg/bin/gitpkg init fish | source
-~/.gitpkg/bin/gitpkg init fish >> ~/.config/fish/config.fish
 ```
 
 ```powershell
 # PowerShell
 Invoke-Expression (& "$env:USERPROFILE\.gitpkg\bin\gitpkg.exe" init powershell)
 # 永久生效：追加到 $PROFILE
+```
+
+```batch
+:: cmd（需安装 clink）
+%USERPROFILE%\.gitpkg\bin\gitpkg.exe init cmd
 ```
 
 如果只需要单独配置自动补全：
@@ -61,14 +65,17 @@ eval "$(gitpkg completion zsh)"
 
 # bash
 eval "$(gitpkg completion bash)"
-
-# fish
-gitpkg completion fish > ~/.config/fish/completions/gitpkg.fish
 ```
 
 ```powershell
 # PowerShell
 Invoke-Expression (& "$env:USERPROFILE\.gitpkg\bin\gitpkg.exe" completion powershell)
+```
+
+```batch
+:: cmd（需安装 clink，通过 load 动态加载）
+load(io.popen('gitpkg completion cmd'):read("*a"))()
+:: clink 脚本目录可通过 clink info 查看（scripts 路径）
 ```
 
 **手动安装：**

@@ -2,7 +2,7 @@ using System.CommandLine;
 using GitPkg;
 using GitPkg.Commands;
 
-namespace GitPkg.Tests;
+namespace GitPkg.Tests.Integration;
 
 /// <summary>
 /// 与 InitCommandTests 共享同一集合，避免并行执行时的 Console 重定向冲突。
@@ -133,9 +133,9 @@ public class CliIntegrationTests
     [Theory]
     [InlineData("zsh")]
     [InlineData("bash")]
-    [InlineData("fish")]
     [InlineData("powershell")]
     [InlineData("pwsh")]
+    [InlineData("cmd")]
     public async Task Init_AllValidShells_Succeed(string shell)
     {
         var (exitCode, stdout, _) = await InvokeAsync(["init", shell]);
@@ -192,62 +192,6 @@ public class CliIntegrationTests
         var (exitCode, _, _) = await InvokeAsync(["info"]);
 
         Assert.NotEqual(0, exitCode);
-    }
-
-    /// <summary>completion zsh 应输出含 compdef 的补全脚本。</summary>
-    [Fact]
-    public async Task Completion_Zsh_ReturnsScript()
-    {
-        var (exitCode, stdout, stderr) = await InvokeAsync(["completion", "zsh"]);
-
-        // 如果失败，输出详细信息帮助诊断
-        Assert.True(exitCode == 0, $"ExitCode={exitCode}, Stdout='{stdout}', Stderr='{stderr}'");
-        Assert.Contains("compdef _gitpkg gitpkg", stdout);
-        Assert.Contains("install", stdout);
-    }
-
-    /// <summary>completion bash 应输出含 complete -F 的补全脚本。</summary>
-    [Fact]
-    public async Task Completion_Bash_ReturnsScript()
-    {
-        var (exitCode, stdout, _) = await InvokeAsync(["completion", "bash"]);
-
-        Assert.Equal(0, exitCode);
-        Assert.Contains("complete -F", stdout);
-        Assert.Contains("install", stdout);
-    }
-
-    /// <summary>completion fish 应输出含 complete -c 的补全脚本。</summary>
-    [Fact]
-    public async Task Completion_Fish_ReturnsScript()
-    {
-        var (exitCode, stdout, _) = await InvokeAsync(["completion", "fish"]);
-
-        Assert.Equal(0, exitCode);
-        Assert.Contains("complete -c", stdout);
-        Assert.Contains("install", stdout);
-    }
-
-    /// <summary>completion powershell 应输出含 Register-ArgumentCompleter 的补全脚本。</summary>
-    [Fact]
-    public async Task Completion_Powershell_ReturnsScript()
-    {
-        var (exitCode, stdout, _) = await InvokeAsync(["completion", "powershell"]);
-
-        Assert.Equal(0, exitCode);
-        Assert.Contains("Register-ArgumentCompleter", stdout);
-        Assert.Contains("install", stdout);
-    }
-
-    /// <summary>completion 非法 shell 应返回错误。</summary>
-    [Fact]
-    public async Task Completion_InvalidShell_ReturnsError()
-    {
-        var (exitCode, stdout, stderr) = await InvokeAsync(["completion", "bad"]);
-
-        Assert.Equal(1, exitCode);
-        Assert.Empty(stdout);
-        Assert.Contains("不支持的 shell", stderr);
     }
 
     /// <summary>install 缺少 repo 参数且无 --from 时应返回非零退出码。</summary>

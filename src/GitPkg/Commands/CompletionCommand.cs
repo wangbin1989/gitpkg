@@ -3,7 +3,7 @@ using System.CommandLine;
 namespace GitPkg.Commands;
 
 /// <summary>
-/// completion 命令：输出 shell 自动补全脚本，用于 eval 集成。
+/// completion 命令：输出 shell 自动补全脚本。
 /// 底层使用静态定义的子命令和选项列表提供补全。
 /// </summary>
 public static class CompletionCommand
@@ -11,9 +11,9 @@ public static class CompletionCommand
     /// <summary>创建 completion 命令。</summary>
     public static Command Create()
     {
-        var cmd = new Command("completion", "输出 shell 自动补全脚本（用于 eval）");
+        var cmd = new Command("completion", "输出 shell 自动补全脚本");
 
-        var shellArg = new Argument<string>("shell") { Description = "目标 shell: zsh, bash, fish, powershell" };
+        var shellArg = new Argument<string>("shell") { Description = "目标 shell: zsh, bash, powershell (pwsh), cmd" };
         cmd.Add(shellArg);
 
         cmd.SetAction((parseResult, ct) =>
@@ -26,10 +26,10 @@ public static class CompletionCommand
                 {
                     "zsh" => ZshCompletion(),
                     "bash" => BashCompletion(),
-                    "fish" => FishCompletion(),
                     "powershell" or "pwsh" => PowershellCompletion(),
+                    "cmd" => ClinkCompletion(),
                     _ => throw new ArgumentException(
-                        $"不支持的 shell: '{shell}'。支持: zsh, bash, fish, powershell")
+                        $"不支持的 shell: '{shell}'。支持: zsh, bash, powershell (pwsh), cmd")
                 };
 
                 Console.Write(script);
@@ -67,7 +67,7 @@ public static class CompletionCommand
                     completions=(--help)
                     ;;
                 init|completion)
-                    completions=(zsh bash fish powershell)
+                    completions=(zsh bash powershell cmd)
                     ;;
                 manifest)
                     completions=(export --help)
@@ -107,7 +107,7 @@ public static class CompletionCommand
                     opts="--help"
                     ;;
                 init|completion)
-                    opts="zsh bash fish powershell"
+                    opts="zsh bash powershell cmd"
                     ;;
                 manifest)
                     opts="export --help"
@@ -128,41 +128,6 @@ public static class CompletionCommand
         """;
 
     /// <summary>
-    /// fish 补全脚本。
-    /// 定义补全函数并通过 complete -c 注册。
-    /// </summary>
-    private static string FishCompletion() => """
-        # gitpkg fish completion — 保存到 ~/.config/fish/completions/gitpkg.fish
-        #   gitpkg completion fish > ~/.config/fish/completions/gitpkg.fish
-
-        # 根命令补全
-        complete -c gitpkg -f -n '__fish_use_subcommand' -a 'install' -d '安装工具'
-        complete -c gitpkg -f -n '__fish_use_subcommand' -a 'update' -d '更新工具'
-        complete -c gitpkg -f -n '__fish_use_subcommand' -a 'uninstall' -d '卸载工具'
-        complete -c gitpkg -f -n '__fish_use_subcommand' -a 'outdated' -d '检查更新'
-        complete -c gitpkg -f -n '__fish_use_subcommand' -a 'list' -d '列出已安装工具'
-        complete -c gitpkg -f -n '__fish_use_subcommand' -a 'info' -d '查看工具详情'
-        complete -c gitpkg -f -n '__fish_use_subcommand' -a 'init' -d '输出 shell 初始化脚本'
-        complete -c gitpkg -f -n '__fish_use_subcommand' -a 'completion' -d '输出 shell 补全脚本'
-        complete -c gitpkg -f -n '__fish_use_subcommand' -a 'manifest' -d '清单管理'
-        complete -c gitpkg -f -n '__fish_use_subcommand' -a 'self-update' -d '更新 gitpkg 自身'
-
-        # install 子命令选项
-        complete -c gitpkg -f -n '__fish_seen_subcommand_from install' -l from -d '从清单文件批量安装'
-        complete -c gitpkg -f -n '__fish_seen_subcommand_from install' -l help -d '帮助'
-
-        # manifest 子命令补全
-        complete -c gitpkg -f -n '__fish_seen_subcommand_from manifest' -a 'export' -d '导出清单文件'
-
-        # init / completion 子命令补全
-        complete -c gitpkg -f -n '__fish_seen_subcommand_from init completion' -a 'zsh bash fish powershell'
-
-        # update / uninstall / info 子命令选项
-        complete -c gitpkg -f -n '__fish_seen_subcommand_from update uninstall info' -l help -d '帮助'
-
-        """;
-
-    /// <summary>
     /// PowerShell 补全脚本。
     /// 使用 Register-ArgumentCompleter 注册 Native 补全。
     /// </summary>
@@ -179,8 +144,8 @@ public static class CompletionCommand
                 "update"    { @('--help') }
                 "uninstall" { @('--help') }
                 "info"      { @('--help') }
-                "init"      { @('zsh', 'bash', 'fish', 'powershell') }
-                "completion"{ @('zsh', 'bash', 'fish', 'powershell') }
+                "init"      { @('zsh', 'bash', 'powershell', 'cmd') }
+                "completion"{ @('zsh', 'bash', 'powershell', 'cmd') }
                 "manifest"  { @('export', '--help') }
                 "list"      { @('--help') }
                 "outdated"  { @('--help') }
@@ -192,6 +157,56 @@ public static class CompletionCommand
                 [System.Management.Automation.CompletionResult]::new($_, $_, 'ParameterValue', $_)
             }
         }
+
+        """;
+
+    /// <summary>
+    /// Clink (cmd.exe) 补全脚本。
+    /// 使用 clink.argmatcher 注册补全，需要安装 clink。
+    /// 通过 clink 的 load(io.popen(...)) 模式动态加载。
+    /// </summary>
+    private static string ClinkCompletion() => """
+        -- gitpkg cmd completion (requires clink)
+        -- 在 clink 中加载:
+        --   load(io.popen('gitpkg completion cmd'):read("*a"))()
+        -- clink 脚本目录可通过 clink info 查看（scripts 路径）
+
+        local sub_parsers = {
+            install = clink.argmatcher("gitpkg install")
+                :addflags("--from", "--help"),
+            update = clink.argmatcher("gitpkg update")
+                :addflags("--help"),
+            uninstall = clink.argmatcher("gitpkg uninstall")
+                :addflags("--help"),
+            info = clink.argmatcher("gitpkg info")
+                :addflags("--help"),
+            init = clink.argmatcher("gitpkg init")
+                :addarg({"zsh", "bash", "powershell", "cmd"}),
+            completion = clink.argmatcher("gitpkg completion")
+                :addarg({"zsh", "bash", "powershell", "cmd"}),
+            manifest = clink.argmatcher("gitpkg manifest")
+                :addarg({"export"})
+                :addflags("--help"),
+            list = clink.argmatcher("gitpkg list")
+                :addflags("--help"),
+            outdated = clink.argmatcher("gitpkg outdated")
+                :addflags("--help"),
+            ["self-update"] = clink.argmatcher("gitpkg self-update")
+                :addflags("--help"),
+        }
+
+        clink.argmatcher("gitpkg")
+            :addarg({
+                "install", "update", "uninstall", "outdated", "list", "info",
+                "init", "completion", "manifest", "self-update",
+                "--help", "--version"
+            })
+            :loop(function (arg_index, word, word_count, line)
+                local cmd = line[2]
+                if cmd and sub_parsers[cmd] then
+                    return sub_parsers[cmd]
+                end
+            end)
 
         """;
 }

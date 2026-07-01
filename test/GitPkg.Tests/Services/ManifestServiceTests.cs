@@ -1,7 +1,7 @@
 using GitPkg.Models;
 using GitPkg.Services;
 
-namespace GitPkg.Tests;
+namespace GitPkg.Tests.Services;
 
 /// <summary>
 /// 清单服务单元测试。

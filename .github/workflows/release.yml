@@ -12,7 +12,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: actions/setup-dotnet@v5
         with:
           dotnet-version: '10.0.x'
@@ -28,7 +28,7 @@ jobs:
           - os: ubuntu-latest
             rid: linux-x64
             name: linux-x86_64
-          - os: ubuntu-24.04-arm
+          - os: ubuntu-latest-arm
             rid: linux-arm64
             name: linux-arm64
           # macOS
@@ -39,12 +39,12 @@ jobs:
           - os: windows-latest
             rid: win-x64
             name: windows-x86_64
-          - os: windows-11-arm
+          - os: windows-latest-arm
             rid: win-arm64
             name: windows-arm64
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - uses: actions/setup-dotnet@v5
         with:
@@ -54,7 +54,7 @@ jobs:
         id: version
         shell: pwsh
         run: |
-          $content = Get-Content src/GitPkg/GitPkg.csproj -Raw
+          $content = Get-Content Directory.Build.props -Raw
           $version = [regex]::Match($content, '<Version>(.+?)</Version>').Groups[1].Value
           echo "version=v$version" >> $env:GITHUB_OUTPUT
 
