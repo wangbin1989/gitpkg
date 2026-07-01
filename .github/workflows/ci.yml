@@ -13,17 +13,17 @@ jobs:
       matrix:
         include:
           # Linux
-          - os: ubuntu-latest
+          - os: ubuntu-26.04
             rid: linux-x64
-          - os: ubuntu-latest-arm
+          - os: ubuntu-26.04-arm
             rid: linux-arm64
           # macOS
-          - os: macos-latest
+          - os: macos-26
             rid: osx-arm64
           # Windows
-          - os: windows-latest
+          - os: windows-2025
             rid: win-x64
-          - os: windows-latest-arm
+          - os: windows-11-arm
             rid: win-arm64
     runs-on: ${{ matrix.os }}
     steps:
