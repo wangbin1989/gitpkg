@@ -14,7 +14,7 @@ public static class InitCommand
     {
         var cmd = new Command("init", "输出 shell 初始化脚本（用于 eval）");
 
-        var shellArg = new Argument<string>("shell") { Description = "目标 shell: zsh, bash, powershell, cmd" };
+        var shellArg = new Argument<string>("shell") { Description = "目标 shell: zsh, bash, powershell (pwsh), cmd" };
         cmd.Add(shellArg);
 
         cmd.SetAction((parseResult, ct) =>
@@ -33,7 +33,7 @@ public static class InitCommand
                     "powershell" or "pwsh" => PowershellInit(binDir),
                     "cmd" => CmdInit(binDir),
                     _ => throw new ArgumentException(
-                        $"不支持的 shell: '{shell}'。支持: zsh, bash, powershell, cmd")
+                        $"不支持的 shell: '{shell}'。支持: zsh, bash, powershell (pwsh), cmd")
                 };
 
                 Console.Write(script);
