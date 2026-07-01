@@ -48,6 +48,7 @@ public static class ListCommand
         table.AddColumn("名称");
         table.AddColumn("版本");
         table.AddColumn("仓库");
+        table.AddColumn("资产");
         table.AddColumn("安装时间");
 
         foreach (var tool in sorted)
@@ -56,6 +57,7 @@ public static class ListCommand
                 $"[bold]{tool.Name}[/]",
                 tool.Version,
                 tool.Repo,
+                tool.AssetName ?? "[grey]-[/]",
                 tool.InstalledAt.ToLocalTime().ToString("yyyy-MM-dd"));
         }
 
