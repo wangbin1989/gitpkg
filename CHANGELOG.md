@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.3.1] - 2026-07-01
+
+### Changed
+- `init cmd` 改为输出 clink Lua 脚本（使用 `os.setenv` 设置环境变量），通过 `load(io.popen(...))` 动态加载
+- 新增 `EscapeForLua` 路径转义方法（`\` → `\\`，`"` → `\"`），替代原 `EscapeForCmd`
+
 ## [2.3.0] - 2026-07-01
 
 ### Added

@@ -53,8 +53,9 @@ Invoke-Expression (& "$env:USERPROFILE\.gitpkg\bin\gitpkg.exe" init powershell)
 ```
 
 ```batch
-:: cmd（需安装 clink）
-%USERPROFILE%\.gitpkg\bin\gitpkg.exe init cmd
+:: cmd（需安装 clink，通过 load 动态加载）
+load(io.popen('gitpkg init cmd'):read("*a"))()
+:: clink 脚本目录可通过 clink info 查看（scripts 路径）
 ```
 
 如果只需要单独配置自动补全：
