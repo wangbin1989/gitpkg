@@ -6,6 +6,7 @@
 
 - 核心框架: .NET 10 (AOT)
 - 组件: System.CommandLine, Spectre.Console
+- 测试: xunit, Shouldly
 
 ## 运行环境
 
@@ -26,7 +27,7 @@
 curl -fsSL https://raw.githubusercontent.com/wangbin1989/gitpkg/main/install.sh | bash
 
 # 指定版本
-curl -fsSL https://raw.githubusercontent.com/wangbin1989/gitpkg/main/install.sh | bash -s v2.1.0
+curl -fsSL https://raw.githubusercontent.com/wangbin1989/gitpkg/main/install.sh | bash -s v2.4.0
 
 # Windows (PowerShell)
 Invoke-Expression (Invoke-RestMethod https://raw.githubusercontent.com/wangbin1989/gitpkg/main/install.ps1)
@@ -85,12 +86,12 @@ load(io.popen('gitpkg completion cmd'):read("*a"))()
 
 ```bash
 # macOS / Linux
-tar -xzf gitpkg-v2.1.0-darwin-arm64.tar.gz
+tar -xzf gitpkg-v2.4.0-darwin-arm64.tar.gz
 chmod +x gitpkg
 mv gitpkg ~/.gitpkg/bin/   # 或其他 PATH 目录
 
 # Windows
-# 解压 gitpkg-v2.1.0-windows-x86_64.zip，将 gitpkg.exe 放入 PATH 目录
+# 解压 gitpkg-v2.4.0-windows-x86_64.zip，将 gitpkg.exe 放入 PATH 目录
 ```
 
 ### 基本用法
@@ -128,15 +129,8 @@ gitpkg uninstall ripgrep
 ### 高级选项
 
 ```bash
-# 指定安装目录
-gitpkg install junegunn/fzf --dir /opt/tools
-
-# 开启 GPG 签名校验
-gitpkg install sharkdp/fd --verify-gpg <key-id>
-
 # 从清单文件批量安装
 gitpkg manifest export > tools.json
-gitpkg install --from tools.json --dry-run   # 预览
 gitpkg install --from tools.json             # 安装
 ```
 

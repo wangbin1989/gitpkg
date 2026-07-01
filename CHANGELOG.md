@@ -1,5 +1,18 @@
 # Changelog
 
+## [2.4.0] - 2026-07-01
+
+### Added
+- `update`/`uninstall`/`info` 命令支持已安装工具名称动态补全（zsh/bash/powershell/clink）
+- 新增 `CompletionHelper` 共享类，提供从 manifest 读取工具名称的动态补全源
+- 命令参数通过 `Argument.CompletionSources.Add` 注册动态补全委托
+
+### Changed
+- 所有命令从 `static class` + `Create()` 工厂方法改为继承 `Command` 的实例类
+- `ManifestCommand` 的 `export` 子命令改为私有嵌套类 `ExportCommand`
+- 测试断言从 xunit `Assert` 统一改为 `Shouldly`（17 个测试文件，196 处断言）
+- `Program.cs` 命令注册改为 `new XxxCommand()` 实例化方式
+
 ## [2.3.1] - 2026-07-01
 
 ### Changed
