@@ -3,8 +3,8 @@ using System.CommandLine;
 namespace GitPkg.Commands;
 
 /// <summary>
-/// init 命令：输出 shell 初始化脚本到标准输出，用于 eval 集成。
-/// 设置 GITPKG_HOME 环境变量并将其 bin 目录加入 PATH，用法：eval "$(gitpkg init zsh)"。
+/// init 命令：输出 shell 初始化脚本到标准输出。
+/// 设置 GITPKG_HOME 环境变量并将其 bin 目录加入 PATH。
 /// 如需自动补全，请单独使用 completion 命令。
 /// </summary>
 public static class InitCommand
@@ -12,7 +12,7 @@ public static class InitCommand
     /// <summary>创建 init 命令。</summary>
     public static Command Create()
     {
-        var cmd = new Command("init", "输出 shell 初始化脚本（用于 eval）");
+        var cmd = new Command("init", "输出 shell 初始化脚本");
 
         var shellArg = new Argument<string>("shell") { Description = "目标 shell: zsh, bash, powershell (pwsh), cmd" };
         cmd.Add(shellArg);
