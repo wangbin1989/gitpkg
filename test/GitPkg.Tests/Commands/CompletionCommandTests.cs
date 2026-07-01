@@ -1,5 +1,6 @@
 using System.CommandLine;
 using GitPkg.Commands;
+using Shouldly;
 
 namespace GitPkg.Tests.Commands;
 
@@ -42,8 +43,8 @@ public partial class CompletionCommandTests
     {
         var (exitCode, stdout, stderr) = await InvokeCompletionAsync("invalid");
 
-        Assert.Equal(1, exitCode);
-        Assert.Empty(stdout);
-        Assert.Contains("不支持的 shell", stderr);
+        exitCode.ShouldBe(1);
+        stdout.ShouldBeEmpty();
+        stderr.ShouldContain("不支持的 shell");
     }
 }

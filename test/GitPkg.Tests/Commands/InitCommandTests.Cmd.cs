@@ -1,4 +1,5 @@
 using GitPkg.Commands;
+using Shouldly;
 
 namespace GitPkg.Tests.Commands;
 
@@ -13,10 +14,10 @@ public partial class InitCommandTests
     {
         var (exitCode, stdout, _) = await InvokeInitAsync("cmd");
 
-        Assert.Equal(0, exitCode);
-        Assert.Contains("-- gitpkg shell init for cmd (requires clink)", stdout);
-        Assert.Contains("os.setenv(\"GITPKG_HOME\",", stdout);
-        Assert.Contains("os.setenv(\"PATH\",", stdout);
+        exitCode.ShouldBe(0);
+        stdout.ShouldContain("-- gitpkg shell init for cmd (requires clink)");
+        stdout.ShouldContain("os.setenv(\"GITPKG_HOME\",");
+        stdout.ShouldContain("os.setenv(\"PATH\",");
     }
 
     /// <summary>Lua 转义：普通路径中的反斜杠应转义为 \\。</summary>
@@ -24,7 +25,7 @@ public partial class InitCommandTests
     public void EscapeForLua_NormalPath_EscapesBackslashes()
     {
         var result = InitCommand.EscapeForLua("C:\\Program Files\\GitPkg");
-        Assert.Equal("C:\\\\Program Files\\\\GitPkg", result);
+        result.ShouldBe("C:\\\\Program Files\\\\GitPkg");
     }
 
     /// <summary>Lua 转义：含双引号的路径应转义为 \"。</summary>
@@ -32,7 +33,7 @@ public partial class InitCommandTests
     public void EscapeForLua_WithQuote_Escapes()
     {
         var result = InitCommand.EscapeForLua("C:\\path\\\"foo\"");
-        Assert.Equal("C:\\\\path\\\\\\\"foo\\\"", result);
+        result.ShouldBe("C:\\\\path\\\\\\\"foo\\\"");
     }
 
     /// <summary>Lua 转义：含反斜杠的路径应转义为 \\。</summary>
@@ -40,6 +41,6 @@ public partial class InitCommandTests
     public void EscapeForLua_WithBackslash_Escapes()
     {
         var result = InitCommand.EscapeForLua("C:\\path\\to\\dir");
-        Assert.Equal("C:\\\\path\\\\to\\\\dir", result);
+        result.ShouldBe("C:\\\\path\\\\to\\\\dir");
     }
 }

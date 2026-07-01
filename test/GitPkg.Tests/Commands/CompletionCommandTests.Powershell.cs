@@ -1,3 +1,5 @@
+using Shouldly;
+
 namespace GitPkg.Tests.Commands;
 
 /// <summary>
@@ -11,8 +13,8 @@ public partial class CompletionCommandTests
     {
         var (exitCode, stdout, _) = await InvokeCompletionAsync("powershell");
 
-        Assert.Equal(0, exitCode);
-        Assert.Contains("Register-ArgumentCompleter -Native -CommandName gitpkg", stdout);
+        exitCode.ShouldBe(0);
+        stdout.ShouldContain("Register-ArgumentCompleter -Native -CommandName gitpkg");
     }
 
     /// <summary>powershell：补全脚本包含所有根命令。</summary>
@@ -22,7 +24,7 @@ public partial class CompletionCommandTests
         var (_, stdout, _) = await InvokeCompletionAsync("powershell");
 
         foreach (string cmd in new[] { "install", "update", "uninstall", "outdated", "list", "info", "init", "completion", "manifest", "self-update" })
-            Assert.Contains($"\"{cmd}\"", stdout);
+            stdout.ShouldContain($"\"{cmd}\"");
     }
 
     /// <summary>powershell：init/completion 子命令补全包含 cmd。</summary>
@@ -31,7 +33,7 @@ public partial class CompletionCommandTests
     {
         var (_, stdout, _) = await InvokeCompletionAsync("powershell");
 
-        Assert.Contains("'cmd'", stdout);
+        stdout.ShouldContain("'cmd'");
     }
 
     /// <summary>powershell：install 子命令补全包含 --from 选项。</summary>
@@ -40,7 +42,7 @@ public partial class CompletionCommandTests
     {
         var (_, stdout, _) = await InvokeCompletionAsync("powershell");
 
-        Assert.Contains("'--from'", stdout);
+        stdout.ShouldContain("'--from'");
     }
 
     /// <summary>pwsh 别名输出应与 powershell 一致。</summary>
@@ -50,6 +52,6 @@ public partial class CompletionCommandTests
         var (_, stdoutPwsh, _) = await InvokeCompletionAsync("pwsh");
         var (_, stdoutPs, _) = await InvokeCompletionAsync("powershell");
 
-        Assert.Equal(stdoutPs, stdoutPwsh);
+        stdoutPwsh.ShouldBe(stdoutPs);
     }
 }

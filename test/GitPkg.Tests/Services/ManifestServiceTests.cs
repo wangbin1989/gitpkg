@@ -1,5 +1,6 @@
 using GitPkg.Models;
 using GitPkg.Services;
+using Shouldly;
 
 namespace GitPkg.Tests.Services;
 
@@ -26,8 +27,8 @@ public class ManifestServiceTests
         {
             var service = new ManifestService(dir);
             var manifest = await service.LoadAsync();
-            Assert.NotNull(manifest);
-            Assert.Empty(manifest.Tools);
+            manifest.ShouldNotBeNull();
+            manifest.Tools.ShouldBeEmpty();
         }
         finally
         {
@@ -44,7 +45,7 @@ public class ManifestServiceTests
         {
             var service = new ManifestService(dir);
             var tool = await service.FindToolAsync("nonexistent");
-            Assert.Null(tool);
+            tool.ShouldBeNull();
         }
         finally
         {
@@ -72,10 +73,10 @@ public class ManifestServiceTests
             await service.AddToolAsync(entry);
             var found = await service.FindToolAsync("testtool");
 
-            Assert.NotNull(found);
-            Assert.Equal("testtool", found!.Name);
-            Assert.Equal("owner/testtool", found.Repo);
-            Assert.Equal("v1.0.0", found.Version);
+            found.ShouldNotBeNull();
+            found!.Name.ShouldBe("testtool");
+            found.Repo.ShouldBe("owner/testtool");
+            found.Version.ShouldBe("v1.0.0");
         }
         finally
         {
@@ -104,8 +105,8 @@ public class ManifestServiceTests
             await service.AddToolAsync(entry);
             var found = await service.FindToolAsync("testtool");
 
-            Assert.NotNull(found);
-            Assert.Equal("testtool-x86_64-apple-darwin.tar.gz", found!.AssetName);
+            found.ShouldNotBeNull();
+            found!.AssetName.ShouldBe("testtool-x86_64-apple-darwin.tar.gz");
         }
         finally
         {
@@ -133,8 +134,8 @@ public class ManifestServiceTests
             await service.AddToolAsync(entry);
             var found = await service.FindToolAsync("testtool");
 
-            Assert.NotNull(found);
-            Assert.Null(found!.AssetName);
+            found.ShouldNotBeNull();
+            found!.AssetName.ShouldBeNull();
         }
         finally
         {
@@ -164,9 +165,9 @@ public class ManifestServiceTests
             });
 
             var found = await service.FindToolAsync("testtool");
-            Assert.NotNull(found);
-            Assert.Equal("v2.0.0", found!.Version);
-            Assert.Equal("testtool-v2.tar.gz", found.AssetName);
+            found.ShouldNotBeNull();
+            found!.Version.ShouldBe("v2.0.0");
+            found.AssetName.ShouldBe("testtool-v2.tar.gz");
         }
         finally
         {
@@ -194,8 +195,8 @@ public class ManifestServiceTests
             });
 
             var manifest = await service.LoadAsync();
-            Assert.Single(manifest.Tools);
-            Assert.Equal("v2.0.0", manifest.Tools[0].Version);
+            manifest.Tools.ShouldHaveSingleItem();
+            manifest.Tools[0].Version.ShouldBe("v2.0.0");
         }
         finally
         {
@@ -218,10 +219,10 @@ public class ManifestServiceTests
             });
 
             var removed = await service.RemoveToolAsync("testtool");
-            Assert.True(removed);
+            removed.ShouldBeTrue();
 
             var found = await service.FindToolAsync("testtool");
-            Assert.Null(found);
+            found.ShouldBeNull();
         }
         finally
         {
@@ -238,7 +239,7 @@ public class ManifestServiceTests
         {
             var service = new ManifestService(dir);
             var removed = await service.RemoveToolAsync("nonexistent");
-            Assert.False(removed);
+            removed.ShouldBeFalse();
         }
         finally
         {
@@ -251,15 +252,15 @@ public class ManifestServiceTests
     public void GetToolDir_ReturnsCorrectPath()
     {
         var dir = ManifestService.GetToolDir("mytool");
-        Assert.EndsWith(Path.Combine(".gitpkg", "tools", "mytool"), dir);
+        dir.ShouldEndWith(Path.Combine(".gitpkg", "tools", "mytool"));
     }
 
     /// <summary>owner/repo 应正确提取 repo 部分。</summary>
     [Fact]
     public void GetRepoName_ParsesOwnerRepo()
     {
-        Assert.Equal("repo", ManifestService.GetRepoName("owner/repo"));
-        Assert.Equal("repo", ManifestService.GetRepoName("repo"));
+        ManifestService.GetRepoName("owner/repo").ShouldBe("repo");
+        ManifestService.GetRepoName("repo").ShouldBe("repo");
     }
 
     /// <summary>bin 目录路径应以 .gitpkg/bin 结尾。</summary>
@@ -267,6 +268,6 @@ public class ManifestServiceTests
     public void GetBinDir_ReturnsCorrectPath()
     {
         var dir = ManifestService.GetBinDir();
-        Assert.EndsWith(Path.Combine(".gitpkg", "bin"), dir);
+        dir.ShouldEndWith(Path.Combine(".gitpkg", "bin"));
     }
 }
