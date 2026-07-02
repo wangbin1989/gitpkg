@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.4.2] - 2026-07-02
+
+### Fixed
+- `SelectAsset` 提前过滤辅助资产（校验、签名、源码归档、安装包等），修复提示数量与选择列表不一致的问题
+- `update`/`self-update` 命令 Ctrl+C 取消时终端光标消失：注册 `Console.CancelKeyPress` 处理器恢复光标，补充 `OperationCanceledException` 专门捕获
+- `update` 命令补充 `HttpRequestException` 分类捕获（资源不存在 / 网络错误），与 `install` 命令保持一致
+
 ## [2.4.1] - 2026-07-02
 
 ### Fixed
