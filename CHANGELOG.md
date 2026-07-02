@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.4.4] - 2026-07-02
+
+### Fixed
+- `AssetMatcher` Windows 关键词增加 `win`，修复 `win-` 前缀资产无法匹配 Windows 平台的问题
+- 关键词匹配改为词边界匹配，避免 `win` 误匹配 `darwin`
+
 ## [2.4.3] - 2026-07-02
 
 ### Fixed

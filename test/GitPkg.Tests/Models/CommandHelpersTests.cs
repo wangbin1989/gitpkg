@@ -1,6 +1,8 @@
 using System.Text;
 using GitPkg.Commands;
 using GitPkg.Models;
+using GitPkg.Services;
+using GitPkg.Tests.Data;
 using Shouldly;
 using Spectre.Console;
 
@@ -283,6 +285,20 @@ public class CommandHelpersTests : IDisposable
             "tool-b9803-darwin-arm64.tar.gz", "b9803", "b9859");
 
         result.Name.ShouldBe("tool-b9859-darwin-arm64.tar.gz");
+    }
+
+    /// <summary>真实场景：llama 构建号变化（b9803 → b9859），替换后精确匹配同名资产。</summary>
+    [Fact]
+    public void SelectAsset_LlamaBuildNumber_ReplacesAndMatches()
+    {
+        var all = TestDataLoader.LoadLlamaB9859Assets();
+        var matcher = new AssetMatcher();
+        var matches = matcher.Match(all, new PlatformInfo("windows", "x64"));
+
+        var result = CommandHelpers.SelectAsset(all, matches, new PlatformInfo("windows", "x64"),
+            "llama-b9803-bin-win-cuda-13.3-x64.zip", "b9803", "b9859");
+
+        result.Name.ShouldBe("llama-b9859-bin-win-cuda-13.3-x64.zip");
     }
 
     /// <summary>替换版本号后仍无匹配时，应回退到平台匹配。</summary>
