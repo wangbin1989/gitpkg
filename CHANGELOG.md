@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.4.1] - 2026-07-02
+
+### Fixed
+- `update`/`uninstall`/`info` 命令 `--help` 输出不再显示具体的已安装工具名称，改为通用的 `<name>` 占位符
+- `PromptAssetSelection` 排除校验文件（`.sha256`/`.sha512`）、签名文件（`.sig`/`.asc`/`.minisig`）、源码归档和安装包（`.msi`/`.deb`/`.rpm`/`.pkg`/`.dmg`/`.appimage`/`.snap`/`.flatpak`/`.apk`）
+
 ## [2.4.0] - 2026-07-01
 
 ### Added
