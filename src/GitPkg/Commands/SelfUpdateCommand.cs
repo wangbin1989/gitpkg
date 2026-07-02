@@ -40,6 +40,11 @@ public class SelfUpdateCommand : Command
                 AnsiConsole.MarkupLine($"[red]✗ 网络错误: {ex.Message}[/]");
                 return 1;
             }
+            catch (OperationCanceledException)
+            {
+                AnsiConsole.MarkupLine("[yellow]操作已取消[/]");
+                return 1;
+            }
             catch (Exception ex)
             {
                 AnsiConsole.MarkupLine($"[red]✗ 错误: {ex.Message}[/]");
