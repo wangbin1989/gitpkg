@@ -35,6 +35,8 @@ test/GitPkg.Tests/           # 测试项目
 
 ## NativeAOT
 
+- 绝不使用动态加载（例如 `Assembly.LoadFile`）
+- 绝不生成运行时代码（例如 `System.Reflection.Emit`）
 - 绝不使用反射
 - JSON 序列化必须使用 AppJsonContext 源生成上下文
 - InvariantGlobalization 已启用，不支持区域性特定格式
@@ -44,11 +46,17 @@ test/GitPkg.Tests/           # 测试项目
 - 测试框架: xunit
 - 断言库: Shouldly
 
-## Do Not
+## Never (绝不)
 
-- 不准自动执行 git push 操作。每次执行都需要手动确认。
-- 不准自动执行 pull request 操作。每次执行都需要手动确认。
+## Do Not (不准)
+
 - 不准修改 sln 文件。
 - 不准修改 csproj 文件。
 - 不准添加或删除项目引用的 NuGet 包。
-- 不准修改项目引用的 NuGet 包版本。不同版本的 NuGet 包命名空间、类、方法、属性、字段、事件等可能存在差异，修改 NuGet 包版本可能导致编译错误或运行时异常。
+- 不准修改项目引用的 NuGet 包版本。
+
+## CRITICAL (关键)
+
+- 每次执行 `git commit` 操作都必须手动确认，确保不会误提交不必要的更改。
+- 每次执行 `git push` 操作都必须手动确认，确保不会误推送不必要的更改。
+- 每次执行 `gh pr` 操作都必须手动确认，确保不会误创建不必要的 pull request。
