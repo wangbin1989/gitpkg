@@ -26,6 +26,21 @@ public class UpdateCommand : Command
                 await HandleAsync(name, ct);
                 return 0;
             }
+            catch (HttpRequestException ex) when (ex.Message.Contains("Not Found") || ex.Message.Contains("资源不存在"))
+            {
+                AnsiConsole.MarkupLine($"[red]✗ 资源不存在: {ex.Message.Split(": ").Last()}[/]");
+                return 1;
+            }
+            catch (HttpRequestException ex)
+            {
+                AnsiConsole.MarkupLine($"[red]✗ 网络错误: {ex.Message}[/]");
+                return 1;
+            }
+            catch (OperationCanceledException)
+            {
+                AnsiConsole.MarkupLine("[yellow]操作已取消[/]");
+                return 1;
+            }
             catch (Exception ex)
             {
                 AnsiConsole.MarkupLine($"[red]✗ 错误: {ex.Message}[/]");
