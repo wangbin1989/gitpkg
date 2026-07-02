@@ -59,4 +59,4 @@ test/GitPkg.Tests/           # 测试项目
 
 - 每次执行 `git commit` 操作都必须手动确认，确保不会误提交不必要的更改。
 - 每次执行 `git push` 操作都必须手动确认，确保不会误推送不必要的更改。
-- 每次执行 `gh pr` 操作都必须手动确认，确保不会误创建不必要的 pull request。
+- 每次执行 `pull request / merge` 操作都必须手动确认，确保不会误创建不必要的 pull request。
