@@ -1,5 +1,6 @@
 using GitPkg.Models;
 using GitPkg.Services;
+using GitPkg.Tests.Data;
 using Shouldly;
 
 namespace GitPkg.Tests.Models;
@@ -62,6 +63,22 @@ public class AssetMatcherTests
         var result = matcher.Match(assets, platform);
 
         result.ShouldBeEmpty();
+    }
+
+    /// <summary>Windows x64 应匹配 win- 前缀的资产（词边界匹配，不误匹配 darwin）。</summary>
+    [Fact]
+    public void Match_WindowsX64_WinPrefix_ReturnsMatch()
+    {
+        var matcher = new AssetMatcher();
+        var assets = TestDataLoader.LoadLlamaB9859Assets();
+        var platform = new PlatformInfo("windows", "x64");
+
+        var result = matcher.Match(assets, platform);
+
+        result.ShouldContain(a => a.Name == "llama-b9859-bin-win-cuda-13.3-x64.zip");
+        result.ShouldContain(a => a.Name == "llama-b9859-bin-win-cpu-x64.zip");
+        result.ShouldNotContain(a => a.Name == "llama-b9859-bin-win-cpu-arm64.zip");
+        result.ShouldNotContain(a => a.Name == "llama-b9859-bin-macos-arm64.tar.gz");
     }
 
     /// <summary>多个文件名同时匹配时应全部返回。</summary>

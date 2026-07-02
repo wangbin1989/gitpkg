@@ -12,7 +12,7 @@ public class AssetMatcher
     private static readonly Dictionary<string, string[]> OsKeywords = new()
     {
         ["macos"] = ["darwin", "macos", "osx", "apple", "mac"],
-        ["windows"] = ["windows", "win64", "win32", "msvc"],
+        ["windows"] = ["windows", "win64", "win32", "win", "msvc"],
         ["linux"] = ["linux", "ubuntu", "debian", "rhel", "gnu", "musl"],
     };
 
@@ -48,8 +48,23 @@ public class AssetMatcher
 
     private static bool Matches(string assetName, string[] osPatterns, string[] archPatterns)
     {
-        var hasOS = osPatterns.Any(p => assetName.Contains(p));
-        var hasArch = archPatterns.Any(p => assetName.Contains(p));
+        var hasOS = osPatterns.Any(p => ContainsWord(assetName, p));
+        var hasArch = archPatterns.Any(p => ContainsWord(assetName, p));
         return hasOS && hasArch;
+    }
+
+    /// <summary>检查资产名中是否包含指定关键词（词边界匹配，避免 win 误匹配 darwin）。</summary>
+    private static bool ContainsWord(string assetName, string keyword)
+    {
+        int idx = assetName.IndexOf(keyword, StringComparison.Ordinal);
+        while (idx >= 0)
+        {
+            bool startOk = idx == 0 || !char.IsLetterOrDigit(assetName[idx - 1]);
+            int end = idx + keyword.Length;
+            bool endOk = end >= assetName.Length || !char.IsLetterOrDigit(assetName[end]);
+            if (startOk && endOk) return true;
+            idx = assetName.IndexOf(keyword, end, StringComparison.Ordinal);
+        }
+        return false;
     }
 }
