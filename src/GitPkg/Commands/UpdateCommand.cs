@@ -114,7 +114,7 @@ public class UpdateCommand : Command
                 var platform = PlatformInfo.Current();
                 var matches = matcher.Match(release.Assets, platform);
 
-                var selected = CommandHelpers.SelectAsset(release.Assets, matches, platform, tool.AssetName);
+                var selected = CommandHelpers.SelectAsset(release.Assets, matches, platform, tool.AssetName, tool.Version, release.TagName);
                 var tmpDir = ManifestService.GetTmpDir();
                 Directory.CreateDirectory(tmpDir);
                 var archivePath = Path.Combine(tmpDir, selected.Name);

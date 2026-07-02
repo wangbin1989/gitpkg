@@ -251,6 +251,74 @@ public class CommandHelpersTests : IDisposable
         result.Name.ShouldBe("tool-linux-amd64.tar.gz");
     }
 
+    /// <summary>版本号变化时（v5.0.0 → v5.1.0），替换后应匹配新资产。</summary>
+    [Fact]
+    public void SelectAsset_SavedNameDifferentVersion_ReplacesAndMatches()
+    {
+        var all = new List<GitHubAsset>
+        {
+            Asset("podman-v5.1.0-darwin-arm64.tar.gz"),
+            Asset("podman-v5.1.0-linux-amd64.tar.gz"),
+        };
+        var matches = new List<GitHubAsset> { all[0] };
+
+        var result = CommandHelpers.SelectAsset(all, matches, Platform(),
+            "podman-v5.0.0-darwin-arm64.tar.gz", "v5.0.0", "v5.1.0");
+
+        result.Name.ShouldBe("podman-v5.1.0-darwin-arm64.tar.gz");
+    }
+
+    /// <summary>构建号变化时（b9803 → b9859），替换后应匹配新资产。</summary>
+    [Fact]
+    public void SelectAsset_SavedNameBuildNumber_ReplacesAndMatches()
+    {
+        var all = new List<GitHubAsset>
+        {
+            Asset("tool-b9859-darwin-arm64.tar.gz"),
+            Asset("tool-b9859-linux-amd64.tar.gz"),
+        };
+        var matches = new List<GitHubAsset> { all[0] };
+
+        var result = CommandHelpers.SelectAsset(all, matches, Platform(),
+            "tool-b9803-darwin-arm64.tar.gz", "b9803", "b9859");
+
+        result.Name.ShouldBe("tool-b9859-darwin-arm64.tar.gz");
+    }
+
+    /// <summary>替换版本号后仍无匹配时，应回退到平台匹配。</summary>
+    [Fact]
+    public void SelectAsset_SavedNameReplaceNoMatch_FallsBackToPlatformMatch()
+    {
+        var all = new List<GitHubAsset>
+        {
+            Asset("tool-v2.0.0-darwin-arm64.tar.gz"),
+            Asset("tool-v2.0.0-linux-amd64.tar.gz"),
+        };
+        var matches = new List<GitHubAsset> { all[0] };
+
+        // saved 为 linux 资产，替换版本后仍不在平台匹配列表中
+        var result = CommandHelpers.SelectAsset(all, matches, Platform(),
+            "tool-v1.0.0-linux-amd64.tar.gz", "v1.0.0", "v2.0.0");
+
+        result.Name.ShouldBe("tool-v2.0.0-darwin-arm64.tar.gz");
+    }
+
+    /// <summary>未传入版本号时，应回退到精确匹配。</summary>
+    [Fact]
+    public void SelectAsset_SavedNameNoVersion_ExactMatch()
+    {
+        var all = new List<GitHubAsset>
+        {
+            Asset("tool-darwin-arm64.tar.gz"),
+            Asset("tool-linux-amd64.tar.gz"),
+        };
+        var matches = new List<GitHubAsset> { all[0] };
+
+        var result = CommandHelpers.SelectAsset(all, matches, Platform(), "tool-darwin-arm64.tar.gz");
+
+        result.Name.ShouldBe("tool-darwin-arm64.tar.gz");
+    }
+
     // ---- FindChecksumAsset 测试 ----
 
     /// <summary>应识别 .sha256 后缀的校验文件。</summary>
