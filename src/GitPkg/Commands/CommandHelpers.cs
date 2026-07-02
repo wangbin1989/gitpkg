@@ -88,19 +88,22 @@ public static class CommandHelpers
             }
         }
 
+        // 过滤辅助文件（校验、签名、源码归档、安装包等）
+        var filtered = matches.Where(a => !IsAuxiliaryAsset(a.Name)).ToList();
+
         // 平台匹配
-        if (matches.Count == 0)
+        if (filtered.Count == 0)
         {
             AnsiConsole.MarkupLine($"[yellow]⚠ 未找到匹配 {platform} 的资产[/]");
             AnsiConsole.MarkupLine("[grey]以下为全部可用资产，请手动选择:[/]");
             return PromptAssetSelection(assets);
         }
 
-        if (matches.Count == 1)
-            return matches[0];
+        if (filtered.Count == 1)
+            return filtered[0];
 
-        AnsiConsole.MarkupLine($"[yellow]发现 {matches.Count} 个匹配的资产，请选择:[/]");
-        return PromptAssetSelection(matches);
+        AnsiConsole.MarkupLine($"[yellow]发现 {filtered.Count} 个匹配的资产，请选择:[/]");
+        return PromptAssetSelection(filtered);
     }
 
     /// <summary>

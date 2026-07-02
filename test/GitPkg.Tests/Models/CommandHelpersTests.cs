@@ -218,6 +218,23 @@ public class CommandHelpersTests : IDisposable
         result.Name.ShouldBe("tool-darwin-arm64.tar.gz");
     }
 
+    /// <summary>匹配列表含辅助文件时，应过滤后计数，避免提示数与选择列表不一致。</summary>
+    [Fact]
+    public void SelectAsset_AuxiliaryAssetFiltered_CountMatchesList()
+    {
+        var all = new List<GitHubAsset>
+        {
+            Asset("tool-darwin-arm64.tar.gz"),
+            Asset("tool-darwin-arm64.tar.gz.sha256"),
+        };
+        var matches = new List<GitHubAsset> { all[0], all[1] };
+
+        // sha256 为辅助文件，过滤后仅 1 个，应自动选中而非提示选择
+        var result = CommandHelpers.SelectAsset(all, matches, Platform(), null);
+
+        result.Name.ShouldBe("tool-darwin-arm64.tar.gz");
+    }
+
     /// <summary>无平台匹配时，在非交互模式下从全部资产中选第一个。</summary>
     [Fact]
     public void SelectAsset_NoMatches_NonInteractive_SelectsFirstFromAll()
