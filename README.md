@@ -27,7 +27,7 @@
 curl -fsSL https://raw.githubusercontent.com/wangbin1989/gitpkg/main/install.sh | bash
 
 # 指定版本
-curl -fsSL https://raw.githubusercontent.com/wangbin1989/gitpkg/main/install.sh | bash -s v2.4.0
+curl -fsSL https://raw.githubusercontent.com/wangbin1989/gitpkg/main/install.sh | bash -s v2.4.1
 
 # Windows (PowerShell)
 Invoke-Expression (Invoke-RestMethod https://raw.githubusercontent.com/wangbin1989/gitpkg/main/install.ps1)
@@ -86,12 +86,12 @@ load(io.popen('gitpkg completion cmd'):read("*a"))()
 
 ```bash
 # macOS / Linux
-tar -xzf gitpkg-v2.4.0-darwin-arm64.tar.gz
+tar -xzf gitpkg-v2.4.1-darwin-arm64.tar.gz
 chmod +x gitpkg
 mv gitpkg ~/.gitpkg/bin/   # 或其他 PATH 目录
 
 # Windows
-# 解压 gitpkg-v2.4.0-windows-x86_64.zip，将 gitpkg.exe 放入 PATH 目录
+# 解压 gitpkg-v2.4.1-windows-x86_64.zip，将 gitpkg.exe 放入 PATH 目录
 ```
 
 ### 基本用法

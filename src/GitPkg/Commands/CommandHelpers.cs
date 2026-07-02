@@ -14,19 +14,44 @@ public static class CommandHelpers
     /// </summary>
     public static GitHubAsset PromptAssetSelection(List<GitHubAsset> assets)
     {
+        var filtered = assets.Where(a => !IsAuxiliaryAsset(a.Name)).ToList();
+        if (filtered.Count == 0) filtered = assets;
+
         if (!AnsiConsole.Profile.Capabilities.Interactive)
         {
-            var first = assets[0];
+            var first = filtered[0];
             AnsiConsole.MarkupLine($"[grey]非交互模式，自动选择 [bold]{first.Name}[/][/]");
             return first;
         }
 
-        var choices = assets.Select(a => $"{a.Name} ({FormatSize(a.Size)})").ToArray();
+        var choices = filtered.Select(a => $"{a.Name} ({FormatSize(a.Size)})").ToArray();
         var prompt = new SelectionPrompt<string>()
             .Title("选择要安装的资产")
             .AddChoices(choices);
         var chosen = AnsiConsole.Prompt(prompt);
-        return assets[Array.IndexOf(choices, chosen)];
+        return filtered[Array.IndexOf(choices, chosen)];
+    }
+
+    /// <summary>判断是否为辅助文件（校验、签名、源码归档、安装包等），不应出现在安装选择中。</summary>
+    private static bool IsAuxiliaryAsset(string name)
+    {
+        var n = name.ToLowerInvariant();
+        // 校验文件
+        if (n.EndsWith(".sha256") || n.EndsWith(".sha512")
+            || n is "checksums.txt" or "sha256sums" or "sha256sums.txt")
+            return true;
+        // 签名文件
+        if (n.EndsWith(".sig") || n.EndsWith(".asc") || n.EndsWith(".minisig"))
+            return true;
+        // 源码归档
+        if (n.Contains("source code") || n.Contains("source-code"))
+            return true;
+        // 安装包
+        if (n.EndsWith(".msi") || n.EndsWith(".deb") || n.EndsWith(".rpm")
+            || n.EndsWith(".pkg") || n.EndsWith(".dmg") || n.EndsWith(".appimage")
+            || n.EndsWith(".snap") || n.EndsWith(".flatpak") || n.EndsWith(".apk"))
+            return true;
+        return false;
     }
 
     /// <summary>将字节数格式化为人类可读的大小字符串（B / KB / MB / GB）。</summary>

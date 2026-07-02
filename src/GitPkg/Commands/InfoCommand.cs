@@ -14,7 +14,6 @@ public class InfoCommand : Command
     public InfoCommand() : base("info", "查看工具详情")
     {
         var nameArg = new Argument<string>("name") { Description = "工具名称或 owner/repo" };
-        nameArg.CompletionSources.Add(CompletionHelper.GetInstalledToolNames);
         Add(nameArg);
 
         SetAction(async (parseResult, ct) =>
