@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.4.3] - 2026-07-02
+
+### Fixed
+- `FindExecutableDir` 支持 `usr/bin` 和 `usr/local/bin` 子目录，修复 podman 等 Linux 风格打包的可执行文件链接问题
+- `SelectAsset` 通过替换版本号匹配资产，解决更新时版本号变化（如 `b9803` → `b9859`）导致匹配失败的问题
+
 ## [2.4.2] - 2026-07-02
 
 ### Fixed
