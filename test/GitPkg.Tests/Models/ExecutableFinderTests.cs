@@ -166,6 +166,52 @@ public class ExecutableFinderTests
         }
     }
 
+    /// <summary>可执行文件在 usr/bin 子目录中时应返回 usr/bin 子目录路径。</summary>
+    [Fact]
+    public void FindExecutableDir_ExecutablesInUsrBinSubdir_ReturnsUsrBinSubdir()
+    {
+        var dir = CreateTempDirWithFiles();
+        var usrBinDir = Path.Combine(dir, "usr", "bin");
+        try
+        {
+            Directory.CreateDirectory(usrBinDir);
+            File.WriteAllText(Path.Combine(usrBinDir, "tool"), "");
+
+            if (!OperatingSystem.IsWindows())
+            {
+                var result = ExecutableFinder.FindExecutableDir(dir);
+                result.ShouldBe(usrBinDir);
+            }
+        }
+        finally
+        {
+            if (Directory.Exists(dir)) Directory.Delete(dir, recursive: true);
+        }
+    }
+
+    /// <summary>可执行文件在 usr/local/bin 子目录中时应返回 usr/local/bin 子目录路径。</summary>
+    [Fact]
+    public void FindExecutableDir_ExecutablesInUsrLocalBinSubdir_ReturnsUsrLocalBinSubdir()
+    {
+        var dir = CreateTempDirWithFiles();
+        var usrLocalBinDir = Path.Combine(dir, "usr", "local", "bin");
+        try
+        {
+            Directory.CreateDirectory(usrLocalBinDir);
+            File.WriteAllText(Path.Combine(usrLocalBinDir, "tool"), "");
+
+            if (!OperatingSystem.IsWindows())
+            {
+                var result = ExecutableFinder.FindExecutableDir(dir);
+                result.ShouldBe(usrLocalBinDir);
+            }
+        }
+        finally
+        {
+            if (Directory.Exists(dir)) Directory.Delete(dir, recursive: true);
+        }
+    }
+
     /// <summary>目录中无可执行文件时应返回原始目录。</summary>
     [Fact]
     public void FindExecutableDir_NoExecutables_ReturnsOriginalDir()

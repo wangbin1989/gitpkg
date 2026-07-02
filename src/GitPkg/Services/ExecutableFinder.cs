@@ -40,7 +40,7 @@ public static class ExecutableFinder
         if (FindExecutables(installDir).Count > 0)
             return installDir;
 
-        foreach (var sub in new[] { "bin" })
+        foreach (var sub in new[] { "bin", "usr/bin", "usr/local/bin" })
         {
             var path = Path.Combine(installDir, sub);
             if (Directory.Exists(path) && FindExecutables(path).Count > 0)
