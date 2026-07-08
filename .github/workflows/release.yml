@@ -42,6 +42,15 @@ jobs:
           - os: windows-11-arm
             rid: win-arm64
             name: windows-arm64
+          # Baseline versions (compatible with older x86-64 CPUs)
+          - os: ubuntu-26.04
+            rid: linux-x64
+            name: linux-x86_64-baseline
+            publish-args: -p:TargetInstructionSet=baseline
+          - os: windows-2025
+            rid: win-x64
+            name: windows-x86_64-baseline
+            publish-args: -p:TargetInstructionSet=baseline
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v7
@@ -59,7 +68,7 @@ jobs:
           echo "version=v$version" >> $env:GITHUB_OUTPUT
 
       - name: Publish
-        run: dotnet publish src/GitPkg -c Release -r ${{ matrix.rid }} -o publish
+        run: dotnet publish src/GitPkg -c Release -r ${{ matrix.rid }} -o publish ${{ matrix.publish-args }}
 
       - name: Package (Unix)
         if: runner.os != 'Windows'

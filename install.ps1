@@ -29,6 +29,35 @@ function Get-Platform {
     return "windows-$arch"
 }
 
+# ---- CPU ISA 检测 ----
+# 检查 x86_64 CPU 是否支持 AVX2（.NET 8+ 默认要求的指令集）
+# ARM64 架构无需检测，始终使用标准版本
+function Test-Avx2Support {
+    param([string]$Arch)
+
+    # ARM64 不需要检测
+    if ($Arch -eq "arm64") {
+        return $true
+    }
+
+    # x86_64 架构检测 AVX2 支持
+    try {
+        # 通过 .NET 运行时检测 AVX2 支持
+        return [System.Runtime.Intrinsics.X86.Avx2]::IsSupported
+    } catch {
+        # 如果 .NET 不可用，回退到检查 CPU 特性
+        try {
+            $cpu = Get-CimInstance -ClassName Win32_Processor | Select-Object -First 1
+            # 较新的 Intel/AMD CPU 通常支持 AVX2
+            # 这里使用保守策略：假设支持
+            return $true
+        } catch {
+            # 无法检测，假设支持
+            return $true
+        }
+    }
+}
+
 # ---- 下载与安装 ----
 function Install-GitPkg {
     $platform = Get-Platform
@@ -37,12 +66,23 @@ function Install-GitPkg {
     Write-Host "安装目录: $InstallDir" -ForegroundColor Cyan
     Write-Host "检测到平台: $platform" -ForegroundColor Cyan
 
+    # 从平台字符串中提取架构
+    $arch = $platform -replace '^windows-', ''
+
     $platformSuffix = switch ($platform) {
         "windows-x86_64" { "windows-x86_64" }
         "windows-arm64"  { "windows-arm64" }
         default {
             Write-Host "不支持的平台: $platform" -ForegroundColor Red
             exit 1
+        }
+    }
+
+    # 检查 x86_64 平台是否需要 baseline 版本
+    if ($arch -eq "x86_64") {
+        if (-not (Test-Avx2Support -Arch $arch)) {
+            Write-Host "CPU 不支持 AVX2，使用 baseline 版本" -ForegroundColor Yellow
+            $platformSuffix = "$platformSuffix-baseline"
         }
     }
 

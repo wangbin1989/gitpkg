@@ -1,5 +1,10 @@
 # Changelog
 
+## [2.4.5] - 2026-07-03
+
+### Fixed
+- 发布额外的 baseline 版本（`-p:TargetInstructionSet=baseline`），修复旧 x86-64 CPU 运行时 `CPU ISA level is lower than required` 错误
+
 ## [2.4.4] - 2026-07-02
 
 ### Fixed
