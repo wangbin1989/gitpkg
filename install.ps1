@@ -78,11 +78,11 @@ function Install-GitPkg {
         }
     }
 
-    # 检查 x86_64 平台是否需要 baseline 版本
+    # 检查 x86_64 平台是否需要 novector 版本
     if ($arch -eq "x86_64") {
         if (-not (Test-Avx2Support -Arch $arch)) {
-            Write-Host "CPU 不支持 AVX2，使用 baseline 版本" -ForegroundColor Yellow
-            $platformSuffix = "$platformSuffix-baseline"
+            Write-Host "CPU 不支持 AVX2，使用 novector 版本" -ForegroundColor Yellow
+            $platformSuffix = "$platformSuffix-novector"
         }
     }
 

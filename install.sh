@@ -98,11 +98,11 @@ download_and_install() {
             ;;
     esac
 
-    # 检查 x86_64 平台是否需要 baseline 版本
+    # 检查 x86_64 平台是否需要 novector 版本
     if [[ "${arch}" == "x86_64" ]]; then
         if ! supports_avx2 "${arch}"; then
-            info "CPU 不支持 AVX2，使用 baseline 版本"
-            archive_suffix="${archive_suffix}-baseline"
+            info "CPU 不支持 AVX2，使用 novector 版本"
+            archive_suffix="${archive_suffix}-novector"
         fi
     fi
 

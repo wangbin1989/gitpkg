@@ -2,7 +2,7 @@
 
 ## 错误现象
 
-运行 gitpkg 二进制文件时，程序直接崩溃并报错：
+在 Synology DS918+（CPU: Intel Celeron J4125）上运行 gitpkg 二进制文件时，程序直接崩溃并报错：
 
 ```
 CPU ISA level is lower than required
@@ -22,21 +22,15 @@ CPU ISA level is lower than required
 
 ### 方案一：在发布时降低 CPU ISA 要求 ✅ 本项目采用
 
-> **本项目采用此方案**：在 CI/CD 发布流程中，除了发布默认的优化版本外，额外发布一个 `-p:TargetInstructionSet=baseline` 的 baseline 版本。这样既能让大多数用户享受性能优化，又为旧 CPU 用户提供兼容版本。
+> **本项目采用此方案**：在 CI/CD 发布流程中，除了发布默认的优化版本外，额外发布一个 `-p:VectorSupport=false` 的 novector 版本。这样既能让大多数用户享受 SIMD 性能优化，又为旧 CPU 用户提供兼容版本。
 
-在 `dotnet publish` 命令中添加 `-p:TargetInstructionSet=` 参数，禁用特定指令集优化：
-
-```bash
-dotnet publish src/GitPkg -c Release -r linux-x64 -o publish -p:TargetInstructionSet=baseline
-```
-
-> **`baseline` 的含义**：`baseline` 表示使用目标架构（如 x86-64）的最低公共指令集，不启用任何额外的 SIMD 或高级指令集优化。对于 x86-64 架构，`baseline` 等同于仅使用 SSE2 指令集。这样编译出的二进制文件可以在所有该架构的 CPU 上运行，兼容性最好，但会牺牲部分性能优化。
-
-或者明确指定目标指令集为较基础的 SSE2（几乎所有 x86-64 CPU 都支持）：
+在 `dotnet publish` 命令中添加 `-p:VectorSupport=false` 参数，禁用 SIMD 向量指令：
 
 ```bash
-dotnet publish src/GitPkg -c Release -r linux-x64 -o publish -p:TargetInstructionSet=sse2
+dotnet publish src/GitPkg -c Release -r linux-x64 -o publish -p:VectorSupport=false
 ```
+
+> **`VectorSupport=false` 的含义**：禁用所有 SIMD 向量指令支持（SSE、AVX 等），生成的二进制文件仅使用标量指令，兼容所有 x86-64 CPU。相比 `TargetInstructionSet`，此选项更彻底地消除了对向量指令集的依赖。
 
 ### 方案二：通过 MSBuild 属性设置
 
@@ -44,7 +38,7 @@ dotnet publish src/GitPkg -c Release -r linux-x64 -o publish -p:TargetInstructio
 
 ```xml
 <PropertyGroup>
-  <TargetInstructionSet>baseline</TargetInstructionSet>
+  <VectorSupport>false</VectorSupport>
 </PropertyGroup>
 ```
 
