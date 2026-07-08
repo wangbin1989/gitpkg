@@ -54,10 +54,38 @@ detect_platform() {
     echo "${os}-${arch}"
 }
 
+# ---- CPU ISA 检测 ----
+# 检查 x86_64 CPU 是否支持 AVX2（.NET 8+ 默认要求的指令集）
+# ARM64 架构无需检测，始终使用标准版本
+supports_avx2() {
+    local arch="$1"
+
+    # ARM64 不需要检测
+    if [[ "${arch}" == "arm64" ]]; then
+        return 0
+    fi
+
+    # x86_64 架构检测 AVX2 支持
+    case "$(uname -s)" in
+        Linux)
+            grep -q 'avx2' /proc/cpuinfo 2>/dev/null
+            ;;
+        Darwin)
+            # macOS Intel: 检查 CPU 特性
+            sysctl -n machdep.cpu.features 2>/dev/null | grep -q 'AVX2'
+            ;;
+        *)
+            # 未知系统，假设支持
+            return 0
+            ;;
+    esac
+}
+
 # ---- 下载与安装 ----
 download_and_install() {
     local platform="$1"
     local version="$2"
+    local arch="$3"
     local archive_suffix archive_ext
 
     case "${platform}" in
@@ -69,6 +97,14 @@ download_and_install() {
             exit 1
             ;;
     esac
+
+    # 检查 x86_64 平台是否需要 baseline 版本
+    if [[ "${arch}" == "x86_64" ]]; then
+        if ! supports_avx2 "${arch}"; then
+            info "CPU 不支持 AVX2，使用 baseline 版本"
+            archive_suffix="${archive_suffix}-baseline"
+        fi
+    fi
 
     # 获取下载 URL
     local api_url
@@ -207,6 +243,10 @@ main() {
     platform=$(detect_platform)
     info "检测到平台: ${platform}"
 
+    # 从平台字符串中提取架构
+    local arch
+    arch="${platform#*-}"
+
     for cmd in curl tar; do
         if ! command -v "${cmd}" &> /dev/null; then
             error "缺少依赖: ${cmd}"
@@ -214,7 +254,7 @@ main() {
         fi
     done
 
-    download_and_install "${platform}" "${version}"
+    download_and_install "${platform}" "${version}" "${arch}"
     check_path
 
     echo ""
