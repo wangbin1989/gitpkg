@@ -16,6 +16,7 @@ dotnet clean                                        # 清理构建产物
 dotnet build                                        # 构建
 dotnet test                                         # 运行全部测试
 dotnet publish src/GitPkg -c Release -r osx-arm64 -o publish  # AOT 发布 (RID: osx-arm64/linux-x64/linux-arm64/win-x64/win-arm64)
+dotnet publish src/GitPkg -c Release -r osx-arm64 -o publish-singlefile -p:PublishAot=false -p:PublishSingleFile=true -p:SelfContained=true  # 单文件非 AOT 发布 (RID: osx-arm64/linux-x64/linux-arm64/win-x64/win-arm64)
 ```
 
 ## Project Structure

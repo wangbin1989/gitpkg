@@ -31,7 +31,21 @@ CPU ISA level is lower than required
 
 ## 解决方案
 
-### 方案一：在目标机器上编译 ✅ 推荐
+### 方案一：使用单文件非 AOT 版本 ✅ 推荐
+
+从 v2.4.5 开始，Release 页面提供 `-singlefile` 后缀的单文件非 AOT 版本。该版本使用 `PublishSingleFile` 打包但不进行 AOT 编译，由 .NET 运行时处理 CPU 兼容性，避免 ISA 级别检查问题。
+
+```bash
+# 下载 singlefile 版本（以 Linux x64 为例）
+curl -LO https://github.com/wangbin1989/gitpkg/releases/download/v2.4.5/gitpkg-v2.4.5-linux-x86_64-singlefile.tar.gz
+tar -xzf gitpkg-v2.4.5-linux-x86_64-singlefile.tar.gz
+chmod +x gitpkg
+mv gitpkg ~/.gitpkg/bin/
+```
+
+> **原理**：非 AOT 版本由 .NET 运行时（CLR）执行，运行时会在启动时检测 CPU 支持的指令集并动态选择代码路径，因此不会出现 ISA 级别不匹配的问题。
+
+### 方案二：在目标机器上编译
 
 在目标机器上直接编译 NativeAOT 二进制文件，编译器会自动使用该 CPU 支持的指令集：
 
@@ -42,7 +56,7 @@ dotnet publish src/GitPkg -c Release -r linux-x64 -o publish
 
 > **原理**：NativeAOT 编译器会检测当前 CPU 支持的指令集，生成与之匹配的二进制文件。这样生成的二进制文件在该机器上运行不会出现 ISA 级别不匹配的问题。
 
-### 方案二：升级运行环境 CPU
+### 方案三：升级运行环境 CPU
 
 如果目标机器的 CPU 过于老旧（如 Intel Celeron J4125），考虑升级硬件或更换到支持 AVX2 的机器上运行。
 

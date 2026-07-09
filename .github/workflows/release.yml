@@ -58,29 +58,47 @@ jobs:
           $version = [regex]::Match($content, '<Version>(.+?)</Version>').Groups[1].Value
           echo "version=v$version" >> $env:GITHUB_OUTPUT
 
-      - name: Publish
+      - name: Publish (AOT)
         run: dotnet publish src/GitPkg -c Release -r ${{ matrix.rid }} -o publish
 
-      - name: Package (Unix)
+      - name: Publish (SingleFile)
+        run: dotnet publish src/GitPkg -c Release -r ${{ matrix.rid }} -o publish-singlefile -p:PublishAot=false -p:PublishSingleFile=true -p:SelfContained=true
+
+      - name: Package AOT (Unix)
         if: runner.os != 'Windows'
         run: |
           cd publish
           tar -czf ../gitpkg-${{ steps.version.outputs.version }}-${{ matrix.name }}.tar.gz gitpkg
 
-      - name: Package (Windows)
+      - name: Package AOT (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
           cd publish
           Compress-Archive -Path gitpkg.exe -DestinationPath ../gitpkg-${{ steps.version.outputs.version }}-${{ matrix.name }}.zip
 
+      - name: Package SingleFile (Unix)
+        if: runner.os != 'Windows'
+        run: |
+          cd publish-singlefile
+          tar -czf ../gitpkg-${{ steps.version.outputs.version }}-${{ matrix.name }}-singlefile.tar.gz gitpkg
+
+      - name: Package SingleFile (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          cd publish-singlefile
+          Compress-Archive -Path gitpkg.exe -DestinationPath ../gitpkg-${{ steps.version.outputs.version }}-${{ matrix.name }}-singlefile.zip
+
       - name: Upload artifact
         uses: actions/upload-artifact@v7
         with:
           name: gitpkg-${{ steps.version.outputs.version }}-${{ matrix.name }}
           path: |
+            gitpkg-${{ steps.version.outputs.version }}-${{ matrix.name }}-singlefile.*
             gitpkg-${{ steps.version.outputs.version }}-${{ matrix.name }}.*
             !publish/
+            !publish-singlefile/
 
   release:
     needs: build
