@@ -1,0 +1,55 @@
+# CPU ISA level is lower than required
+
+## 错误现象
+
+在 Synology DS918+（CPU: Intel Celeron J4125）上运行 gitpkg 二进制文件时，程序直接崩溃并报错：
+
+```
+CPU ISA level is lower than required
+```
+
+## 原因分析
+
+该错误发生在 .NET NativeAOT 编译的二进制文件中。NativeAOT 在发布时会针对特定的 CPU 指令集架构（ISA level）进行优化编译。当目标运行机器的 CPU 不支持编译时所要求的指令集（如 AVX2、AVX-512 等），就会出现此错误。
+
+常见触发场景：
+
+- 使用较高版本的 .NET SDK 编译，默认启用了更激进的 CPU 优化（如 .NET 8+ 默认要求 AVX2）
+- 在较旧的 CPU 机器上运行针对新架构编译的二进制文件
+- 跨机器部署时，编译环境与运行环境的 CPU 架构不一致
+
+## 已验证无效的方案
+
+以下方案经测试无法解决该问题：
+
+- `IlcInstructionSet=base`：运行时仍会检查默认 ISA 级别
+- `IlcInstructionSet=sse4.2`：运行时仍会检查默认 ISA 级别
+- `IlcInstructionSet=x64-v1`：运行时仍会检查默认 ISA 级别
+- `TargetInstructionSet=baseline`：运行时仍会检查默认 ISA 级别
+- `TargetInstructionSet=x64-v1`：运行时仍会检查默认 ISA 级别
+- `VectorSupport=false`：运行时仍会检查默认 ISA 级别
+
+## 解决方案
+
+### 方案一：在目标机器上编译 ✅ 推荐
+
+在目标机器上直接编译 NativeAOT 二进制文件，编译器会自动使用该 CPU 支持的指令集：
+
+```bash
+# 在目标机器上执行
+dotnet publish src/GitPkg -c Release -r linux-x64 -o publish
+```
+
+> **原理**：NativeAOT 编译器会检测当前 CPU 支持的指令集，生成与之匹配的二进制文件。这样生成的二进制文件在该机器上运行不会出现 ISA 级别不匹配的问题。
+
+### 方案二：升级运行环境 CPU
+
+如果目标机器的 CPU 过于老旧（如 Intel Celeron J4125），考虑升级硬件或更换到支持 AVX2 的机器上运行。
+
+## 参考
+
+- [Microsoft Learn: Native AOT deployment - CPU architecture](https://learn.microsoft.com/en-us/dotnet/core/deploying/native-aot/)
+- [NativeAOT optimizing 文档](https://github.com/dotnet/runtime/blob/main/src/coreclr/nativeaot/docs/optimizing.md) - IlcInstructionSet 等编译选项说明
+- [System.Runtime.Intrinsics 命名空间](https://learn.microsoft.com/zh-cn/dotnet/api/system.runtime.intrinsics) - CPU 指令集 API 文档
+- [dotnet/runtime ISA 测试代码](https://github.com/dotnet/runtime/blob/main/src/tests/JIT/Regression/JitBlue/Runtime_34587/Runtime_34587.cs) - 用于检测 CPU 支持的指令集
+- [ISA_TESTS.cs](./ISA_TESTS.cs) - 本地 ISA 测试脚本（使用 `dotnet run ISA_TESTS.cs` 运行）
