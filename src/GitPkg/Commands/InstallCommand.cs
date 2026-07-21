@@ -123,7 +123,9 @@ public class InstallCommand : Command
 
         // 1. Parse owner/repo[@version]
         var (owner, repoName, version) = ParseRepo(repo);
-        var toolName = repoName;
+        var innerManifest = new InnerManifestService();
+        var innerEntry = innerManifest.FindEntry($"{owner}/{repoName}");
+        var toolName = InnerManifestService.GetToolName(innerEntry, repoName);
 
         // 2. Get release
         GitHubRelease release;
@@ -209,7 +211,11 @@ public class InstallCommand : Command
         }
 
         // 10. Link executables to ~/.gitpkg/bin/
-        LinkToBinDir(installDir, toolName);
+        var innerBinPaths = InnerManifestService.GetBinPaths(innerEntry, platform);
+        if (innerBinPaths != null)
+            LinkBinPaths(installDir, toolName, innerBinPaths);
+        else
+            LinkToBinDir(installDir, toolName);
 
         // 11. Update manifest
         await manifest.AddToolAsync(new ToolEntry
@@ -336,5 +342,61 @@ public class InstallCommand : Command
 
         if (executables.Count > 0)
             AnsiConsole.MarkupLine($"[grey]  已链接 {executables.Count} 个可执行文件到 {binDir}[/]");
+    }
+
+    /// <summary>按 inner-manifest 中的 bin 列表将指定文件链接到 ~/.gitpkg/bin/。</summary>
+    /// <param name="installDir">工具安装目录。</param>
+    /// <param name="toolName">工具名称，单个文件时用作链接名。</param>
+    /// <param name="binPaths">相对于安装目录的可执行文件路径列表。</param>
+    internal static void LinkBinPaths(string installDir, string toolName, List<string> binPaths)
+    {
+        var binDir = ManifestService.GetBinDir();
+        Directory.CreateDirectory(binDir);
+
+        // 移除所有指向该工具安装目录的旧链接
+        var toolDirPrefix = Path.GetFullPath(installDir)
+            + Path.DirectorySeparatorChar;
+        foreach (var existing in Directory.GetFiles(binDir))
+        {
+            try
+            {
+                var linkTarget = File.ResolveLinkTarget(existing, returnFinalTarget: true);
+                if (linkTarget != null &&
+                    Path.GetFullPath(linkTarget.FullName).StartsWith(toolDirPrefix,
+                        StringComparison.OrdinalIgnoreCase))
+                {
+                    File.Delete(existing);
+                }
+            }
+            catch (IOException)
+            {
+                File.Delete(existing);
+            }
+        }
+
+        var linked = 0;
+        foreach (var relativePath in binPaths)
+        {
+            var sourcePath = Path.Combine(installDir, relativePath);
+            if (!File.Exists(sourcePath))
+            {
+                AnsiConsole.MarkupLine($"[yellow]⚠ 内置清单指定的文件不存在: {relativePath}[/]");
+                continue;
+            }
+
+            var linkName = binPaths.Count == 1
+                ? toolName
+                : Path.GetFileName(relativePath);
+            var linkPath = Path.Combine(binDir, linkName);
+
+            if (File.Exists(linkPath))
+                File.Delete(linkPath);
+
+            File.CreateSymbolicLink(linkPath, sourcePath);
+            linked++;
+        }
+
+        if (linked > 0)
+            AnsiConsole.MarkupLine($"[grey]  已链接 {linked} 个可执行文件到 {binDir}[/]");
     }
 }

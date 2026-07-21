@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/wangbin1989/GitPkg/schema.json",
+  "title": "GitPkg Inner Manifest",
+  "description": "GitPkg 内置工具清单配置文件，用于定义工具的自定义名称和平台特定的可执行文件路径。",
+  "type": "object",
+  "properties": {
+    "schema": {
+      "type": "string",
+      "description": "指向本 schema 文件的相对路径，用于编辑器自动补全和校验。"
+    },
+    "tools": {
+      "type": "array",
+      "description": "工具配置列表。",
+      "items": {
+        "$ref": "#/$defs/tool"
+      }
+    }
+  },
+  "required": ["tools"],
+  "additionalProperties": false,
+  "$defs": {
+    "tool": {
+      "type": "object",
+      "description": "单个工具的配置条目。",
+      "properties": {
+        "repo": {
+          "type": "string",
+          "description": "GitHub 仓库，格式为 owner/repo。",
+          "pattern": "^[^/]+/[^/]+$"
+        },
+        "name": {
+          "type": "string",
+          "description": "自定义工具名称，覆盖默认的仓库名。"
+        },
+        "platforms": {
+          "type": "array",
+          "description": "平台特定的可执行文件配置。",
+          "items": {
+            "$ref": "#/$defs/platform"
+          }
+        }
+      },
+      "required": ["repo"],
+      "additionalProperties": false
+    },
+    "platform": {
+      "type": "object",
+      "description": "特定平台架构下的可执行文件配置。",
+      "properties": {
+        "target": {
+          "type": "string",
+          "description": "平台架构标识符，格式为 os-arch。",
+          "enum": ["osx-arm64", "osx-x64", "linux-arm64", "linux-x64", "windows-arm64", "windows-x64"]
+        },
+        "bin": {
+          "type": "array",
+          "description": "需要链接到 bin 目录的可执行文件路径列表（相对于安装目录）。",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        }
+      },
+      "required": ["target", "bin"],
+      "additionalProperties": false
+    }
+  }
+}
