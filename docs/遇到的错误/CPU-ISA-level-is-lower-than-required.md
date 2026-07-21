@@ -1,5 +1,22 @@
 # CPU ISA level is lower than required
 
+## 问题背景
+
+- 开发环境：MacBook Air M2 + macOS 26
+- 发布环境：GitHub Actions
+  - Linux x64: `ubuntu-26.04`
+  - Linux arm64: `ubuntu-26.04-arm`
+  - macOS arm64: `macos-26`
+  - Windows x64: `windows-2025`
+  - Windows arm64: `windows-11-arm`
+- 运行环境：
+  - MacBook Air M2 + macOS 26 ✅
+  - AMD 5800X + Windows 11 Pro 26H1 ✅
+  - AMD 3400G + Ubuntu 24.04 ✅
+  - 联想小新 Mini（Intel i5-13500H）+ Windows 11 Home 26H1 ✅
+  - Synology DS918+（Intel Celeron J4125）+ DSM 7.3.2 ❌
+  - Synology DS723+（AMD Ryzen R1600V）+ DSM 7.3.2 ✅
+
 ## 错误现象
 
 在 Synology DS918+（CPU: Intel Celeron J4125）上运行 gitpkg 二进制文件时，程序直接崩溃并报错：

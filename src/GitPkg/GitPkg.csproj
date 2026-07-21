@@ -19,7 +19,11 @@
     </AssemblyAttribute>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="System.CommandLine" Version="2.0.9" />
-    <PackageReference Include="Spectre.Console" Version="0.57.1" />
+    <PackageReference Include="System.CommandLine" Version="2.0.10" />
+    <PackageReference Include="Spectre.Console" Version="0.57.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)inner-manifest.json" />
   </ItemGroup>
 </Project>

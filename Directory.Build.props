@@ -4,6 +4,8 @@
     <LangVersion>latest</LangVersion>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <Version>2.4.5</Version>
+    <Version>2.5.0</Version>
+    <!-- 不在 InformationalVersion 中包含 commit hash -->
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
   </PropertyGroup>
 </Project>

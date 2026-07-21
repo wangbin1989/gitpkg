@@ -1,5 +1,18 @@
 # Changelog
 
+## [2.5.0] - 2026-07-21
+
+### Added
+- 新增内置清单（inner-manifest.json）支持，可为特定仓库预配置自定义工具名称和平台特定的可执行文件路径
+- 新增 `InnerManifestService` 服务，读取嵌入的 inner-manifest.json 资源
+- 新增 `InnerManifest`、`InnerManifestTool`、`InnerManifestPlatform` 数据模型
+- 新增 `schema.json`，为 inner-manifest.json 提供 JSON Schema 校验
+
+### Changed
+- `install` 命令安装时读取内置清单：已配置的仓库使用自定义名称和指定 bin 文件链接
+- `update` 命令更新时读取内置清单：已配置的仓库使用指定 bin 文件链接
+- NuGet 依赖升级：`System.CommandLine` 2.0.9 → 2.0.10、`Spectre.Console` 0.57.1 → 0.57.2、`Microsoft.NET.Test.Sdk` 18.7.0 → 18.8.1
+
 ## [2.4.5] - 2026-07-09
 
 ### Added

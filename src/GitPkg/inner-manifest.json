@@ -1,0 +1,31 @@
+{
+  "schema": "https://github.com/wangbin1989/GitPkg/schema.json#",
+  "tools": [
+    {
+      "repo": "cli/cli",
+      "name": "github-cli"
+    },
+    {
+      "repo": "colbymchenry/codegraph",
+      "platforms": [
+        {
+          "target": "osx-arm64",
+          "bin": ["bin/codegraph"]
+        }
+      ]
+    },
+    {
+      "repo": "dotnet/cli-lab",
+      "name": "dotnet-core-uninstall"
+    },
+    {
+      "repo": "podman-container-tools/podman",
+      "platforms": [
+        {
+          "target": "osx-arm64",
+          "bin": ["usr/bin/podman"]
+        }
+      ]
+    }
+  ]
+}

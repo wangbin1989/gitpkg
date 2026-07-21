@@ -60,6 +60,7 @@ public class UpdateCommand : Command
         var extractor = new ArchiveExtractor();
         var verifier = new Sha256Verifier();
         var manifest = new ManifestService();
+        var innerManifest = new InnerManifestService();
 
         var tools = await manifest.LoadAsync(ct);
 
@@ -181,7 +182,12 @@ public class UpdateCommand : Command
                     File.Delete(archivePath);
 
                 // Re-link executables to ~/.gitpkg/bin/
-                InstallCommand.LinkToBinDir(tool.InstallPath, tool.Name);
+                var innerEntry = innerManifest.FindEntry(tool.Repo);
+                var innerBinPaths = InnerManifestService.GetBinPaths(innerEntry, platform);
+                if (innerBinPaths != null)
+                    InstallCommand.LinkBinPaths(tool.InstallPath, tool.Name, innerBinPaths);
+                else
+                    InstallCommand.LinkToBinDir(tool.InstallPath, tool.Name);
 
                 // Update manifest
                 await manifest.AddToolAsync(tool with
