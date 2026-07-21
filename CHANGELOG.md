@@ -4,6 +4,10 @@
 
 ### Fixed
 - 修复 AOT 构建版本号错误包含 `-scd` 后缀的问题，将条件版本逻辑从 `Directory.Build.props` 移至 `Directory.Build.targets`
+- `update` 命令现在会根据 inner-manifest.json 更新工具名称，名称变化时自动重命名安装目录
+
+### Changed
+- `manifest.json` 写入时格式化 JSON（缩进），便于阅读和调试
 
 ## [2.5.1] - 2026-07-21
 

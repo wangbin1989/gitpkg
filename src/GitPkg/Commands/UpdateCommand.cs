@@ -96,6 +96,10 @@ public class UpdateCommand : Command
                     continue;
                 }
 
+                // 检查 inner-manifest 获取最新的工具名称
+                var innerEntry = innerManifest.FindEntry(tool.Repo);
+                var newName = InnerManifestService.GetToolName(innerEntry, parts[1]);
+
                 var release = await gitHub.GetLatestReleaseAsync(parts[0], parts[1], ct);
 
                 if (release.TagName == tool.Version)
@@ -182,23 +186,37 @@ public class UpdateCommand : Command
                     File.Delete(archivePath);
 
                 // Re-link executables to ~/.gitpkg/bin/
-                var innerEntry = innerManifest.FindEntry(tool.Repo);
                 var innerBinPaths = InnerManifestService.GetBinPaths(innerEntry, platform);
                 if (innerBinPaths != null)
-                    InstallCommand.LinkBinPaths(tool.InstallPath, tool.Name, innerBinPaths);
+                    InstallCommand.LinkBinPaths(tool.InstallPath, newName, innerBinPaths);
                 else
-                    InstallCommand.LinkToBinDir(tool.InstallPath, tool.Name);
+                    InstallCommand.LinkToBinDir(tool.InstallPath, newName);
+
+                // 如果名称发生变化，重命名安装目录
+                var currentInstallPath = tool.InstallPath;
+                if (!string.Equals(tool.Name, newName, StringComparison.OrdinalIgnoreCase))
+                {
+                    var newInstallDir = ManifestService.GetToolDir(newName);
+                    if (Directory.Exists(tool.InstallPath) && !Directory.Exists(newInstallDir))
+                    {
+                        Directory.Move(tool.InstallPath, newInstallDir);
+                        currentInstallPath = newInstallDir;
+                        AnsiConsole.MarkupLine($"[grey]  重命名: {tool.Name} → {newName}[/]");
+                    }
+                }
 
                 // Update manifest
                 await manifest.AddToolAsync(tool with
                 {
+                    Name = newName,
                     Version = release.TagName,
+                    InstallPath = currentInstallPath,
                     InstalledAt = DateTime.UtcNow,
                     AssetName = selected.Name
                 }, ct);
 
                 var versionDisplay = release.Name ?? release.TagName;
-                AnsiConsole.MarkupLine($"[green]✓ {tool.Name} {tool.Version} → {versionDisplay}[/]");
+                AnsiConsole.MarkupLine($"[green]✓ {newName} {tool.Version} → {versionDisplay}[/]");
                 updated++;
             }
             catch (Exception ex)
