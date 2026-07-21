@@ -5,6 +5,7 @@
 ### Fixed
 - `self-update` 命令修复版本号包含 `-scd` 后缀时比较失败的问题，现在正确识别 SCD 版本
 - `self-update` 命令根据当前构建类型（AOT/SCD）自动选择对应版本的资产进行更新
+- 修复重复安装时因 inner-manifest 名称不同导致 manifest.json 出现同仓库重复条目的问题
 
 ### Changed
 - 单文件版本资产名称格式从 `gitpkg-{version}-{platform}-singlefile` 调整为 `gitpkg-{version}-scd-{platform}`

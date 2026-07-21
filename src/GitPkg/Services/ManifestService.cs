@@ -44,18 +44,16 @@ public class ManifestService
         await JsonSerializer.SerializeAsync(stream, manifest, _jsonContext.ToolManifest, ct);
     }
 
-    /// <summary>添加或更新工具条目（按名称匹配，已存在则覆盖）。</summary>
+    /// <summary>添加或更新工具条目（按名称或仓库匹配，已存在则覆盖；清除同仓库的旧条目）。</summary>
     public async Task AddToolAsync(ToolEntry entry, CancellationToken ct = default)
     {
         var manifest = await LoadAsync(ct);
-        var existing = manifest.Tools.FindIndex(t =>
-            t.Name.Equals(entry.Name, StringComparison.OrdinalIgnoreCase));
 
-        if (existing >= 0)
-            manifest.Tools[existing] = entry;
-        else
-            manifest.Tools.Add(entry);
+        // 移除同仓库的旧条目（名称可能因 inner-manifest 变更而不同）
+        manifest.Tools.RemoveAll(t =>
+            t.Repo.Equals(entry.Repo, StringComparison.OrdinalIgnoreCase));
 
+        manifest.Tools.Add(entry);
         await SaveAsync(manifest, ct);
     }
 
