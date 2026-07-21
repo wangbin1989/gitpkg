@@ -2,6 +2,10 @@
 
 ## [2.5.1] - 2026-07-21
 
+### Fixed
+- `self-update` 命令修复版本号包含 `-scd` 后缀时比较失败的问题，现在正确识别 SCD 版本
+- `self-update` 命令根据当前构建类型（AOT/SCD）自动选择对应版本的资产进行更新
+
 ### Changed
 - 单文件版本资产名称格式从 `gitpkg-{version}-{platform}-singlefile` 调整为 `gitpkg-{version}-scd-{platform}`
 - 安装脚本（install.sh / install.ps1）新增 `-scd` 开关，支持选择安装单文件版本
