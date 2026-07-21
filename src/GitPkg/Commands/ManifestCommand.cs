@@ -31,8 +31,7 @@ public class ManifestCommand : Command
                     var manifest = new ManifestService();
                     var tools = await manifest.LoadAsync(ct);
 
-                    var jsonContext = new AppJsonContext();
-                    var json = JsonSerializer.Serialize(tools, jsonContext.ToolManifest);
+                    var json = JsonSerializer.Serialize(tools, AppJsonContext.Default.ToolManifest);
                     Console.WriteLine(json);
                     return 0;
                 }

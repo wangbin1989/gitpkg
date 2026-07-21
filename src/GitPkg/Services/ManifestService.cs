@@ -16,7 +16,6 @@ public class ManifestService
 
     private readonly string _baseDir;
     private readonly string _manifestPath;
-    private readonly AppJsonContext _jsonContext = new();
 
     /// <summary>可指定自定义基础目录，主要用于单元测试隔离。</summary>
     public ManifestService(string? baseDir = null)
@@ -32,7 +31,7 @@ public class ManifestService
             return new ToolManifest();
 
         await using var stream = File.OpenRead(_manifestPath);
-        return await JsonSerializer.DeserializeAsync(stream, _jsonContext.ToolManifest, ct)
+        return await JsonSerializer.DeserializeAsync(stream, AppJsonContext.Default.ToolManifest, ct)
                ?? new ToolManifest();
     }
 
@@ -40,8 +39,8 @@ public class ManifestService
     public async Task SaveAsync(ToolManifest manifest, CancellationToken ct = default)
     {
         Directory.CreateDirectory(_baseDir);
-        await using var stream = File.Create(_manifestPath);
-        await JsonSerializer.SerializeAsync(stream, manifest, _jsonContext.ToolManifest, ct);
+        var json = JsonSerializer.Serialize(manifest, AppJsonContext.Default.ToolManifest);
+        await File.WriteAllTextAsync(_manifestPath, json, ct);
     }
 
     /// <summary>添加或更新工具条目（按名称或仓库匹配，已存在则覆盖；清除同仓库的旧条目）。</summary>

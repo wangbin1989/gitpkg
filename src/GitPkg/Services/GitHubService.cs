@@ -11,7 +11,6 @@ namespace GitPkg.Services;
 public class GitHubService
 {
     private readonly HttpClient _http;
-    private readonly AppJsonContext _jsonContext = new();
 
     /// <summary>使用共享的 <see cref="HttpClient"/> 实例创建客户端。</summary>
     public GitHubService(HttpClient http)
@@ -23,21 +22,21 @@ public class GitHubService
     public async Task<GitHubRelease> GetLatestReleaseAsync(string owner, string repo, CancellationToken ct = default)
     {
         var url = $"https://api.github.com/repos/{owner}/{repo}/releases/latest";
-        return await GetAsync(url, _jsonContext.GitHubRelease, ct);
+        return await GetAsync(url, AppJsonContext.Default.GitHubRelease, ct);
     }
 
     /// <summary>按版本标签获取指定 Release。</summary>
     public async Task<GitHubRelease> GetReleaseByTagAsync(string owner, string repo, string tag, CancellationToken ct = default)
     {
         var url = $"https://api.github.com/repos/{owner}/{repo}/releases/tags/{tag}";
-        return await GetAsync(url, _jsonContext.GitHubRelease, ct);
+        return await GetAsync(url, AppJsonContext.Default.GitHubRelease, ct);
     }
 
     /// <summary>获取仓库基本信息。</summary>
     public async Task<GitHubRepo> GetRepoAsync(string owner, string repo, CancellationToken ct = default)
     {
         var url = $"https://api.github.com/repos/{owner}/{repo}";
-        return await GetAsync(url, _jsonContext.GitHubRepo, ct);
+        return await GetAsync(url, AppJsonContext.Default.GitHubRepo, ct);
     }
 
     /// <summary>下载文本内容（如校验和文件）。</summary>
