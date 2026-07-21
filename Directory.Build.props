@@ -4,9 +4,7 @@
     <LangVersion>latest</LangVersion>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <Version>2.5.1</Version>
-    <!-- 非 AOT 发布时，版本号增加 -scd 后缀 -->
-    <Version Condition="'$(PublishAot)' != 'true'">$(Version)-scd</Version>
+    <Version>2.5.2</Version>
     <!-- 不在 InformationalVersion 中包含 commit hash -->
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
   </PropertyGroup>
