@@ -36,7 +36,7 @@ public class ManifestService
                ?? new ToolManifest();
     }
 
-    /// <summary>将清单写入 manifest.json，自动创建目录。</summary>
+    /// <summary>将清单写入 manifest.json，自动创建目录，格式化输出。</summary>
     public async Task SaveAsync(ToolManifest manifest, CancellationToken ct = default)
     {
         Directory.CreateDirectory(_baseDir);
