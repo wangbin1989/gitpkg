@@ -81,21 +81,21 @@ jobs:
         if: runner.os != 'Windows'
         run: |
           cd publish-singlefile
-          tar -czf ../gitpkg-${{ steps.version.outputs.version }}-${{ matrix.name }}-singlefile.tar.gz gitpkg
+          tar -czf ../gitpkg-${{ steps.version.outputs.version }}-scd-${{ matrix.name }}.tar.gz gitpkg
 
       - name: Package SingleFile (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
           cd publish-singlefile
-          Compress-Archive -Path gitpkg.exe -DestinationPath ../gitpkg-${{ steps.version.outputs.version }}-${{ matrix.name }}-singlefile.zip
+          Compress-Archive -Path gitpkg.exe -DestinationPath ../gitpkg-${{ steps.version.outputs.version }}-scd-${{ matrix.name }}.zip
 
       - name: Upload artifact
         uses: actions/upload-artifact@v7
         with:
           name: gitpkg-${{ steps.version.outputs.version }}-${{ matrix.name }}
           path: |
-            gitpkg-${{ steps.version.outputs.version }}-${{ matrix.name }}-singlefile.*
+            gitpkg-${{ steps.version.outputs.version }}-scd-${{ matrix.name }}.*
             gitpkg-${{ steps.version.outputs.version }}-${{ matrix.name }}.*
             !publish/
             !publish-singlefile/

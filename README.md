@@ -27,10 +27,16 @@
 curl -fsSL https://raw.githubusercontent.com/wangbin1989/gitpkg/main/install.sh | bash
 
 # 指定版本
-curl -fsSL https://raw.githubusercontent.com/wangbin1989/gitpkg/main/install.sh | bash -s v2.5.0
+curl -fsSL https://raw.githubusercontent.com/wangbin1989/gitpkg/main/install.sh | bash -s v2.5.1
+
+# 安装单文件版本（适用于不支持 AOT 的环境）
+curl -fsSL https://raw.githubusercontent.com/wangbin1989/gitpkg/main/install.sh | bash -s -- -scd
 
 # Windows (PowerShell)
 Invoke-Expression (Invoke-RestMethod https://raw.githubusercontent.com/wangbin1989/gitpkg/main/install.ps1)
+
+# Windows 单文件版本
+.\install.ps1 -Scd
 ```
 
 脚本会自动检测平台，下载最新版本并安装到 `~/.gitpkg/bin`，安装完成后会提示通过 `gitpkg init` 将目录加入 PATH 并启用自动补全。
@@ -86,15 +92,15 @@ load(io.popen('gitpkg completion cmd'):read("*a"))()
 
 ```bash
 # macOS / Linux
-tar -xzf gitpkg-v2.5.0-darwin-arm64.tar.gz
+tar -xzf gitpkg-v2.5.1-darwin-arm64.tar.gz
 chmod +x gitpkg
 mv gitpkg ~/.gitpkg/bin/   # 或其他 PATH 目录
 
 # Windows
-# 解压 gitpkg-v2.5.0-windows-x86_64.zip，将 gitpkg.exe 放入 PATH 目录
+# 解压 gitpkg-v2.5.1-windows-x86_64.zip，将 gitpkg.exe 放入 PATH 目录
 ```
 
-> **旧 CPU 兼容**：如果遇到 `CPU ISA level is lower than required` 错误，请下载 `-singlefile` 后缀的版本（如 `gitpkg-v2.5.0-linux-x86_64-singlefile.tar.gz`），该版本不使用 AOT 编译，兼容所有 x64 CPU。
+> **旧 CPU 兼容**：如果遇到 `CPU ISA level is lower than required` 错误，请下载 `scd` 版本（如 `gitpkg-v2.5.1-scd-linux-x86_64.tar.gz`），该版本不使用 AOT 编译，兼容所有 x64 CPU。
 
 ### 基本用法
 

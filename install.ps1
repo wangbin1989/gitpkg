@@ -6,9 +6,13 @@
 #
 #   或指定版本:
 #   .\install.ps1 -Version v2.1.0
+#
+#   安装单文件版本 (SCD):
+#   .\install.ps1 -Scd
 
 param(
-    [string]$Version = "latest"
+    [string]$Version = "latest",
+    [switch]$Scd
 )
 
 $ErrorActionPreference = "Stop"
@@ -37,6 +41,10 @@ function Install-GitPkg {
     Write-Host "安装目录: $InstallDir" -ForegroundColor Cyan
     Write-Host "检测到平台: $platform" -ForegroundColor Cyan
 
+    if ($Scd) {
+        Write-Host "安装模式: 单文件 (SCD)" -ForegroundColor Cyan
+    }
+
     $platformSuffix = switch ($platform) {
         "windows-x86_64" { "windows-x86_64" }
         "windows-arm64"  { "windows-arm64" }
@@ -54,8 +62,16 @@ function Install-GitPkg {
 
     Write-Host "获取版本信息..." -ForegroundColor Green
     $releaseJson = Invoke-RestMethod -Uri $apiUrl -Headers @{ "User-Agent" = "gitpkg-installer" }
+
+    # 根据是否使用 SCD 版本构造匹配模式
+    if ($Scd) {
+        $assetPattern = "gitpkg-.*-scd-$platformSuffix\.zip"
+    } else {
+        $assetPattern = "gitpkg-.*-$platformSuffix\.zip"
+    }
+
     $asset = $releaseJson.assets | Where-Object {
-        $_.name -match "gitpkg-.*-$platformSuffix\.zip"
+        $_.name -match $assetPattern
     } | Select-Object -First 1
 
     if (-not $asset) {

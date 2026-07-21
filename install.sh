@@ -7,6 +7,9 @@
 #
 #   或指定版本:
 #   curl -fsSL https://raw.githubusercontent.com/wangbin1989/gitpkg/main/install.sh | bash -s v2.1.0
+#
+#   安装单文件版本 (SCD):
+#   curl -fsSL https://raw.githubusercontent.com/wangbin1989/gitpkg/main/install.sh | bash -s -- -scd
 
 set -euo pipefail
 
@@ -58,7 +61,8 @@ detect_platform() {
 download_and_install() {
     local platform="$1"
     local version="$2"
-    local archive_suffix archive_ext
+    local use_scd="${3:-false}"
+    local archive_suffix archive_ext asset_pattern
 
     case "${platform}" in
         darwin-arm64)   archive_suffix="darwin-arm64"; archive_ext="tar.gz" ;;
@@ -69,6 +73,13 @@ download_and_install() {
             exit 1
             ;;
     esac
+
+    # 根据是否使用 SCD 版本构造匹配模式
+    if [[ "${use_scd}" == "true" ]]; then
+        asset_pattern="gitpkg-.*-scd-${archive_suffix}\.${archive_ext}"
+    else
+        asset_pattern="gitpkg-.*-${archive_suffix}\.${archive_ext}"
+    fi
 
     # 获取下载 URL
     local api_url
@@ -83,7 +94,7 @@ download_and_install() {
     local download_url
     download_url=$(curl -fsSL "${api_url}" \
         | grep "browser_download_url" \
-        | grep "gitpkg-.*-${archive_suffix}\.${archive_ext}" \
+        | grep "${asset_pattern}" \
         | head -n 1 \
         | cut -d '"' -f 4)
 
@@ -190,9 +201,37 @@ check_path() {
     esac
 }
 
+# ---- 参数解析 ----
+parse_args() {
+    local version="latest"
+    local use_scd="false"
+
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            -scd|--scd)
+                use_scd="true"
+                shift
+                ;;
+            -*)
+                error "未知选项: $1"
+                exit 1
+                ;;
+            *)
+                version="$1"
+                shift
+                ;;
+        esac
+    done
+
+    echo "${version} ${use_scd}"
+}
+
 # ---- 主流程 ----
 main() {
-    local version="${1:-latest}"
+    local args
+    args=$(parse_args "$@")
+    local version use_scd
+    read -r version use_scd <<< "${args}"
 
     echo ""
     printf "${CYAN}╔════════════════════════════════════╗${NC}\n"
@@ -214,7 +253,11 @@ main() {
         fi
     done
 
-    download_and_install "${platform}" "${version}"
+    if [[ "${use_scd}" == "true" ]]; then
+        info "安装模式: 单文件 (SCD)"
+    fi
+
+    download_and_install "${platform}" "${version}" "${use_scd}"
     check_path
 
     echo ""

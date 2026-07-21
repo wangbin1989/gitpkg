@@ -61,7 +61,9 @@ public class SelfUpdateCommand : Command
         var verifier = new Sha256Verifier();
 
         var currentVersion = GetCurrentVersion();
-        AnsiConsole.MarkupLine($"[grey]当前版本: {currentVersion}[/]");
+        var isScd = IsScdBuild();
+        var buildType = isScd ? "SCD" : "AOT";
+        AnsiConsole.MarkupLine($"[grey]当前版本: {currentVersion} ({buildType})[/]");
 
         var release = await gitHub.GetLatestReleaseAsync(Owner, Repo, ct);
         var latestVersion = release.TagName;
@@ -87,21 +89,33 @@ public class SelfUpdateCommand : Command
         if (release.Assets.Count == 0)
             throw new InvalidOperationException("Release 中无可用资产");
 
+        // 按构建类型过滤：AOT 版本排除 scd 资产，SCD 版本只保留 scd 资产
+        var filtered = matches.Where(a => isScd
+            ? a.Name.Contains("-scd-", StringComparison.OrdinalIgnoreCase)
+            : !a.Name.Contains("-scd-", StringComparison.OrdinalIgnoreCase)
+        ).ToList();
+
         GitHubAsset selected;
 
-        if (matches.Count == 0)
+        if (filtered.Count == 1)
+        {
+            selected = filtered[0];
+        }
+        else if (filtered.Count > 1)
+        {
+            selected = filtered[0];
+            AnsiConsole.MarkupLine($"[grey]多个匹配，自动选择: {selected.Name}[/]");
+        }
+        else if (matches.Count == 0)
         {
             AnsiConsole.MarkupLine($"[yellow]⚠ 未找到匹配 {platform} 的资产，手动选择:[/]");
             selected = CommandHelpers.PromptAssetSelection(release.Assets);
         }
-        else if (matches.Count == 1)
-        {
-            selected = matches[0];
-        }
         else
         {
+            // 回退：无同类型资产时使用平台匹配的资产
             selected = matches[0];
-            AnsiConsole.MarkupLine($"[grey]多个匹配，自动选择: {selected.Name}[/]");
+            AnsiConsole.MarkupLine($"[yellow]⚠ 未找到 {buildType} 版本，使用: {selected.Name}[/]");
         }
 
         AnsiConsole.MarkupLine($"[grey]下载 {selected.Name} ({CommandHelpers.FormatSize(selected.Size)})...[/]");
@@ -197,6 +211,10 @@ public class SelfUpdateCommand : Command
         if (attr != null && !string.IsNullOrEmpty(attr.InformationalVersion))
         {
             var v = attr.InformationalVersion.Split('+')[0];
+            // 去除 -scd 等预发布后缀，保留语义化版本号
+            var dashIndex = v.IndexOf('-', StringComparison.Ordinal);
+            if (dashIndex > 0)
+                v = v[..dashIndex];
             if (!v.StartsWith('v'))
                 v = "v" + v;
             return v;
@@ -207,6 +225,19 @@ public class SelfUpdateCommand : Command
             return $"v{version.Major}.{version.Minor}.{version.Build}";
 
         return "v0.0.0";
+    }
+
+    /// <summary>检测当前运行的是否为 SCD（单文件）构建版本。</summary>
+    private static bool IsScdBuild()
+    {
+        var attr = Assembly.GetExecutingAssembly()
+            .GetCustomAttribute<AssemblyInformationalVersionAttribute>();
+        if (attr != null && !string.IsNullOrEmpty(attr.InformationalVersion))
+        {
+            var v = attr.InformationalVersion.Split('+')[0];
+            return v.Contains("-scd", StringComparison.OrdinalIgnoreCase);
+        }
+        return false;
     }
 
     /// <summary>按语义化版本号比较，判断 latest 是否比 current 更新。</summary>
