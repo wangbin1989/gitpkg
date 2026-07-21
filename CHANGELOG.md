@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.5.1] - 2026-07-21
+
+### Changed
+- 单文件版本资产名称格式从 `gitpkg-{version}-{platform}-singlefile` 调整为 `gitpkg-{version}-scd-{platform}`
+- 安装脚本（install.sh / install.ps1）新增 `-scd` 开关，支持选择安装单文件版本
+
 ## [2.5.0] - 2026-07-21
 
 ### Added
