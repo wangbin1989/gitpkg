@@ -64,9 +64,8 @@ public class InstallCommand : Command
         if (!File.Exists(fromFile))
             throw new FileNotFoundException($"清单文件不存在: {fromFile}");
 
-        var jsonContext = new AppJsonContext();
         var json = await File.ReadAllTextAsync(fromFile, ct);
-        var manifest = JsonSerializer.Deserialize(json, jsonContext.ToolManifest);
+        var manifest = JsonSerializer.Deserialize(json, AppJsonContext.Default.ToolManifest);
         if (manifest == null || manifest.Tools.Count == 0)
         {
             AnsiConsole.MarkupLine("[yellow]清单文件为空[/]");

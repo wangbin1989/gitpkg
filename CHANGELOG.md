@@ -1,5 +1,10 @@
 # Changelog
 
+## [2.5.3] - 2026-07-21
+
+### Changed
+- JSON 序列化统一使用 `AppJsonContext.Default` 静态属性，替代创建新实例，确保 `WriteIndented` 选项生效
+
 ## [2.5.2] - 2026-07-21
 
 ### Fixed
