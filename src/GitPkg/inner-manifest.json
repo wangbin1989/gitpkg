@@ -1,0 +1,18 @@
+{
+  "cli/cli": {
+    "name": "github-cli"
+  },
+  "colbymchenry/codegraph": {
+    "osx-arm64": {
+      "bin": ["bin/codegraph"]
+    }
+  },
+  "dotnet/cli-lab": {
+    "name": "dotnet-core-uninstall"
+  },
+  "podman-container-tools/podman": {
+    "osx-arm64": {
+      "bin": ["usr/bin/podman"]
+    }
+  }
+}
