@@ -1,0 +1,7 @@
+<Project>
+  <!-- 非 AOT 发布时，版本号增加 -scd 后缀 -->
+  <!-- 必须放在 .targets 中，因为 PublishAot 在 csproj 中定义，加载顺序在 .props 之后 -->
+  <PropertyGroup Condition="'$(PublishAot)' != 'true'">
+    <Version>$(Version)-scd</Version>
+  </PropertyGroup>
+</Project>
