@@ -1,5 +1,10 @@
 # Changelog
 
+## [2.5.2] - 2026-07-21
+
+### Fixed
+- 修复 AOT 构建版本号错误包含 `-scd` 后缀的问题，将条件版本逻辑从 `Directory.Build.props` 移至 `Directory.Build.targets`
+
 ## [2.5.1] - 2026-07-21
 
 ### Fixed
