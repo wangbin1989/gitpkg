@@ -27,7 +27,7 @@
 curl -fsSL https://raw.githubusercontent.com/wangbin1989/gitpkg/main/install.sh | bash
 
 # 指定版本
-curl -fsSL https://raw.githubusercontent.com/wangbin1989/gitpkg/main/install.sh | bash -s v2.5.3
+curl -fsSL https://raw.githubusercontent.com/wangbin1989/gitpkg/main/install.sh | bash -s v2.5.4
 
 # 安装单文件版本（适用于不支持 AOT 的环境）
 curl -fsSL https://raw.githubusercontent.com/wangbin1989/gitpkg/main/install.sh | bash -s -- -scd
@@ -92,15 +92,15 @@ load(io.popen('gitpkg completion cmd'):read("*a"))()
 
 ```bash
 # macOS / Linux
-tar -xzf gitpkg-v2.5.3-darwin-arm64.tar.gz
+tar -xzf gitpkg-v2.5.4-darwin-arm64.tar.gz
 chmod +x gitpkg
 mv gitpkg ~/.gitpkg/bin/   # 或其他 PATH 目录
 
 # Windows
-# 解压 gitpkg-v2.5.3-windows-x86_64.zip，将 gitpkg.exe 放入 PATH 目录
+# 解压 gitpkg-v2.5.4-windows-x86_64.zip，将 gitpkg.exe 放入 PATH 目录
 ```
 
-> **旧 CPU 兼容**：如果遇到 `CPU ISA level is lower than required` 错误，请下载 `scd` 版本（如 `gitpkg-v2.5.3-scd-linux-x86_64.tar.gz`），该版本不使用 AOT 编译，兼容所有 x64 CPU。
+> **旧 CPU 兼容**：如果遇到 `CPU ISA level is lower than required` 错误，请下载 `scd` 版本（如 `gitpkg-v2.5.4-scd-linux-x86_64.tar.gz`），该版本不使用 AOT 编译，兼容所有 x64 CPU。
 
 ### 基本用法
 

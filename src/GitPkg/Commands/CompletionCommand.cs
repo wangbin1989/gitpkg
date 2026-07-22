@@ -65,7 +65,7 @@ public class CompletionCommand : Command
                     # 动态补全已安装工具名称
                     local manifest="$HOME/.gitpkg/manifest.json"
                     if [[ -f "$manifest" ]]; then
-                        completions=(${(f)"$(grep -o '"name":"[^"]*"' "$manifest" 2>/dev/null | sed 's/"name":"//;s/"//' 2>/dev/null)"})
+                        completions=(${(f)"$(grep -o '"name"[[:space:]]*:[[:space:]]*"[^"]*"' "$manifest" 2>/dev/null | sed 's/"name"[[:space:]]*:[[:space:]]*"//;s/"//' 2>/dev/null)"})
                     fi
                     completions+=("--help")
                     ;;
@@ -111,7 +111,7 @@ public class CompletionCommand : Command
                     # 动态补全已安装工具名称
                     local manifest="$HOME/.gitpkg/manifest.json"
                     if [[ -f "$manifest" ]]; then
-                        opts="$(grep -o '"name":"[^"]*"' "$manifest" 2>/dev/null | sed 's/"name":"//;s/"//' | tr '\n' ' ')--help"
+                        opts="$(grep -o '"name"[[:space:]]*:[[:space:]]*"[^"]*"' "$manifest" 2>/dev/null | sed 's/"name"[[:space:]]*:[[:space:]]*"//;s/"//' | tr '\n' ' ')--help"
                     else
                         opts="--help"
                     fi
