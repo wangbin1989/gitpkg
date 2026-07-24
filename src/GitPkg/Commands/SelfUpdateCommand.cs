@@ -23,7 +23,7 @@ public class SelfUpdateCommand : Command
     /// <summary>创建 self-update 命令。</summary>
     public SelfUpdateCommand() : base("self-update", "更新 GitPkg 自身到最新版本")
     {
-        SetAction(async (parseResult, ct) =>
+        SetAction(async (_, ct) =>
         {
             try
             {
