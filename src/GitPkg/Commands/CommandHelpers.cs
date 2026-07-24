@@ -175,10 +175,11 @@ public static class CommandHelpers
         GitHubService gitHub, string url, string destPath,
         string fileName, long fileSize, CancellationToken ct)
     {
+        var sizeDisplay = fileSize > 0 ? $" ({FormatSize(fileSize)})" : "";
         await AnsiConsole.Progress()
             .StartAsync(async ctx =>
             {
-                var task = ctx.AddTask($"[green]下载 {fileName}[/]", maxValue: fileSize > 0 ? fileSize : 100);
+                var task = ctx.AddTask($"[green]下载 {fileName}[/]{sizeDisplay}", maxValue: fileSize > 0 ? fileSize : 100);
                 var lastUpdate = DateTime.MinValue;
 
                 await gitHub.DownloadFileAsync(url, destPath,

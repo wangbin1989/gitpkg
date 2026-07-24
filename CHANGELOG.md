@@ -4,6 +4,7 @@
 
 ### Changed
 - 提取 `install`/`update`/`self-update` 命令中重复的进度条下载逻辑为 `CommandHelpers.DownloadWithProgressAsync` 公共方法
+- 下载进度条显示文件大小（如 `下载 asset.tar.gz (12.5 MB)`）
 
 ### Removed
 - 移除未使用的 `CompletionHelper` 类（补全脚本直接在 shell 层面解析 manifest.json）
