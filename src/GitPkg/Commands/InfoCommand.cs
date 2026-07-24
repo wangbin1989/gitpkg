@@ -88,7 +88,7 @@ public class InfoCommand : Command
         }
 
         // Build panel
-        var content = new List<string>();
+        List<string> content = [];
 
         content.Add($"仓库:     {owner}/{repoName}");
         if (repo.Description != null)
