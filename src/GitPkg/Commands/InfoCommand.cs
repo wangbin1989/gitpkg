@@ -88,9 +88,17 @@ public class InfoCommand : Command
         }
 
         // Build panel
-        List<string> content = [];
+        var releaseDisplay = release.Name ?? release.TagName;
+        var releaseDate = release.PublishedAt != default
+            ? release.PublishedAt.ToLocalTime().ToString("yyyy-MM-dd")
+            : "-";
 
-        content.Add($"仓库:     {owner}/{repoName}");
+        List<string> content =
+        [
+            $"仓库:     {owner}/{repoName}",
+            $"最新版本: {releaseDisplay} ({releaseDate})",
+        ];
+
         if (repo.Description != null)
             content.Add($"描述:     {repo.Description}");
 
@@ -100,12 +108,6 @@ public class InfoCommand : Command
             if (installed.AssetName != null)
                 content.Add($"记录资产: {installed.AssetName}");
         }
-
-        var releaseDisplay = release.Name ?? release.TagName;
-        var releaseDate = release.PublishedAt != default
-            ? release.PublishedAt.ToLocalTime().ToString("yyyy-MM-dd")
-            : "-";
-        content.Add($"最新版本: {releaseDisplay} ({releaseDate})");
 
         if (release.Assets.Count > 0)
         {
