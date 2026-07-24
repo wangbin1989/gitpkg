@@ -8,7 +8,7 @@ namespace GitPkg.Commands;
 
 /// <summary>
 /// install 命令：从 GitHub Release 下载并安装工具。
-/// 核心流程：解析仓库 → 获取 Release → 匹配资产 → 下载 → 校验 → 解压 → 链接到 bin → 记录清单。
+/// 核心流程：解析仓库 → 获取 Release → 匹配资产 → 下载 → 解压 → 链接到 bin → 记录清单。
 /// </summary>
 public class InstallCommand : Command
 {
@@ -107,17 +107,15 @@ public class InstallCommand : Command
     /// 2. 获取 Release 信息
     /// 3. 平台匹配并选择资产
     /// 4. 下载归档文件
-    /// 5. SHA256 校验
-    /// 6. 解压到安装目录
-    /// 7. 链接可执行文件到 ~/.gitpkg/bin/
-    /// 8. 更新 manifest.json
+    /// 5. 解压到安装目录
+    /// 6. 链接可执行文件到 ~/.gitpkg/bin/
+    /// 7. 更新 manifest.json
     /// </summary>
     private static async Task InstallSingleAsync(string repo, CancellationToken ct)
     {
         var gitHub = new GitHubService(GitPkgApp.Http);
         var matcher = new AssetMatcher();
         var extractor = new ArchiveExtractor();
-        var verifier = new Sha256Verifier();
         var manifest = new ManifestService();
 
         // 1. Parse owner/repo[@version]
@@ -179,10 +177,7 @@ public class InstallCommand : Command
                 task.Value(task.MaxValue);
             });
 
-        // 6. SHA256 verification
-        await VerifyChecksumAsync(gitHub, verifier, release.Assets, selected.Name, archivePath, ct);
-
-        // 8. Extract
+        // 6. Extract
         AnsiConsole.MarkupLine($"[grey]解压到 {installDir}...[/]");
         if (Directory.Exists(installDir))
             Directory.Delete(installDir, recursive: true);
@@ -252,43 +247,6 @@ public class InstallCommand : Command
             throw new ArgumentException($"无效的仓库格式 '{input}'，应为 owner/repo");
 
         return (parts[0], parts[1], version);
-    }
-
-    private static async Task VerifyChecksumAsync(
-        GitHubService gitHub, Sha256Verifier verifier,
-        List<GitHubAsset> assets, string targetName, string archivePath,
-        CancellationToken ct)
-    {
-        var checksumAsset = CommandHelpers.FindChecksumAsset(assets);
-
-        if (checksumAsset == null)
-        {
-            AnsiConsole.MarkupLine("[yellow]⚠ 未找到 SHA256 校验文件，跳过完整性校验[/]");
-            return;
-        }
-
-        var content = await gitHub.DownloadStringAsync(checksumAsset.DownloadUrl, ct);
-        var expectedHash = Sha256Verifier.ParseChecksum(content, targetName);
-
-        if (expectedHash == null)
-        {
-            AnsiConsole.MarkupLine("[yellow]⚠ 校验文件中未找到当前资产的校验和[/]");
-            return;
-        }
-
-        AnsiConsole.Markup("[grey]校验 SHA256...[/]");
-        var actualHash = await verifier.ComputeHashAsync(archivePath, ct);
-
-        if (!string.Equals(actualHash, expectedHash, StringComparison.OrdinalIgnoreCase))
-        {
-            if (File.Exists(archivePath))
-                File.Delete(archivePath);
-
-            throw new InvalidOperationException(
-                $"SHA256 校验失败！\n  期望: {expectedHash}\n  实际: {actualHash}");
-        }
-
-        AnsiConsole.MarkupLine("[green] ✓[/]");
     }
 
     /// <summary>将安装目录中的可执行文件链接到 ~/.gitpkg/bin/。</summary>

@@ -58,7 +58,6 @@ public class SelfUpdateCommand : Command
         var gitHub = new GitHubService(GitPkgApp.Http);
         var matcher = new AssetMatcher();
         var extractor = new ArchiveExtractor();
-        var verifier = new Sha256Verifier();
 
         var currentVersion = GetCurrentVersion();
         var isScd = IsScdBuild();
@@ -150,27 +149,6 @@ public class SelfUpdateCommand : Command
 
                 task.Value(task.MaxValue);
             });
-
-        var checksumAsset = CommandHelpers.FindChecksumAsset(release.Assets);
-        if (checksumAsset != null)
-        {
-            var content = await gitHub.DownloadStringAsync(checksumAsset.DownloadUrl, ct);
-            var expectedHash = Sha256Verifier.ParseChecksum(content, selected.Name);
-            if (expectedHash != null)
-            {
-                AnsiConsole.Markup("[grey]校验 SHA256...[/]");
-                if (!verifier.Verify(archivePath, expectedHash))
-                {
-                    File.Delete(archivePath);
-                    throw new InvalidOperationException("SHA256 校验失败");
-                }
-                AnsiConsole.MarkupLine("[green] ✓[/]");
-            }
-        }
-        else
-        {
-            AnsiConsole.MarkupLine("[yellow]⚠ 未找到校验文件，跳过完整性校验[/]");
-        }
 
         var extractDir = Path.Combine(tmpDir, "self-update");
         if (Directory.Exists(extractDir))

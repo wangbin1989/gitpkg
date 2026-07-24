@@ -10,7 +10,7 @@ namespace GitPkg.Tests.Models;
 
 /// <summary>
 /// 命令辅助方法单元测试。
-/// 覆盖 FormatSize、PromptAssetSelection、SelectAsset、FindChecksumAsset。
+/// 覆盖 FormatSize、PromptAssetSelection、SelectAsset。
 /// </summary>
 public class CommandHelpersTests : IDisposable
 {
@@ -333,96 +333,6 @@ public class CommandHelpersTests : IDisposable
         var result = CommandHelpers.SelectAsset(all, matches, Platform(), "tool-darwin-arm64.tar.gz");
 
         result.Name.ShouldBe("tool-darwin-arm64.tar.gz");
-    }
-
-    // ---- FindChecksumAsset 测试 ----
-
-    /// <summary>应识别 .sha256 后缀的校验文件。</summary>
-    [Fact]
-    public void FindChecksumAsset_Sha256Extension_Found()
-    {
-        var assets = new List<GitHubAsset>
-        {
-            Asset("tool.tar.gz"),
-            Asset("tool.tar.gz.sha256"),
-        };
-
-        var result = CommandHelpers.FindChecksumAsset(assets);
-
-        result.ShouldNotBeNull();
-        result!.Name.ShouldBe("tool.tar.gz.sha256");
-    }
-
-    /// <summary>应识别 checksums.txt 文件。</summary>
-    [Fact]
-    public void FindChecksumAsset_ChecksumsTxt_Found()
-    {
-        var assets = new List<GitHubAsset>
-        {
-            Asset("tool.tar.gz"),
-            Asset("checksums.txt"),
-        };
-
-        var result = CommandHelpers.FindChecksumAsset(assets);
-
-        result.ShouldNotBeNull();
-        result!.Name.ShouldBe("checksums.txt");
-    }
-
-    /// <summary>应识别 sha256sums 文件。</summary>
-    [Fact]
-    public void FindChecksumAsset_Sha256Sums_Found()
-    {
-        var assets = new List<GitHubAsset>
-        {
-            Asset("tool.tar.gz"),
-            Asset("sha256sums"),
-        };
-
-        var result = CommandHelpers.FindChecksumAsset(assets);
-
-        result.ShouldNotBeNull();
-        result!.Name.ShouldBe("sha256sums");
-    }
-
-    /// <summary>应识别 sha256sums.txt 文件。</summary>
-    [Fact]
-    public void FindChecksumAsset_Sha256SumsTxt_Found()
-    {
-        var assets = new List<GitHubAsset>
-        {
-            Asset("tool.tar.gz"),
-            Asset("sha256sums.txt"),
-        };
-
-        var result = CommandHelpers.FindChecksumAsset(assets);
-
-        result.ShouldNotBeNull();
-        result!.Name.ShouldBe("sha256sums.txt");
-    }
-
-    /// <summary>无校验文件时应返回 null。</summary>
-    [Fact]
-    public void FindChecksumAsset_NoChecksum_ReturnsNull()
-    {
-        var assets = new List<GitHubAsset>
-        {
-            Asset("tool.tar.gz"),
-            Asset("tool.zip"),
-        };
-
-        var result = CommandHelpers.FindChecksumAsset(assets);
-
-        result.ShouldBeNull();
-    }
-
-    /// <summary>空资产列表应返回 null。</summary>
-    [Fact]
-    public void FindChecksumAsset_EmptyList_ReturnsNull()
-    {
-        var result = CommandHelpers.FindChecksumAsset([]);
-
-        result.ShouldBeNull();
     }
 
     // ---- StripPlatformSuffix 测试 ----

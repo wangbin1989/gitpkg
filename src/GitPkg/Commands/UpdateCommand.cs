@@ -58,7 +58,6 @@ public class UpdateCommand : Command
         var gitHub = new GitHubService(GitPkgApp.Http);
         var matcher = new AssetMatcher();
         var extractor = new ArchiveExtractor();
-        var verifier = new Sha256Verifier();
         var manifest = new ManifestService();
         var innerManifest = new InnerManifestService();
 
@@ -152,23 +151,6 @@ public class UpdateCommand : Command
 
                         task.Value(task.MaxValue);
                     });
-
-                // Verify
-                var checksumAsset = CommandHelpers.FindChecksumAsset(release.Assets);
-                if (checksumAsset != null)
-                {
-                    var content = await gitHub.DownloadStringAsync(checksumAsset.DownloadUrl, ct);
-                    var expectedHash = Sha256Verifier.ParseChecksum(content, selected.Name);
-                    if (expectedHash != null)
-                    {
-                        if (!verifier.Verify(archivePath, expectedHash))
-                        {
-                            if (File.Exists(archivePath))
-                                File.Delete(archivePath);
-                            throw new InvalidOperationException("SHA256 校验失败");
-                        }
-                    }
-                }
 
                 // Keep old dir as backup during extraction
                 var backupDir = tool.InstallPath + ".bak";

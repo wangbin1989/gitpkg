@@ -39,7 +39,7 @@ public class GitHubService
         return await GetAsync(url, AppJsonContext.Default.GitHubRepo, ct);
     }
 
-    /// <summary>下载文本内容（如校验和文件）。</summary>
+    /// <summary>下载文本内容。</summary>
     public async Task<string> DownloadStringAsync(string url, CancellationToken ct = default)
     {
         return await _http.GetStringAsync(url, ct);
