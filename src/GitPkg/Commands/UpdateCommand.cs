@@ -69,8 +69,8 @@ public class UpdateCommand : Command
             return;
         }
 
-        var toUpdate = name != null
-            ? tools.Tools.Where(t => t.Name.Equals(name, StringComparison.OrdinalIgnoreCase)).ToList()
+        List<ToolEntry> toUpdate = name != null
+            ? [.. tools.Tools.Where(t => t.Name.Equals(name, StringComparison.OrdinalIgnoreCase))]
             : tools.Tools;
 
         if (name != null && toUpdate.Count == 0)
