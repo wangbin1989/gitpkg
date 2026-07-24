@@ -82,7 +82,7 @@ public class InfoCommand : Command
         {
             release = await gitHub.GetLatestReleaseAsync(owner, repoName, ct);
         }
-        catch
+        catch (HttpRequestException ex) when (ex.Message.Contains("资源不存在"))
         {
             release = new Models.GitHubRelease { TagName = "(无 Release)", Assets = [] };
         }
