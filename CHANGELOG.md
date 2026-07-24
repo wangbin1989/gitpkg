@@ -1,5 +1,10 @@
 # Changelog
 
+## [Unreleased]
+
+### Changed
+- 提取 `install`/`update`/`self-update` 命令中重复的进度条下载逻辑为 `CommandHelpers.DownloadWithProgressAsync` 公共方法
+
 ## [2.5.6] - 2026-07-24
 
 ### Fixed
