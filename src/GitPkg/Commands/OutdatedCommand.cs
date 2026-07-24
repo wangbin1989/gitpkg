@@ -47,6 +47,7 @@ public class OutdatedCommand : Command
         table.AddColumn("仓库");
 
         var outdatedCount = 0;
+        var failedCount = 0;
 
         foreach (var tool in tools.Tools)
         {
@@ -75,16 +76,28 @@ public class OutdatedCommand : Command
                     tool.Version,
                     "[red]查询失败[/]",
                     tool.Repo);
+                failedCount++;
             }
         }
 
-        if (outdatedCount == 0)
+        if (failedCount == tools.Tools.Count)
+        {
+            AnsiConsole.MarkupLine("[red]✗ 所有工具查询失败，可能是 GitHub API 限流，请稍后重试[/]");
+            return;
+        }
+
+        if (outdatedCount == 0 && failedCount == 0)
         {
             AnsiConsole.MarkupLine("[green]所有工具均为最新版本[/]");
             return;
         }
 
         AnsiConsole.Write(table);
-        AnsiConsole.MarkupLine($"[grey]共 {outdatedCount} 个工具可更新，使用 gitpkg update 更新[/]");
+
+        if (outdatedCount > 0)
+            AnsiConsole.MarkupLine($"[grey]共 {outdatedCount} 个工具可更新，使用 gitpkg update 更新[/]");
+
+        if (failedCount > 0)
+            AnsiConsole.MarkupLine($"[yellow]⚠ {failedCount} 个工具查询失败，可能是 GitHub API 限流，请稍后重试[/]");
     }
 }
