@@ -32,7 +32,7 @@ public class SelfUpdateCommand : Command
             }
             catch (HttpRequestException ex) when (ex.Message.Contains("Not Found") || ex.Message.Contains("资源不存在"))
             {
-                AnsiConsole.MarkupLine($"[red]✗ 未找到 GitPkg 的最新 Release[/]");
+                AnsiConsole.MarkupLine("[red]✗ 未找到 GitPkg 的最新 Release[/]");
                 return 1;
             }
             catch (HttpRequestException ex)
@@ -70,7 +70,7 @@ public class SelfUpdateCommand : Command
 
         if (currentVersion == latestVersion)
         {
-            AnsiConsole.MarkupLine($"[green]✓ GitPkg 已是最新版本[/]");
+            AnsiConsole.MarkupLine("[green]✓ GitPkg 已是最新版本[/]");
             return;
         }
 
