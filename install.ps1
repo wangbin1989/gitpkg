@@ -67,7 +67,8 @@ function Install-GitPkg {
     if ($Scd) {
         $assetPattern = "gitpkg-.*-scd-$platformSuffix\.zip"
     } else {
-        $assetPattern = "gitpkg-.*-$platformSuffix\.zip"
+        # 使用负向前瞻排除 scd 版本，避免误匹配
+        $assetPattern = "gitpkg-.*-(?!scd-)$platformSuffix\.zip"
     }
 
     $asset = $releaseJson.assets | Where-Object {

@@ -92,11 +92,21 @@ download_and_install() {
     fi
 
     local download_url
-    download_url=$(curl -fsSL "${api_url}" \
-        | grep "browser_download_url" \
-        | grep "${asset_pattern}" \
-        | head -n 1 \
-        | cut -d '"' -f 4)
+    if [[ "${use_scd}" == "true" ]]; then
+        download_url=$(curl -fsSL "${api_url}" \
+            | grep "browser_download_url" \
+            | grep "${asset_pattern}" \
+            | head -n 1 \
+            | cut -d '"' -f 4)
+    else
+        # 非 scd 模式时，排除 scd 版本避免误匹配
+        download_url=$(curl -fsSL "${api_url}" \
+            | grep "browser_download_url" \
+            | grep "${asset_pattern}" \
+            | grep -v "scd" \
+            | head -n 1 \
+            | cut -d '"' -f 4)
+    fi
 
     if [[ -z "${download_url}" ]]; then
         error "未找到 ${platform} 平台的发布包"
