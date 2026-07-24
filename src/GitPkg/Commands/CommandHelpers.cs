@@ -112,21 +112,6 @@ public static class CommandHelpers
         return PromptAssetSelection(filtered);
     }
 
-    /// <summary>
-    /// 从 Release 资产列表中查找 SHA256 校验文件。
-    /// 支持 .sha256、checksums.txt、sha256sums 等常见命名。
-    /// </summary>
-    /// <returns>校验文件资产，未找到时返回 null。</returns>
-    public static GitHubAsset? FindChecksumAsset(List<GitHubAsset> assets)
-    {
-        return assets.FirstOrDefault(a =>
-        {
-            var n = a.Name.ToLowerInvariant();
-            return n.EndsWith(".sha256") || n == "checksums.txt"
-                || n == "sha256sums" || n == "sha256sums.txt";
-        });
-    }
-
     /// <summary>去除文件名中的平台和架构信息，保留基础名称和扩展名。</summary>
     /// <remarks>
     /// 示例：my-tool-windows-amd64.exe → my-tool.exe，my-tool_linux_arm64 → my-tool

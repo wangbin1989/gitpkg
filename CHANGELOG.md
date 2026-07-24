@@ -5,6 +5,9 @@
 ### Fixed
 - `update` 命令下载文件时显示进度条，与 `install` 和 `self-update` 保持一致
 
+### Removed
+- 移除 SHA256 完整性校验功能
+
 ## [2.5.5] - 2026-07-24
 
 ### Fixed
