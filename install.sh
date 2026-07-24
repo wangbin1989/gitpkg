@@ -62,7 +62,7 @@ download_and_install() {
     local platform="$1"
     local version="$2"
     local use_scd="${3:-false}"
-    local archive_suffix archive_ext asset_pattern
+    local archive_suffix archive_ext
 
     case "${platform}" in
         darwin-arm64)   archive_suffix="darwin-arm64"; archive_ext="tar.gz" ;;
@@ -74,14 +74,7 @@ download_and_install() {
             ;;
     esac
 
-    # 根据是否使用 SCD 版本构造匹配模式
-    if [[ "${use_scd}" == "true" ]]; then
-        asset_pattern="gitpkg-.*-scd-${archive_suffix}\.${archive_ext}"
-    else
-        asset_pattern="gitpkg-.*-${archive_suffix}\.${archive_ext}"
-    fi
-
-    # 获取下载 URL
+    # 获取 Release 信息
     local api_url
     if [[ "$version" == "latest" ]]; then
         info "获取最新版本信息..."
@@ -91,25 +84,36 @@ download_and_install() {
         api_url="${GITHUB_API}/releases/tags/${version}"
     fi
 
-    local download_url
-    if [[ "${use_scd}" == "true" ]]; then
-        download_url=$(curl -fsSL "${api_url}" \
-            | grep "browser_download_url" \
-            | grep "${asset_pattern}" \
-            | head -n 1 \
-            | cut -d '"' -f 4)
-    else
-        # 非 scd 模式时，排除 scd 版本避免误匹配
-        download_url=$(curl -fsSL "${api_url}" \
-            | grep "browser_download_url" \
-            | grep "${asset_pattern}" \
-            | grep -v "scd" \
-            | head -n 1 \
-            | cut -d '"' -f 4)
+    local release_json
+    release_json=$(curl -fsSL "${api_url}")
+
+    # 提取版本号并构造精确的资产名称
+    local tag_name
+    tag_name=$(echo "${release_json}" | grep '"tag_name"' | head -n 1 | cut -d '"' -f 4)
+
+    if [[ -z "${tag_name}" ]]; then
+        error "无法获取版本号"
+        exit 1
     fi
 
+    local asset_name
+    if [[ "${use_scd}" == "true" ]]; then
+        asset_name="gitpkg-${tag_name}-scd-${archive_suffix}.${archive_ext}"
+    else
+        asset_name="gitpkg-${tag_name}-${archive_suffix}.${archive_ext}"
+    fi
+
+    info "目标资产: ${asset_name}"
+
+    local download_url
+    download_url=$(echo "${release_json}" \
+        | grep "browser_download_url" \
+        | grep "${asset_name}" \
+        | head -n 1 \
+        | cut -d '"' -f 4)
+
     if [[ -z "${download_url}" ]]; then
-        error "未找到 ${platform} 平台的发布包"
+        error "未找到资产: ${asset_name}"
         exit 1
     fi
 

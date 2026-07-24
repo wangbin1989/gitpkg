@@ -63,20 +63,22 @@ function Install-GitPkg {
     Write-Host "获取版本信息..." -ForegroundColor Green
     $releaseJson = Invoke-RestMethod -Uri $apiUrl -Headers @{ "User-Agent" = "gitpkg-installer" }
 
-    # 根据是否使用 SCD 版本构造匹配模式
+    # 使用版本号构造精确的资产名称
+    $tagName = $releaseJson.tag_name
     if ($Scd) {
-        $assetPattern = "gitpkg-.*-scd-$platformSuffix\.zip"
+        $assetName = "gitpkg-$tagName-scd-$platformSuffix.zip"
     } else {
-        # 使用负向前瞻排除 scd 版本，避免误匹配
-        $assetPattern = "gitpkg-.*-(?!scd-)$platformSuffix\.zip"
+        $assetName = "gitpkg-$tagName-$platformSuffix.zip"
     }
 
+    Write-Host "目标资产: $assetName" -ForegroundColor Cyan
+
     $asset = $releaseJson.assets | Where-Object {
-        $_.name -match $assetPattern
+        $_.name -eq $assetName
     } | Select-Object -First 1
 
     if (-not $asset) {
-        Write-Host "未找到 $platform 平台的发布包" -ForegroundColor Red
+        Write-Host "未找到资产: $assetName" -ForegroundColor Red
         exit 1
     }
 
