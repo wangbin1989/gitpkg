@@ -1,5 +1,10 @@
 # Changelog
 
+## [2.5.6] - 2026-07-24
+
+### Fixed
+- `update` 命令下载文件时显示进度条，与 `install` 和 `self-update` 保持一致
+
 ## [2.5.5] - 2026-07-24
 
 ### Fixed
