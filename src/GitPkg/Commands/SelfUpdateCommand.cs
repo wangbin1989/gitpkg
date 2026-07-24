@@ -268,7 +268,6 @@ public class SelfUpdateCommand : Command
     private static void ReplaceOnWindows(string newBinary, string currentPath)
     {
         var dir = Path.GetDirectoryName(currentPath)!;
-        var exeName = Path.GetFileName(currentPath);
         var newPath = currentPath + ".new";
 
         File.Move(newBinary, newPath, overwrite: true);
