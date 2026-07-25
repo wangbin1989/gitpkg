@@ -5,6 +5,15 @@
 ### Changed
 - 提取 `install`/`update`/`self-update` 命令中重复的进度条下载逻辑为 `CommandHelpers.DownloadWithProgressAsync` 公共方法
 - 下载进度条显示文件大小（如 `下载 asset.tar.gz (12.5 MB)`）
+- `UpdateCommand` 使用集合表达式替代 `.ToList()`
+- `InfoCommand` 使用集合表达式一次性构建 content 列表
+
+### Fixed
+- 移除多个命令中未使用的 `CancellationToken` 参数（`CompletionCommand`、`InitCommand`）
+- 移除多个命令中未使用的 `parseResult` 参数（`ListCommand`、`OutdatedCommand`、`SelfUpdateCommand`、`ManifestCommand`）
+- 移除 `SelfUpdateCommand` 中未使用的 `exeName` 变量
+- 移除 `SelfUpdateCommand` 中冗余的字符串插值
+- 移除 `UninstallCommand` 中冗余的 nullable 抑制表达式
 
 ### Removed
 - 移除未使用的 `CompletionHelper` 类（补全脚本直接在 shell 层面解析 manifest.json）
