@@ -5,23 +5,20 @@ namespace GitPkg.Models;
 /// <summary>
 /// 当前运行平台的操作系统和架构信息，用于匹配 GitHub Release 中对应平台的资产。
 /// </summary>
-/// <param name="os">操作系统标识符（macos / windows / linux）</param>
-/// <param name="arch">CPU 架构标识符（x64 / arm64）</param>
-public record PlatformInfo(string os, string arch)
+/// <param name="Os">操作系统标识符（macos / windows / linux）</param>
+/// <param name="Arch">CPU 架构标识符（x64 / arm64）</param>
+public record PlatformInfo(string Os, string Arch)
 {
-    public string OS { get; init; } = os;
-    public string Arch { get; init; } = arch;
-
     /// <summary>获取当前运行时的平台信息。</summary>
     public static PlatformInfo Current()
     {
-        var os = GetOS();
+        var os = GetOs();
         var arch = GetArch();
         return new PlatformInfo(os, arch);
     }
 
     /// <summary>通过 <see cref="RuntimeInformation"/> 检测操作系统。</summary>
-    private static string GetOS()
+    private static string GetOs()
     {
         if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX)) return "macos";
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) return "windows";
@@ -41,5 +38,5 @@ public record PlatformInfo(string os, string arch)
         };
     }
 
-    public override string ToString() => $"{OS}/{Arch}";
+    public override string ToString() => $"{Os}/{Arch}";
 }

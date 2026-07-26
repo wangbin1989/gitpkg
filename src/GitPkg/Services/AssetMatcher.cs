@@ -31,7 +31,7 @@ public class AssetMatcher
     /// <returns>匹配的资产列表（可能为空）。</returns>
     public List<GitHubAsset> Match(List<GitHubAsset> assets, PlatformInfo platform)
     {
-        var osPatterns = GetKeywords(OsKeywords, platform.OS);
+        var osPatterns = GetKeywords(OsKeywords, platform.Os);
         var archPatterns = GetKeywords(ArchKeywords, platform.Arch);
 
         var matches = assets
