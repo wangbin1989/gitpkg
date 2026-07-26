@@ -48,9 +48,9 @@ public class AssetMatcher
 
     private static bool Matches(string assetName, string[] osPatterns, string[] archPatterns)
     {
-        var hasOS = osPatterns.Any(p => ContainsWord(assetName, p));
+        var hasOs = osPatterns.Any(p => ContainsWord(assetName, p));
         var hasArch = archPatterns.Any(p => ContainsWord(assetName, p));
-        return hasOS && hasArch;
+        return hasOs && hasArch;
     }
 
     /// <summary>检查资产名中是否包含指定关键词（词边界匹配，避免 win 误匹配 darwin）。</summary>
