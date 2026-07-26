@@ -1,4 +1,5 @@
 using System.Text.Json;
+
 using GitPkg.Models;
 
 namespace GitPkg.Services;
@@ -49,7 +50,7 @@ public class InnerManifestService
     /// <summary>将 PlatformInfo 转换为 inner-manifest 平台键格式（如 macos/arm64 → osx-arm64）。</summary>
     private static string? ToInnerManifestKey(PlatformInfo platform)
     {
-        var os = platform.OS.ToLowerInvariant() switch
+        var os = platform.Os.ToLowerInvariant() switch
         {
             "macos" => "osx",
             "linux" => "linux",

@@ -12,7 +12,7 @@ public class OutdatedCommand : Command
     /// <summary>创建 outdated 命令。</summary>
     public OutdatedCommand() : base("outdated", "检查已安装工具的更新")
     {
-        SetAction(async (parseResult, ct) =>
+        SetAction(async (_, ct) =>
         {
             try
             {

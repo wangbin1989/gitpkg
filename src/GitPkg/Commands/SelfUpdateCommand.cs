@@ -23,7 +23,7 @@ public class SelfUpdateCommand : Command
     /// <summary>创建 self-update 命令。</summary>
     public SelfUpdateCommand() : base("self-update", "更新 GitPkg 自身到最新版本")
     {
-        SetAction(async (parseResult, ct) =>
+        SetAction(async (_, ct) =>
         {
             try
             {
@@ -32,7 +32,7 @@ public class SelfUpdateCommand : Command
             }
             catch (HttpRequestException ex) when (ex.Message.Contains("Not Found") || ex.Message.Contains("资源不存在"))
             {
-                AnsiConsole.MarkupLine($"[red]✗ 未找到 GitPkg 的最新 Release[/]");
+                AnsiConsole.MarkupLine("[red]✗ 未找到 GitPkg 的最新 Release[/]");
                 return 1;
             }
             catch (HttpRequestException ex)
@@ -70,7 +70,7 @@ public class SelfUpdateCommand : Command
 
         if (currentVersion == latestVersion)
         {
-            AnsiConsole.MarkupLine($"[green]✓ GitPkg 已是最新版本[/]");
+            AnsiConsole.MarkupLine("[green]✓ GitPkg 已是最新版本[/]");
             return;
         }
 
@@ -122,33 +122,9 @@ public class SelfUpdateCommand : Command
         Directory.CreateDirectory(tmpDir);
         var archivePath = Path.Combine(tmpDir, selected.Name);
 
-        await AnsiConsole.Progress()
-            .StartAsync(async ctx =>
-            {
-                var task = ctx.AddTask($"[green]下载 {selected.Name}[/]", maxValue: selected.Size > 0 ? selected.Size : 100);
-                var lastUpdate = DateTime.MinValue;
-
-                await gitHub.DownloadFileAsync(selected.DownloadUrl, archivePath,
-                    onProgress: (downloaded, total) =>
-                    {
-                        var now = DateTime.UtcNow;
-                        if ((now - lastUpdate).TotalMilliseconds < 100) return;
-                        lastUpdate = now;
-
-                        if (total > 0)
-                        {
-                            task.MaxValue(total);
-                            task.Value(downloaded);
-                        }
-                        else
-                        {
-                            task.MaxValue(downloaded + 8192);
-                            task.Value(downloaded);
-                        }
-                    }, ct: ct);
-
-                task.Value(task.MaxValue);
-            });
+        await CommandHelpers.DownloadWithProgressAsync(
+            gitHub, selected.DownloadUrl, archivePath,
+            selected.Name, selected.Size, ct);
 
         var extractDir = Path.Combine(tmpDir, "self-update");
         if (Directory.Exists(extractDir))
@@ -292,7 +268,6 @@ public class SelfUpdateCommand : Command
     private static void ReplaceOnWindows(string newBinary, string currentPath)
     {
         var dir = Path.GetDirectoryName(currentPath)!;
-        var exeName = Path.GetFileName(currentPath);
         var newPath = currentPath + ".new";
 
         File.Move(newBinary, newPath, overwrite: true);

@@ -12,7 +12,7 @@ public class ListCommand : Command
     /// <summary>创建 list 命令。</summary>
     public ListCommand() : base("list", "列出已安装的工具")
     {
-        SetAction(async (parseResult, ct) =>
+        SetAction(async (_, ct) =>
         {
             try
             {

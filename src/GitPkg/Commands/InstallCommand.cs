@@ -149,33 +149,9 @@ public class InstallCommand : Command
         var archivePath = Path.Combine(tmpDir, selected.Name);
 
         // 5. Download
-        await AnsiConsole.Progress()
-            .StartAsync(async ctx =>
-            {
-                var task = ctx.AddTask($"[green]下载 {selected.Name}[/]", maxValue: selected.Size > 0 ? selected.Size : 100);
-                var lastUpdate = DateTime.MinValue;
-
-                await gitHub.DownloadFileAsync(selected.DownloadUrl, archivePath,
-                    onProgress: (downloaded, total) =>
-                    {
-                        var now = DateTime.UtcNow;
-                        if ((now - lastUpdate).TotalMilliseconds < 100) return;
-                        lastUpdate = now;
-
-                        if (total > 0)
-                        {
-                            task.MaxValue(total);
-                            task.Value(downloaded);
-                        }
-                        else
-                        {
-                            task.MaxValue(downloaded + 8192);
-                            task.Value(downloaded);
-                        }
-                    }, ct: ct);
-
-                task.Value(task.MaxValue);
-            });
+        await CommandHelpers.DownloadWithProgressAsync(
+            gitHub, selected.DownloadUrl, archivePath,
+            selected.Name, selected.Size, ct);
 
         // 6. Extract
         AnsiConsole.MarkupLine($"[grey]解压到 {installDir}...[/]");

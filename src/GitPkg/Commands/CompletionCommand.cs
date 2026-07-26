@@ -15,7 +15,7 @@ public class CompletionCommand : Command
         var shellArg = new Argument<string>("shell") { Description = "目标 shell: zsh, bash, powershell (pwsh), cmd" };
         Add(shellArg);
 
-        SetAction((parseResult, ct) =>
+        SetAction((parseResult, _) =>
         {
             try
             {

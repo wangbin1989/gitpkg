@@ -1,5 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Serialization.Metadata;
+
 using GitPkg.Models;
 
 namespace GitPkg.Services;
@@ -39,20 +40,6 @@ public class GitHubService
         return await GetAsync(url, AppJsonContext.Default.GitHubRepo, ct);
     }
 
-    /// <summary>下载文本内容。</summary>
-    public async Task<string> DownloadStringAsync(string url, CancellationToken ct = default)
-    {
-        return await _http.GetStringAsync(url, ct);
-    }
-
-    /// <summary>以流形式获取远程文件。</summary>
-    public async Task<Stream> GetStreamAsync(string url, CancellationToken ct = default)
-    {
-        var response = await _http.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, ct);
-        response.EnsureSuccessStatusCode();
-        return await response.Content.ReadAsStreamAsync(ct);
-    }
-
     /// <summary>下载文件到本地，支持进度回调。</summary>
     public async Task DownloadFileAsync(string url, string destPath, Action<long, long>? onProgress = null, CancellationToken ct = default)
     {
@@ -60,8 +47,8 @@ public class GitHubService
         response.EnsureSuccessStatusCode();
 
         var totalBytes = response.Content.Headers.ContentLength ?? -1;
-        using var stream = await response.Content.ReadAsStreamAsync(ct);
-        using var fileStream = File.Create(destPath);
+        await using var stream = await response.Content.ReadAsStreamAsync(ct);
+        await using var fileStream = File.Create(destPath);
 
         var buffer = new byte[8192];
         var downloaded = 0L;

@@ -1,5 +1,35 @@
 # Changelog
 
+## [Unreleased]
+
+## [2.6.0] - 2026-07-26
+
+### Changed
+- 提取 `install`/`update`/`self-update` 命令中重复的进度条下载逻辑为 `CommandHelpers.DownloadWithProgressAsync` 公共方法
+- 下载进度条显示文件大小（如 `下载 asset.tar.gz (12.5 MB)`）
+- `UpdateCommand` 使用集合表达式替代 `.ToList()`
+- `InfoCommand` 使用集合表达式一次性构建 content 列表
+- `Program.cs` 使用集合初始化器注册子命令
+- `PlatformInfo` record 主构造参数和属性命名统一为 PascalCase（`os`→`Os`、`OS`→`Os`、`GetOS`→`GetOs`）
+- 移除 `PlatformInfo` 中冗余的显式属性声明
+- `AssetMatcher` 局部变量 `hasOS` 改为 `hasOs`（camelCase 规范）
+- Services 目录 using 语句组间添加空行（`dotnet_separate_import_directive_groups`）
+- `GitHubService` 移除未使用的 `DownloadStringAsync` 和 `GetStreamAsync` 方法，`using` 改为 `await using`
+- `ArchiveExtractor` zip 解压改为异步方法（`ExtractZipAsync`），支持 `CancellationToken`
+- `ArchiveExtractor.ExtractAsync` 补充 `ct` 参数 XML doc
+
+### Fixed
+- 移除多个命令中未使用的 `CancellationToken` 参数（`CompletionCommand`、`InitCommand`）
+- 移除多个命令中未使用的 `parseResult` 参数（`ListCommand`、`OutdatedCommand`、`SelfUpdateCommand`、`ManifestCommand`）
+- 移除 `SelfUpdateCommand` 中未使用的 `exeName` 变量
+- 移除 `SelfUpdateCommand` 中冗余的字符串插值
+- 移除 `UninstallCommand` 中冗余的 nullable 抑制表达式
+- `AppJsonContext` 使用分号代替空类体（C# 12 语法）
+- Services 目录所有文件移除末尾多余换行（`insert_final_newline = false`）
+
+### Removed
+- 移除未使用的 `CompletionHelper` 类（补全脚本直接在 shell 层面解析 manifest.json）
+
 ## [2.5.6] - 2026-07-24
 
 ### Fixed

@@ -15,6 +15,7 @@ public class ArchiveExtractor
     /// </summary>
     /// <param name="archivePath">归档文件路径。</param>
     /// <param name="destDir">目标目录（自动创建）。</param>
+    /// <param name="ct">取消令牌。</param>
     public async Task ExtractAsync(string archivePath, string destDir, CancellationToken ct = default)
     {
         Directory.CreateDirectory(destDir);
@@ -24,8 +25,7 @@ public class ArchiveExtractor
 
         if (ext == ".zip")
         {
-            ZipFile.ExtractToDirectory(archivePath, destDir, overwriteFiles: true);
-            EnsureExecutablePermissions(destDir);
+            await ExtractZipAsync(archivePath, destDir, ct);
         }
         else if (ext == ".gz" && name.EndsWith(".tar"))
         {
@@ -77,5 +77,31 @@ public class ArchiveExtractor
     private static async Task ExtractTarAsync(string archivePath, string destDir, CancellationToken ct)
     {
         await TarFile.ExtractToDirectoryAsync(archivePath, destDir, overwriteFiles: true, cancellationToken: ct);
+    }
+
+    /// <summary>异步解压 .zip 归档文件。</summary>
+    private static async Task ExtractZipAsync(string archivePath, string destDir, CancellationToken ct)
+    {
+        await using var archive = await ZipFile.OpenReadAsync(archivePath, ct);
+        foreach (var entry in archive.Entries)
+        {
+            ct.ThrowIfCancellationRequested();
+
+            var destPath = Path.Combine(destDir, entry.FullName);
+
+            // 目录条目（以 / 结尾）只创建目录
+            if (string.IsNullOrEmpty(entry.Name))
+            {
+                Directory.CreateDirectory(destPath);
+                continue;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(destPath)!);
+            await using var entryStream = await entry.OpenAsync(ct);
+            await using var fileStream = File.Create(destPath);
+            await entryStream.CopyToAsync(fileStream, ct);
+        }
+
+        EnsureExecutablePermissions(destDir);
     }
 }

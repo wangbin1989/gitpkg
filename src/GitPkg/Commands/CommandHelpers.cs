@@ -1,4 +1,5 @@
 using GitPkg.Models;
+using GitPkg.Services;
 using Spectre.Console;
 
 namespace GitPkg.Commands;
@@ -167,6 +168,41 @@ public static class CommandHelpers
             return fileName;
 
         return result + ext;
+    }
+
+    /// <summary>下载文件并显示进度条。</summary>
+    public static async Task DownloadWithProgressAsync(
+        GitHubService gitHub, string url, string destPath,
+        string fileName, long fileSize, CancellationToken ct)
+    {
+        var sizeDisplay = fileSize > 0 ? $" ({FormatSize(fileSize)})" : "";
+        await AnsiConsole.Progress()
+            .StartAsync(async ctx =>
+            {
+                var task = ctx.AddTask($"[green]下载 {fileName}[/]{sizeDisplay}", maxValue: fileSize > 0 ? fileSize : 100);
+                var lastUpdate = DateTime.MinValue;
+
+                await gitHub.DownloadFileAsync(url, destPath,
+                    onProgress: (downloaded, total) =>
+                    {
+                        var now = DateTime.UtcNow;
+                        if ((now - lastUpdate).TotalMilliseconds < 100) return;
+                        lastUpdate = now;
+
+                        if (total > 0)
+                        {
+                            task.MaxValue(total);
+                            task.Value(downloaded);
+                        }
+                        else
+                        {
+                            task.MaxValue(downloaded + 8192);
+                            task.Value(downloaded);
+                        }
+                    }, ct: ct);
+
+                task.Value(task.MaxValue);
+            });
     }
 
     /// <summary>提取已知文件扩展名，避免将版本号中的点号误识别为扩展名分隔符。</summary>

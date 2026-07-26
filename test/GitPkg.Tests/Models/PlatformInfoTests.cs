@@ -15,9 +15,9 @@ public class PlatformInfoTests
     {
         var platform = PlatformInfo.Current();
 
-        platform.OS.ShouldNotBeNull();
+        platform.Os.ShouldNotBeNull();
         platform.Arch.ShouldNotBeNull();
-        platform.OS.ShouldNotBeEmpty();
+        platform.Os.ShouldNotBeEmpty();
         platform.Arch.ShouldNotBeEmpty();
     }
 }

@@ -24,7 +24,7 @@ public class ManifestCommand : Command
     {
         public ExportCommand() : base("export", "导出清单文件到标准输出")
         {
-            SetAction(async (parseResult, ct) =>
+            SetAction(async (_, ct) =>
             {
                 try
                 {
