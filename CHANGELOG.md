@@ -9,6 +9,7 @@
 - 修正 `schema.json` 和 `inner-manifest.json` 中的 schema 链接为 raw 内容地址（原链接返回 404）
 - `inner-manifest.json` 中 platform 对象的 `bin` 字段重命名为 `link`，格式从字符串数组改为对象数组（`source` 必填，`target` 可选）
 - 各命令错误输出统一提取到 `CommandHelpers.WriteError`，Debug 模式下显示完整堆栈
+- Release 工作流从 CHANGELOG.md 提取 release notes，替代 GitHub 自动生成
 
 ### Added
 - `inner-manifest.json` 新增 `asset` 属性，可在平台配置中指定资产名称匹配模式，用于精确选择 release asset
