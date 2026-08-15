@@ -1,5 +1,5 @@
 {
-  "schema": "https://github.com/wangbin1989/GitPkg/schema.json#",
+  "schema": "https://raw.githubusercontent.com/wangbin1989/GitPkg/main/schema.json#",
   "tools": [
     {
       "repo": "cli/cli",

@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/wangbin1989/GitPkg/schema.json",
+  "$id": "https://raw.githubusercontent.com/wangbin1989/GitPkg/main/schema.json",
   "title": "GitPkg Inner Manifest",
   "description": "GitPkg 内置工具清单配置文件，用于定义工具的自定义名称和平台特定的可执行文件路径。",
   "type": "object",
