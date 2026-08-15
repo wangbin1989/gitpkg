@@ -88,7 +88,7 @@ public class InstallCommand : Command
             }
             catch (Exception ex)
             {
-                CommandHelpers.WriteError($"  ✗ {tool.Name}", ex);
+                CommandHelpers.WriteError(ex, $"  ✗ {tool.Name}");
                 failed++;
             }
         }
