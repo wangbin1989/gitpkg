@@ -20,6 +20,7 @@ var root = new RootCommand("gitpkg — GitHub Release 自动更新工具")
     new UpdateCommand(),
     new OutdatedCommand(),
     new UninstallCommand(),
+    new LinkCommand(),
     new ListCommand(),
     new InfoCommand(),
     new ManifestCommand(),
