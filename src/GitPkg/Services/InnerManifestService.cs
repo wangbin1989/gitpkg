@@ -44,7 +44,7 @@ public class InnerManifestService
         var match = entry.Platforms.Find(p =>
             p.Rid.Equals(platformKey, StringComparison.OrdinalIgnoreCase));
 
-        return match?.Bin.Count > 0 ? match.Bin : null;
+        return match?.Bin is { Count: > 0 } bin ? bin : null;
     }
 
     /// <summary>
