@@ -61,7 +61,7 @@ public class CompletionCommand : Command
                 install)
                     completions=(--from --help)
                     ;;
-                update|uninstall|info)
+                update|uninstall|info|link)
                     # 动态补全已安装工具名称
                     local manifest="$HOME/.gitpkg/manifest.json"
                     if [[ -f "$manifest" ]]; then
@@ -79,7 +79,7 @@ public class CompletionCommand : Command
                     completions=(--help)
                     ;;
                 *)
-                    completions=(install update uninstall outdated list info init completion manifest self-update --help --version)
+                    completions=(install update uninstall link outdated list info init completion manifest self-update --help --version)
                     ;;
             esac
 
@@ -107,7 +107,7 @@ public class CompletionCommand : Command
                 install)
                     opts="--from --help"
                     ;;
-                update|uninstall|info)
+                update|uninstall|info|link)
                     # 动态补全已安装工具名称
                     local manifest="$HOME/.gitpkg/manifest.json"
                     if [[ -f "$manifest" ]]; then
@@ -126,7 +126,7 @@ public class CompletionCommand : Command
                     opts="--help"
                     ;;
                 *)
-                    opts="install update uninstall outdated list info init completion manifest self-update --help --version"
+                    opts="install update uninstall link outdated list info init completion manifest self-update --help --version"
                     ;;
             esac
 
@@ -179,13 +179,21 @@ public class CompletionCommand : Command
                     }
                     $names + @('--help')
                 }
+                "link"      {
+                    $names = @()
+                    if (Test-Path $manifestPath) {
+                        $json = Get-Content $manifestPath -Raw | ConvertFrom-Json
+                        $names = @($json.tools | ForEach-Object { $_.name })
+                    }
+                    $names + @('--help')
+                }
                 "init"      { @('zsh', 'bash', 'powershell', 'cmd') }
                 "completion"{ @('zsh', 'bash', 'powershell', 'cmd') }
                 "manifest"  { @('export', '--help') }
                 "list"      { @('--help') }
                 "outdated"  { @('--help') }
                 "self-update" { @('--help') }
-                default     { @('install', 'update', 'uninstall', 'outdated', 'list', 'info', 'init', 'completion', 'manifest', 'self-update', '--help', '--version') }
+                default     { @('install', 'update', 'uninstall', 'link', 'outdated', 'list', 'info', 'init', 'completion', 'manifest', 'self-update', '--help', '--version') }
             }
 
             $completions | Where-Object { $_ -like "$wordToComplete*" } | ForEach-Object {
@@ -235,7 +243,7 @@ public class CompletionCommand : Command
         }
 
         local commands = {
-            "install", "update", "uninstall", "outdated", "list", "info",
+            "install", "update", "uninstall", "link", "outdated", "list", "info",
             "init", "completion", "manifest", "self-update",
             "--help", "--version"
         }
@@ -246,7 +254,7 @@ public class CompletionCommand : Command
                 local cmd = line_state:getword(2)
                 if cmd then
                     -- update/uninstall/info 动态补全已安装工具名称
-                    if cmd == "update" or cmd == "uninstall" or cmd == "info" then
+                    if cmd == "update" or cmd == "uninstall" or cmd == "info" or cmd == "link" then
                         local names = get_tool_names()
                         table.insert(names, "--help")
                         return names
