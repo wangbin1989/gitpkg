@@ -31,10 +31,10 @@ public class InnerManifestService
     }
 
     /// <summary>
-    /// 获取当前平台架构对应的 bin 文件列表。
-    /// 未匹配到平台或无 bin 配置时返回 null。
+    /// 获取当前平台架构对应的链接配置列表。
+    /// 未匹配到平台或无 link 配置时返回 null。
     /// </summary>
-    public static List<string>? GetBinPaths(InnerManifestTool? entry, PlatformInfo platform)
+    public static List<InnerManifestLink>? GetLinkPaths(InnerManifestTool? entry, PlatformInfo platform)
     {
         if (entry?.Platforms == null) return null;
 
@@ -44,7 +44,24 @@ public class InnerManifestService
         var match = entry.Platforms.Find(p =>
             p.Rid.Equals(platformKey, StringComparison.OrdinalIgnoreCase));
 
-        return match?.Bin.Count > 0 ? match.Bin : null;
+        return match?.Link is { Count: > 0 } link ? link : null;
+    }
+
+    /// <summary>
+    /// 获取当前平台架构对应的资产名称匹配模式。
+    /// 未匹配到平台或无 asset 配置时返回 null。
+    /// </summary>
+    public static string? GetAssetPattern(InnerManifestTool? entry, PlatformInfo platform)
+    {
+        if (entry?.Platforms == null) return null;
+
+        var platformKey = ToInnerManifestKey(platform);
+        if (platformKey == null) return null;
+
+        var match = entry.Platforms.Find(p =>
+            p.Rid.Equals(platformKey, StringComparison.OrdinalIgnoreCase));
+
+        return !string.IsNullOrWhiteSpace(match?.Asset) ? match.Asset : null;
     }
 
     /// <summary>将 PlatformInfo 转换为 inner-manifest 平台键格式（如 macos/arm64 → osx-arm64）。</summary>

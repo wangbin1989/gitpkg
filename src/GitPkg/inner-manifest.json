@@ -10,7 +10,7 @@
       "platforms": [
         {
           "rid": "osx-arm64",
-          "bin": ["bin/codegraph"]
+          "link": [{ "source": "bin/codegraph" }]
         }
       ]
     },
@@ -23,7 +23,55 @@
       "platforms": [
         {
           "rid": "osx-arm64",
-          "bin": ["usr/bin/podman"]
+          "link": [{ "source": "usr/bin/podman" }]
+        },
+        {
+          "rid": "win-x64",
+          "link": [{ "source": "usr/bin/podman.exe" }]
+        }
+      ]
+    },
+    {
+      "repo": "ggml-org/llama.cpp",
+      "platforms": [
+        {
+          "rid": "osx-arm64",
+          "link": [
+            { "source": "llama-cli" },
+            { "source": "llama-server" }
+          ]
+        },
+        {
+          "rid": "win-x64",
+          "link": [
+            { "source": "llama-cli.exe" },
+            { "source": "llama-server.exe" }
+          ]
+        }
+      ]
+    },
+    {
+      "repo": "openai/codex",
+      "platforms": [
+        {
+          "rid": "osx-arm64",
+          "asset": "codex-aarch64-apple-darwin.tar.gz",
+          "link": [
+            {
+              "source": "codex-aarch64-apple-darwin",
+              "target": "codex"
+            }
+          ]
+        },
+        {
+          "rid": "win-x64",
+          "asset": "codex-x86_64-pc-windows-msvc.exe.zip",
+          "link": [
+            {
+              "source": "codex-x86_64-pc-windows-msvc.exe",
+              "target": "codex.exe"
+            }
+          ]
         }
       ]
     }

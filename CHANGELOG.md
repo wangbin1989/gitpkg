@@ -2,6 +2,24 @@
 
 ## [Unreleased]
 
+## [2.7.0] - 2026-08-15
+
+### Changed
+- `inner-manifest.json` 中 platform 对象的 `target` 字段重命名为 `rid`
+- 修正 `schema.json` 和 `inner-manifest.json` 中的 schema 链接为 raw 内容地址（原链接返回 404）
+- `inner-manifest.json` 中 platform 对象的 `bin` 字段重命名为 `link`，格式从字符串数组改为对象数组（`source` 必填，`target` 可选）
+- 各命令错误输出统一提取到 `CommandHelpers.WriteError`，Debug 模式下显示完整堆栈
+
+### Added
+- `inner-manifest.json` 新增 `asset` 属性，可在平台配置中指定资产名称匹配模式，用于精确选择 release asset
+- 资产选择优先级：清单 asset 匹配 → 已记录资产名（版本替换） → 平台关键词匹配 → 手动选择
+- `InnerManifestService` 新增 `GetAssetPattern` 方法
+- `schema.json` 中 `platform.link` 改为可选属性（部分工具仅需 `asset` 指定资产，无需显式配置链接路径）
+- 内置清单新增 `ggml-org/llama.cpp` 配置，仅链接 `llama-cli` 和 `llama-server`
+
+### Fixed
+- 修复 `GetLinkPaths` 在 inner-manifest 无 `link` 字段时抛出 `NullReferenceException` 的问题
+
 ## [2.6.0] - 2026-07-26
 
 ### Changed

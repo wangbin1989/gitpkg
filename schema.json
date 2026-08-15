@@ -53,16 +53,36 @@
           "description": "平台架构标识符，格式为 os-arch。",
           "enum": ["osx-arm64", "osx-x64", "linux-arm64", "linux-x64", "windows-arm64", "windows-x64"]
         },
-        "bin": {
+        "asset": {
+          "type": "string",
+          "description": "资产名称匹配模式，用于精确选择 release asset。"
+        },
+        "link": {
           "type": "array",
-          "description": "需要链接到 bin 目录的可执行文件路径列表（相对于安装目录）。",
+          "description": "需要链接到 bin 目录的可执行文件配置列表。",
           "items": {
-            "type": "string"
+            "$ref": "#/$defs/link"
           },
           "minItems": 1
         }
       },
-      "required": ["rid", "bin"],
+      "required": ["rid"],
+      "additionalProperties": false
+    },
+    "link": {
+      "type": "object",
+      "description": "链接配置条目。",
+      "properties": {
+        "source": {
+          "type": "string",
+          "description": "源文件路径（相对于安装目录）。"
+        },
+        "target": {
+          "type": "string",
+          "description": "链接名称，为空时使用 source 的文件名。"
+        }
+      },
+      "required": ["source"],
       "additionalProperties": false
     }
   }

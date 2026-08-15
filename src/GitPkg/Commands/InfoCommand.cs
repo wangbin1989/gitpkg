@@ -32,7 +32,7 @@ public class InfoCommand : Command
             }
             catch (Exception ex)
             {
-                AnsiConsole.MarkupLine($"[red]✗ 错误: {ex.Message}[/]");
+                CommandHelpers.WriteError(ex);
                 return 1;
             }
         });

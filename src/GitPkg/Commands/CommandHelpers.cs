@@ -5,10 +5,31 @@ using Spectre.Console;
 namespace GitPkg.Commands;
 
 /// <summary>
-/// 命令通用辅助方法。提供交互式资产选择和格式化输出。
+/// 命令通用辅助方法。提供交互式资产选择、错误输出和格式化工具。
 /// </summary>
 public static class CommandHelpers
 {
+    /// <summary>输出错误信息，Debug 模式下显示完整堆栈。</summary>
+    public static void WriteError(Exception ex)
+    {
+#if DEBUG
+        AnsiConsole.WriteException(ex, ExceptionFormats.ShortenEverything);
+#else
+        AnsiConsole.MarkupLine($"[red]✗ 错误: {ex.Message}[/]");
+#endif
+    }
+
+    /// <summary>输出带前缀的错误信息，Debug 模式下显示完整堆栈。</summary>
+    public static void WriteError(string prefix, Exception ex)
+    {
+#if DEBUG
+        AnsiConsole.MarkupLine($"[red]{prefix}[/]");
+        AnsiConsole.WriteException(ex, ExceptionFormats.ShortenEverything);
+#else
+        AnsiConsole.MarkupLine($"[red]{prefix}: {ex.Message}[/]");
+#endif
+    }
+
     /// <summary>
     /// 显示交互式选择面板，让用户从资产列表中手动选择一项。
     /// 在非交互式终端中自动选择第一项。
@@ -65,8 +86,9 @@ public static class CommandHelpers
     };
 
     /// <summary>
-    /// 统一的资产选择逻辑：优先使用已记录的资产名称匹配（替换版本号），
-    /// 其次按平台匹配，最后回退到手动选择。
+    /// 统一的资产选择逻辑：优先使用清单指定的资产名称匹配，
+    /// 其次使用已记录的资产名称匹配（替换版本号），
+    /// 再按平台匹配，最后回退到手动选择。
     /// </summary>
     /// <param name="assets">Release 的全部资产。</param>
     /// <param name="matches">平台匹配的资产子集。</param>
@@ -74,12 +96,26 @@ public static class CommandHelpers
     /// <param name="savedAssetName">已记录的资产名称（可为 null）。</param>
     /// <param name="oldVersion">旧版本标签（可为 null）。</param>
     /// <param name="newVersion">新版本标签（可为 null）。</param>
+    /// <param name="assetPattern">清单指定的资产名称匹配模式（可为 null）。</param>
     /// <returns>选中的资产。</returns>
     public static GitHubAsset SelectAsset(
         List<GitHubAsset> assets, List<GitHubAsset> matches,
         PlatformInfo platform, string? savedAssetName,
-        string? oldVersion = null, string? newVersion = null)
+        string? oldVersion = null, string? newVersion = null,
+        string? assetPattern = null)
     {
+        // 最高优先级：使用清单指定的资产名称匹配
+        if (assetPattern != null)
+        {
+            var manifestMatch = assets.FirstOrDefault(a =>
+                a.Name.Equals(assetPattern, StringComparison.OrdinalIgnoreCase));
+            if (manifestMatch != null)
+            {
+                AnsiConsole.MarkupLine($"[grey]  自动选择清单指定的资产: {manifestMatch.Name}[/]");
+                return manifestMatch;
+            }
+        }
+
         // 优先使用已记录的资产名称（替换版本号后匹配）
         if (savedAssetName != null)
         {

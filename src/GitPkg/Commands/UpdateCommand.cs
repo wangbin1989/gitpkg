@@ -43,7 +43,7 @@ public class UpdateCommand : Command
             }
             catch (Exception ex)
             {
-                AnsiConsole.MarkupLine($"[red]✗ 错误: {ex.Message}[/]");
+                CommandHelpers.WriteError(ex);
                 return 1;
             }
         });
@@ -118,7 +118,8 @@ public class UpdateCommand : Command
                 var platform = PlatformInfo.Current();
                 var matches = matcher.Match(release.Assets, platform);
 
-                var selected = CommandHelpers.SelectAsset(release.Assets, matches, platform, tool.AssetName, tool.Version, release.TagName);
+                var assetPattern = InnerManifestService.GetAssetPattern(innerEntry, platform);
+                var selected = CommandHelpers.SelectAsset(release.Assets, matches, platform, tool.AssetName, tool.Version, release.TagName, assetPattern);
                 var tmpDir = ManifestService.GetTmpDir();
                 Directory.CreateDirectory(tmpDir);
                 var archivePath = Path.Combine(tmpDir, selected.Name);
@@ -170,9 +171,9 @@ public class UpdateCommand : Command
                     File.Delete(archivePath);
 
                 // Re-link executables to ~/.gitpkg/bin/
-                var innerBinPaths = InnerManifestService.GetBinPaths(innerEntry, platform);
-                if (innerBinPaths != null)
-                    InstallCommand.LinkBinPaths(tool.InstallPath, newName, innerBinPaths);
+                var innerLinkPaths = InnerManifestService.GetLinkPaths(innerEntry, platform);
+                if (innerLinkPaths != null)
+                    InstallCommand.LinkPaths(tool.InstallPath, newName, innerLinkPaths);
                 else
                     InstallCommand.LinkToBinDir(tool.InstallPath, newName);
 

@@ -53,7 +53,7 @@ public class InstallCommand : Command
             }
             catch (Exception ex)
             {
-                AnsiConsole.MarkupLine($"[red]✗ 错误: {ex.Message}[/]");
+                CommandHelpers.WriteError(ex);
                 return 1;
             }
         });
@@ -88,7 +88,7 @@ public class InstallCommand : Command
             }
             catch (Exception ex)
             {
-                AnsiConsole.MarkupLine($"  [red]✗ {tool.Name}: {ex.Message}[/]");
+                CommandHelpers.WriteError($"  ✗ {tool.Name}", ex);
                 failed++;
             }
         }
@@ -140,7 +140,8 @@ public class InstallCommand : Command
         var matches = matcher.Match(release.Assets, platform);
 
         // 4. Select asset
-        var selected = CommandHelpers.SelectAsset(release.Assets, matches, platform, null);
+        var assetPattern = InnerManifestService.GetAssetPattern(innerEntry, platform);
+        var selected = CommandHelpers.SelectAsset(release.Assets, matches, platform, null, assetPattern: assetPattern);
 
         var installDir = ManifestService.GetToolDir(toolName);
         var tmpDir = ManifestService.GetTmpDir();
@@ -181,9 +182,9 @@ public class InstallCommand : Command
         }
 
         // 10. Link executables to ~/.gitpkg/bin/
-        var innerBinPaths = InnerManifestService.GetBinPaths(innerEntry, platform);
-        if (innerBinPaths != null)
-            LinkBinPaths(installDir, toolName, innerBinPaths);
+        var innerLinkPaths = InnerManifestService.GetLinkPaths(innerEntry, platform);
+        if (innerLinkPaths != null)
+            LinkPaths(installDir, toolName, innerLinkPaths);
         else
             LinkToBinDir(installDir, toolName);
 
@@ -277,11 +278,11 @@ public class InstallCommand : Command
             AnsiConsole.MarkupLine($"[grey]  已链接 {executables.Count} 个可执行文件到 {binDir}[/]");
     }
 
-    /// <summary>按 inner-manifest 中的 bin 列表将指定文件链接到 ~/.gitpkg/bin/。</summary>
+    /// <summary>按 inner-manifest 中的 link 列表将指定文件链接到 ~/.gitpkg/bin/。</summary>
     /// <param name="installDir">工具安装目录。</param>
-    /// <param name="toolName">工具名称，单个文件时用作链接名。</param>
-    /// <param name="binPaths">相对于安装目录的可执行文件路径列表。</param>
-    internal static void LinkBinPaths(string installDir, string toolName, List<string> binPaths)
+    /// <param name="toolName">工具名称，单个文件且无 target 时用作链接名。</param>
+    /// <param name="links">链接配置列表。</param>
+    internal static void LinkPaths(string installDir, string toolName, List<InnerManifestLink> links)
     {
         var binDir = ManifestService.GetBinDir();
         Directory.CreateDirectory(binDir);
@@ -308,18 +309,20 @@ public class InstallCommand : Command
         }
 
         var linked = 0;
-        foreach (var relativePath in binPaths)
+        foreach (var entry in links)
         {
-            var sourcePath = Path.Combine(installDir, relativePath);
+            var sourcePath = Path.Combine(installDir, entry.Source);
             if (!File.Exists(sourcePath))
             {
-                AnsiConsole.MarkupLine($"[yellow]⚠ 内置清单指定的文件不存在: {relativePath}[/]");
+                AnsiConsole.MarkupLine($"[yellow]⚠ 内置清单指定的文件不存在: {entry.Source}[/]");
                 continue;
             }
 
-            var linkName = binPaths.Count == 1
-                ? toolName
-                : Path.GetFileName(relativePath);
+            var linkName = !string.IsNullOrWhiteSpace(entry.Target)
+                ? entry.Target
+                : links.Count == 1
+                    ? toolName
+                    : Path.GetFileName(entry.Source);
             var linkPath = Path.Combine(binDir, linkName);
 
             if (File.Exists(linkPath))
