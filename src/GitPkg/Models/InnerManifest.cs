@@ -36,8 +36,8 @@ public record InnerManifestTool
 public record InnerManifestPlatform
 {
     /// <summary>平台架构标识符（如 osx-arm64、linux-x64）。</summary>
-    [JsonPropertyName("target")]
-    public string Target { get; init; } = "";
+    [JsonPropertyName("rid")]
+    public string Rid { get; init; } = "";
 
     /// <summary>需要链接到 bin 目录的可执行文件路径列表（相对于安装目录）。</summary>
     [JsonPropertyName("bin")]
