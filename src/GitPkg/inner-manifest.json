@@ -24,6 +24,29 @@
         {
           "rid": "osx-arm64",
           "link": [{ "source": "usr/bin/podman" }]
+        },
+        {
+          "rid": "win-x64",
+          "link": [{ "source": "usr/bin/podman.exe" }]
+        }
+      ]
+    },
+    {
+      "repo": "ggml-org/llama.cpp",
+      "platforms": [
+        {
+          "rid": "osx-arm64",
+          "link": [
+            { "source": "llama-cli" },
+            { "source": "llama-server" }
+          ]
+        },
+        {
+          "rid": "win-x64",
+          "link": [
+            { "source": "llama-cli.exe" },
+            { "source": "llama-server.exe" }
+          ]
         }
       ]
     },
@@ -42,7 +65,13 @@
         },
         {
           "rid": "win-x64",
-          "asset": "codex-x86_64-pc-windows-msvc.exe.zip"
+          "asset": "codex-x86_64-pc-windows-msvc.exe.zip",
+          "link": [
+            {
+              "source": "codex-x86_64-pc-windows-msvc.exe",
+              "target": "codex.exe"
+            }
+          ]
         }
       ]
     }
