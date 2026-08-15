@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [2.7.0] - 2026-08-15
+
 ### Changed
 - `inner-manifest.json` 中 platform 对象的 `target` 字段重命名为 `rid`
 - 修正 `schema.json` 和 `inner-manifest.json` 中的 schema 链接为 raw 内容地址（原链接返回 404）
