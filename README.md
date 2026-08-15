@@ -27,7 +27,7 @@
 curl -fsSL https://raw.githubusercontent.com/wangbin1989/gitpkg/main/install.sh | bash
 
 # 指定版本
-curl -fsSL https://raw.githubusercontent.com/wangbin1989/gitpkg/main/install.sh | bash -s v2.7.1
+curl -fsSL https://raw.githubusercontent.com/wangbin1989/gitpkg/main/install.sh | bash -s v2.8.0
 
 # 安装单文件版本（适用于不支持 AOT 的环境）
 curl -fsSL https://raw.githubusercontent.com/wangbin1989/gitpkg/main/install.sh | bash -s -- -scd
@@ -92,15 +92,15 @@ load(io.popen('gitpkg completion cmd'):read("*a"))()
 
 ```bash
 # macOS / Linux
-tar -xzf gitpkg-v2.7.1-darwin-arm64.tar.gz
+tar -xzf gitpkg-v2.8.0-darwin-arm64.tar.gz
 chmod +x gitpkg
 mv gitpkg ~/.gitpkg/bin/   # 或其他 PATH 目录
 
 # Windows
-# 解压 gitpkg-v2.7.1-win-x64.zip，将 gitpkg.exe 放入 PATH 目录
+# 解压 gitpkg-v2.8.0-win-x64.zip，将 gitpkg.exe 放入 PATH 目录
 ```
 
-> **旧 CPU 兼容**：如果遇到 `CPU ISA level is lower than required` 错误，请下载 `scd` 版本（如 `gitpkg-v2.7.1-scd-linux-x86_64.tar.gz`），该版本不使用 AOT 编译，兼容所有 x64 CPU。
+> **旧 CPU 兼容**：如果遇到 `CPU ISA level is lower than required` 错误，请下载 `scd` 版本（如 `gitpkg-v2.8.0-scd-linux-x86_64.tar.gz`），该版本不使用 AOT 编译，兼容所有 x64 CPU。
 
 ### 基本用法
 
@@ -132,6 +132,9 @@ gitpkg info BurntSushi/ripgrep   # 未安装时使用 owner/repo 格式
 
 # 卸载工具
 gitpkg uninstall ripgrep
+
+# 重新创建符号链接（链接丢失或损坏时使用）
+gitpkg link ripgrep
 ```
 
 ### 高级选项
@@ -167,6 +170,7 @@ gitpkg install --from tools.json             # 安装
 | `gitpkg update [name]` | 更新工具 |
 | `gitpkg outdated` | 检查更新 |
 | `gitpkg uninstall <name>` | 卸载工具 |
+| `gitpkg link <name>` | 重新创建符号链接 |
 | `gitpkg list` | 列出已安装工具 |
 | `gitpkg info <name>` | 查看工具详情 |
 | `gitpkg manifest export` | 导出清单 |
