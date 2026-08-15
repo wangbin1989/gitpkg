@@ -47,7 +47,7 @@ public class SelfUpdateCommand : Command
             }
             catch (Exception ex)
             {
-                AnsiConsole.MarkupLine($"[red]✗ 错误: {ex.Message}[/]");
+                CommandHelpers.WriteError(ex);
                 return 1;
             }
         });

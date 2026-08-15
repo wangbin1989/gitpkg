@@ -53,7 +53,7 @@ public class InstallCommand : Command
             }
             catch (Exception ex)
             {
-                AnsiConsole.MarkupLine($"[red]✗ 错误: {ex.Message}[/]");
+                CommandHelpers.WriteError(ex);
                 return 1;
             }
         });
@@ -88,7 +88,7 @@ public class InstallCommand : Command
             }
             catch (Exception ex)
             {
-                AnsiConsole.MarkupLine($"  [red]✗ {tool.Name}: {ex.Message}[/]");
+                CommandHelpers.WriteError($"  ✗ {tool.Name}", ex);
                 failed++;
             }
         }

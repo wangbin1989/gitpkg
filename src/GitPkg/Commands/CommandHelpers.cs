@@ -5,10 +5,31 @@ using Spectre.Console;
 namespace GitPkg.Commands;
 
 /// <summary>
-/// 命令通用辅助方法。提供交互式资产选择和格式化输出。
+/// 命令通用辅助方法。提供交互式资产选择、错误输出和格式化工具。
 /// </summary>
 public static class CommandHelpers
 {
+    /// <summary>输出错误信息，Debug 模式下显示完整堆栈。</summary>
+    public static void WriteError(Exception ex)
+    {
+#if DEBUG
+        AnsiConsole.WriteException(ex, ExceptionFormats.ShortenEverything);
+#else
+        AnsiConsole.MarkupLine($"[red]✗ 错误: {ex.Message}[/]");
+#endif
+    }
+
+    /// <summary>输出带前缀的错误信息，Debug 模式下显示完整堆栈。</summary>
+    public static void WriteError(string prefix, Exception ex)
+    {
+#if DEBUG
+        AnsiConsole.MarkupLine($"[red]{prefix}[/]");
+        AnsiConsole.WriteException(ex, ExceptionFormats.ShortenEverything);
+#else
+        AnsiConsole.MarkupLine($"[red]{prefix}: {ex.Message}[/]");
+#endif
+    }
+
     /// <summary>
     /// 显示交互式选择面板，让用户从资产列表中手动选择一项。
     /// 在非交互式终端中自动选择第一项。
