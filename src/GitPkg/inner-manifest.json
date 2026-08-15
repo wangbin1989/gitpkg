@@ -26,6 +26,19 @@
           "bin": ["usr/bin/podman"]
         }
       ]
+    },
+    {
+      "repo": "openai/codex",
+      "platforms": [
+        {
+          "rid": "osx-arm64",
+          "asset": "codex-aarch64-apple-darwin.tar.gz"
+        },
+        {
+          "rid": "win-x64",
+          "asset": "codex-x86_64-pc-windows-msvc.exe.zip"
+        }
+      ]
     }
   ]
 }

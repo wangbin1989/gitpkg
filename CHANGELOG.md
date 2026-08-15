@@ -2,6 +2,16 @@
 
 ## [Unreleased]
 
+### Changed
+- `inner-manifest.json` 中 platform 对象的 `target` 字段重命名为 `rid`
+- 修正 `schema.json` 和 `inner-manifest.json` 中的 schema 链接为 raw 内容地址（原链接返回 404）
+
+### Added
+- `inner-manifest.json` 新增 `asset` 属性，可在平台配置中指定资产名称匹配模式，用于精确选择 release asset
+- 资产选择优先级：清单 asset 匹配 → 已记录资产名（版本替换） → 平台关键词匹配 → 手动选择
+- `InnerManifestService` 新增 `GetAssetPattern` 方法
+- `schema.json` 中 `platform.bin` 改为可选属性（部分工具仅需 `asset` 指定资产，无需显式配置 bin 路径）
+
 ## [2.6.0] - 2026-07-26
 
 ### Changed

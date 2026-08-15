@@ -140,7 +140,8 @@ public class InstallCommand : Command
         var matches = matcher.Match(release.Assets, platform);
 
         // 4. Select asset
-        var selected = CommandHelpers.SelectAsset(release.Assets, matches, platform, null);
+        var assetPattern = InnerManifestService.GetAssetPattern(innerEntry, platform);
+        var selected = CommandHelpers.SelectAsset(release.Assets, matches, platform, null, assetPattern: assetPattern);
 
         var installDir = ManifestService.GetToolDir(toolName);
         var tmpDir = ManifestService.GetTmpDir();

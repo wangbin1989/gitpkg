@@ -39,6 +39,10 @@ public record InnerManifestPlatform
     [JsonPropertyName("rid")]
     public string Rid { get; init; } = "";
 
+    /// <summary>资产名称匹配模式（如 codex-aarch64-apple-darwin.tar.gz），用于精确选择 release asset。</summary>
+    [JsonPropertyName("asset")]
+    public string? Asset { get; init; }
+
     /// <summary>需要链接到 bin 目录的可执行文件路径列表（相对于安装目录）。</summary>
     [JsonPropertyName("bin")]
     public List<string> Bin { get; init; } = [];

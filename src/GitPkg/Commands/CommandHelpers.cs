@@ -65,8 +65,9 @@ public static class CommandHelpers
     };
 
     /// <summary>
-    /// 统一的资产选择逻辑：优先使用已记录的资产名称匹配（替换版本号），
-    /// 其次按平台匹配，最后回退到手动选择。
+    /// 统一的资产选择逻辑：优先使用清单指定的资产名称匹配，
+    /// 其次使用已记录的资产名称匹配（替换版本号），
+    /// 再按平台匹配，最后回退到手动选择。
     /// </summary>
     /// <param name="assets">Release 的全部资产。</param>
     /// <param name="matches">平台匹配的资产子集。</param>
@@ -74,12 +75,26 @@ public static class CommandHelpers
     /// <param name="savedAssetName">已记录的资产名称（可为 null）。</param>
     /// <param name="oldVersion">旧版本标签（可为 null）。</param>
     /// <param name="newVersion">新版本标签（可为 null）。</param>
+    /// <param name="assetPattern">清单指定的资产名称匹配模式（可为 null）。</param>
     /// <returns>选中的资产。</returns>
     public static GitHubAsset SelectAsset(
         List<GitHubAsset> assets, List<GitHubAsset> matches,
         PlatformInfo platform, string? savedAssetName,
-        string? oldVersion = null, string? newVersion = null)
+        string? oldVersion = null, string? newVersion = null,
+        string? assetPattern = null)
     {
+        // 最高优先级：使用清单指定的资产名称匹配
+        if (assetPattern != null)
+        {
+            var manifestMatch = assets.FirstOrDefault(a =>
+                a.Name.Equals(assetPattern, StringComparison.OrdinalIgnoreCase));
+            if (manifestMatch != null)
+            {
+                AnsiConsole.MarkupLine($"[grey]  自动选择清单指定的资产: {manifestMatch.Name}[/]");
+                return manifestMatch;
+            }
+        }
+
         // 优先使用已记录的资产名称（替换版本号后匹配）
         if (savedAssetName != null)
         {
