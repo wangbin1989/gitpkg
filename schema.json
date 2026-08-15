@@ -57,7 +57,7 @@
           "type": "string",
           "description": "资产名称匹配模式，用于精确选择 release asset。"
         },
-        "bin": {
+        "link": {
           "type": "array",
           "description": "需要链接到 bin 目录的可执行文件路径列表（相对于安装目录）。",
           "items": {

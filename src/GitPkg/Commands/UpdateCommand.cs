@@ -171,9 +171,9 @@ public class UpdateCommand : Command
                     File.Delete(archivePath);
 
                 // Re-link executables to ~/.gitpkg/bin/
-                var innerBinPaths = InnerManifestService.GetBinPaths(innerEntry, platform);
-                if (innerBinPaths != null)
-                    InstallCommand.LinkBinPaths(tool.InstallPath, newName, innerBinPaths);
+                var innerLinkPaths = InnerManifestService.GetLinkPaths(innerEntry, platform);
+                if (innerLinkPaths != null)
+                    InstallCommand.LinkPaths(tool.InstallPath, newName, innerLinkPaths);
                 else
                     InstallCommand.LinkToBinDir(tool.InstallPath, newName);
 

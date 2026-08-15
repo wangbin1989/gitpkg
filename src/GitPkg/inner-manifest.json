@@ -10,7 +10,7 @@
       "platforms": [
         {
           "rid": "osx-arm64",
-          "bin": ["bin/codegraph"]
+          "link": ["bin/codegraph"]
         }
       ]
     },
@@ -23,7 +23,7 @@
       "platforms": [
         {
           "rid": "osx-arm64",
-          "bin": ["usr/bin/podman"]
+          "link": ["usr/bin/podman"]
         }
       ]
     },

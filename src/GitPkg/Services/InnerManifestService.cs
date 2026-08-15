@@ -31,10 +31,10 @@ public class InnerManifestService
     }
 
     /// <summary>
-    /// 获取当前平台架构对应的 bin 文件列表。
-    /// 未匹配到平台或无 bin 配置时返回 null。
+    /// 获取当前平台架构对应的链接文件列表。
+    /// 未匹配到平台或无 link 配置时返回 null。
     /// </summary>
-    public static List<string>? GetBinPaths(InnerManifestTool? entry, PlatformInfo platform)
+    public static List<string>? GetLinkPaths(InnerManifestTool? entry, PlatformInfo platform)
     {
         if (entry?.Platforms == null) return null;
 
@@ -44,7 +44,7 @@ public class InnerManifestService
         var match = entry.Platforms.Find(p =>
             p.Rid.Equals(platformKey, StringComparison.OrdinalIgnoreCase));
 
-        return match?.Bin is { Count: > 0 } bin ? bin : null;
+        return match?.Link is { Count: > 0 } link ? link : null;
     }
 
     /// <summary>

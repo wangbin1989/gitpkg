@@ -44,6 +44,6 @@ public record InnerManifestPlatform
     public string? Asset { get; init; }
 
     /// <summary>需要链接到 bin 目录的可执行文件路径列表（相对于安装目录）。</summary>
-    [JsonPropertyName("bin")]
-    public List<string> Bin { get; init; } = [];
+    [JsonPropertyName("link")]
+    public List<string> Link { get; init; } = [];
 }
