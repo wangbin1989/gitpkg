@@ -9,24 +9,15 @@ namespace GitPkg.Commands;
 /// </summary>
 public static class CommandHelpers
 {
-    /// <summary>输出错误信息，Debug 模式下显示完整堆栈。</summary>
-    public static void WriteError(Exception ex)
-    {
-#if DEBUG
-        AnsiConsole.WriteException(ex, ExceptionFormats.ShortenEverything);
-#else
-        AnsiConsole.MarkupLine($"[red]✗ 错误: {ex.Message}[/]");
-#endif
-    }
-
     /// <summary>输出带前缀的错误信息，Debug 模式下显示完整堆栈。</summary>
-    public static void WriteError(string prefix, Exception ex)
+    public static void WriteError(Exception ex, string prefix = "错误")
     {
-#if DEBUG
-        AnsiConsole.MarkupLine($"[red]{prefix}[/]");
-        AnsiConsole.WriteException(ex, ExceptionFormats.ShortenEverything);
-#else
         AnsiConsole.MarkupLine($"[red]{prefix}: {ex.Message}[/]");
+
+#if DEBUG
+#pragma warning disable IL3050 // Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling.
+        AnsiConsole.WriteException(ex, ExceptionFormats.ShortenEverything);
+#pragma warning restore IL3050
 #endif
     }
 

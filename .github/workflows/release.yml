@@ -120,9 +120,26 @@ jobs:
           cd dist
           sha256sum *.tar.gz *.zip > checksums.txt
 
+      - name: Extract release notes from CHANGELOG
+        id: changelog
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          # 提取当前版本的 notes：从 "## [x.y.z]" 到下一个 "## [" 之间的内容
+          notes=$(awk -v ver="$version" '
+            /^## \[/ {
+              if (found) exit
+              if (index($0, "[" ver "]")) { found=1; next }
+            }
+            found { print }
+          ' CHANGELOG.md)
+          # 写入多行输出
+          echo "notes<<EOF" >> $GITHUB_OUTPUT
+          echo "$notes" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
       - name: Create Release
         uses: softprops/action-gh-release@v3
         with:
+          body: ${{ steps.changelog.outputs.notes }}
           files: dist/*
-          generate_release_notes: true
           fail_on_unmatched_files: true
