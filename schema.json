@@ -48,7 +48,7 @@
       "type": "object",
       "description": "特定平台架构下的可执行文件配置。",
       "properties": {
-        "target": {
+        "rid": {
           "type": "string",
           "description": "平台架构标识符，格式为 os-arch。",
           "enum": ["osx-arm64", "osx-x64", "linux-arm64", "linux-x64", "windows-arm64", "windows-x64"]
@@ -62,7 +62,7 @@
           "minItems": 1
         }
       },
-      "required": ["target", "bin"],
+      "required": ["rid", "bin"],
       "additionalProperties": false
     }
   }

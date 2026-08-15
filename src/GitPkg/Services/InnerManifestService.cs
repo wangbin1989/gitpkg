@@ -42,7 +42,7 @@ public class InnerManifestService
         if (platformKey == null) return null;
 
         var match = entry.Platforms.Find(p =>
-            p.Target.Equals(platformKey, StringComparison.OrdinalIgnoreCase));
+            p.Rid.Equals(platformKey, StringComparison.OrdinalIgnoreCase));
 
         return match?.Bin.Count > 0 ? match.Bin : null;
     }
