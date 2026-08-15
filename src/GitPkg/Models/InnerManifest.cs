@@ -43,7 +43,21 @@ public record InnerManifestPlatform
     [JsonPropertyName("asset")]
     public string? Asset { get; init; }
 
-    /// <summary>需要链接到 bin 目录的可执行文件路径列表（相对于安装目录）。</summary>
+    /// <summary>需要链接到 bin 目录的可执行文件配置列表。</summary>
     [JsonPropertyName("link")]
-    public List<string> Link { get; init; } = [];
+    public List<InnerManifestLink> Link { get; init; } = [];
+}
+
+/// <summary>
+/// 内置清单中的链接配置条目。
+/// </summary>
+public record InnerManifestLink
+{
+    /// <summary>源文件路径（相对于安装目录）。</summary>
+    [JsonPropertyName("source")]
+    public string Source { get; init; } = "";
+
+    /// <summary>链接名称，为空时使用 source 的文件名。</summary>
+    [JsonPropertyName("target")]
+    public string? Target { get; init; }
 }

@@ -31,10 +31,10 @@ public class InnerManifestService
     }
 
     /// <summary>
-    /// 获取当前平台架构对应的链接文件列表。
+    /// 获取当前平台架构对应的链接配置列表。
     /// 未匹配到平台或无 link 配置时返回 null。
     /// </summary>
-    public static List<string>? GetLinkPaths(InnerManifestTool? entry, PlatformInfo platform)
+    public static List<InnerManifestLink>? GetLinkPaths(InnerManifestTool? entry, PlatformInfo platform)
     {
         if (entry?.Platforms == null) return null;
 

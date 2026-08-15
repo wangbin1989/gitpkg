@@ -280,9 +280,9 @@ public class InstallCommand : Command
 
     /// <summary>按 inner-manifest 中的 link 列表将指定文件链接到 ~/.gitpkg/bin/。</summary>
     /// <param name="installDir">工具安装目录。</param>
-    /// <param name="toolName">工具名称，单个文件时用作链接名。</param>
-    /// <param name="linkPaths">相对于安装目录的可执行文件路径列表。</param>
-    internal static void LinkPaths(string installDir, string toolName, List<string> linkPaths)
+    /// <param name="toolName">工具名称，单个文件且无 target 时用作链接名。</param>
+    /// <param name="links">链接配置列表。</param>
+    internal static void LinkPaths(string installDir, string toolName, List<InnerManifestLink> links)
     {
         var binDir = ManifestService.GetBinDir();
         Directory.CreateDirectory(binDir);
@@ -309,18 +309,20 @@ public class InstallCommand : Command
         }
 
         var linked = 0;
-        foreach (var relativePath in linkPaths)
+        foreach (var entry in links)
         {
-            var sourcePath = Path.Combine(installDir, relativePath);
+            var sourcePath = Path.Combine(installDir, entry.Source);
             if (!File.Exists(sourcePath))
             {
-                AnsiConsole.MarkupLine($"[yellow]⚠ 内置清单指定的文件不存在: {relativePath}[/]");
+                AnsiConsole.MarkupLine($"[yellow]⚠ 内置清单指定的文件不存在: {entry.Source}[/]");
                 continue;
             }
 
-            var linkName = linkPaths.Count == 1
-                ? toolName
-                : Path.GetFileName(relativePath);
+            var linkName = !string.IsNullOrWhiteSpace(entry.Target)
+                ? entry.Target
+                : links.Count == 1
+                    ? toolName
+                    : Path.GetFileName(entry.Source);
             var linkPath = Path.Combine(binDir, linkName);
 
             if (File.Exists(linkPath))

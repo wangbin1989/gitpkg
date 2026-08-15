@@ -16,4 +16,6 @@ namespace GitPkg.Models;
 [JsonSerializable(typeof(InnerManifest))]
 [JsonSerializable(typeof(InnerManifestTool))]
 [JsonSerializable(typeof(InnerManifestPlatform))]
+[JsonSerializable(typeof(InnerManifestLink))]
+[JsonSerializable(typeof(List<InnerManifestLink>))]
 public partial class AppJsonContext : JsonSerializerContext;
