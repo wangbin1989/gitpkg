@@ -36,10 +36,7 @@
       "platforms": [
         {
           "rid": "osx-arm64",
-          "link": [
-            { "source": "llama-cli" },
-            { "source": "llama-server" }
-          ]
+          "link": [{ "source": "llama-cli" }, { "source": "llama-server" }]
         },
         {
           "rid": "win-x64",
@@ -70,6 +67,12 @@
             {
               "source": "codex-x86_64-pc-windows-msvc.exe",
               "target": "codex.exe"
+            },
+            {
+              "source": "codex-windows-sandbox-setup.exe"
+            },
+            {
+              "source": "codex-command-runner.exe"
             }
           ]
         }
