@@ -2,6 +2,9 @@
 
 ## [Unreleased]
 
+### Fixed
+- Windows 平台 rid 统一使用 `win-x64` / `win-arm64`（原 `windows-x64`）
+
 ## [2.7.0] - 2026-08-15
 
 ### Changed

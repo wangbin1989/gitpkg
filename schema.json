@@ -51,7 +51,7 @@
         "rid": {
           "type": "string",
           "description": "平台架构标识符，格式为 os-arch。",
-          "enum": ["osx-arm64", "osx-x64", "linux-arm64", "linux-x64", "windows-arm64", "windows-x64"]
+          "enum": ["osx-arm64", "osx-x64", "linux-arm64", "linux-x64", "win-arm64", "win-x64"]
         },
         "asset": {
           "type": "string",

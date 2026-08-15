@@ -71,7 +71,7 @@ public class InnerManifestService
         {
             "macos" => "osx",
             "linux" => "linux",
-            "windows" => "windows",
+            "windows" => "win",
             _ => null
         };
 
