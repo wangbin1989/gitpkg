@@ -11,6 +11,10 @@
         {
           "rid": "osx-arm64",
           "link": [{ "source": "bin/codegraph" }]
+        },
+        {
+          "rid": "win-x64",
+          "link": [{ "source": "bin/codegraph.cmd" }]
         }
       ]
     },

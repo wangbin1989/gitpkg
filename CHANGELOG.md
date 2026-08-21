@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+## [2.8.2] - 2026-08-21
+
+### Added
+- 内置清单为 `colbymchenry/codegraph` 添加 `win-x64` 平台配置
+
 ## [2.8.1] - 2026-08-15
 
 ### Fixed
