@@ -2,6 +2,9 @@
 
 ## [Unreleased]
 
+### Added
+- `install`/`update`/`outdated`/`info` 命令新增 `--prerelease` 选项，获取最新版本时包含预发布版本
+
 ## [2.8.2] - 2026-08-21
 
 ### Added

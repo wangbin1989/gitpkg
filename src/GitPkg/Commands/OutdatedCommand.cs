@@ -12,11 +12,16 @@ public class OutdatedCommand : Command
     /// <summary>创建 outdated 命令。</summary>
     public OutdatedCommand() : base("outdated", "检查已安装工具的更新")
     {
-        SetAction(async (_, ct) =>
+        var prereleaseOpt = new Option<bool>("--prerelease") { Description = "包含预发布版本" };
+        Add(prereleaseOpt);
+
+        SetAction(async (parseResult, ct) =>
         {
+            var prerelease = parseResult.GetValue(prereleaseOpt);
+
             try
             {
-                await HandleAsync(ct);
+                await HandleAsync(prerelease, ct);
                 return 0;
             }
             catch (Exception ex)
@@ -28,7 +33,7 @@ public class OutdatedCommand : Command
     }
 
     /// <summary>逐个查询已安装工具的最新版本，生成对比表格。</summary>
-    private static async Task HandleAsync(CancellationToken ct)
+    private static async Task HandleAsync(bool prerelease, CancellationToken ct)
     {
         var gitHub = new GitHubService(GitPkgApp.Http);
         var manifest = new ManifestService();
@@ -56,7 +61,9 @@ public class OutdatedCommand : Command
                 var parts = tool.Repo.Split('/');
                 if (parts.Length != 2) continue;
 
-                var release = await gitHub.GetLatestReleaseAsync(parts[0], parts[1], ct);
+                var release = prerelease
+                    ? await gitHub.GetLatestReleaseIncludingPrereleaseAsync(parts[0], parts[1], ct)
+                    : await gitHub.GetLatestReleaseAsync(parts[0], parts[1], ct);
                 var latest = release.TagName;
 
                 if (latest != tool.Version)

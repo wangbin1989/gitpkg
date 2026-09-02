@@ -16,13 +16,17 @@ public class InfoCommand : Command
         var nameArg = new Argument<string>("name") { Description = "工具名称或 owner/repo" };
         Add(nameArg);
 
+        var prereleaseOpt = new Option<bool>("--prerelease") { Description = "包含预发布版本" };
+        Add(prereleaseOpt);
+
         SetAction(async (parseResult, ct) =>
         {
             var name = parseResult.GetValue(nameArg);
+            var prerelease = parseResult.GetValue(prereleaseOpt);
 
             try
             {
-                await HandleAsync(name!, ct);
+                await HandleAsync(name!, prerelease, ct);
                 return 0;
             }
             catch (HttpRequestException ex) when (ex.Message.Contains("Not Found") || ex.Message.Contains("资源不存在"))
@@ -42,7 +46,7 @@ public class InfoCommand : Command
     /// 解析输入参数，支持已安装工具名和 owner/repo 两种格式。
     /// 展示仓库描述、已安装版本、最新版本和可用资产列表。
     /// </summary>
-    private static async Task HandleAsync(string input, CancellationToken ct)
+    private static async Task HandleAsync(string input, bool prerelease, CancellationToken ct)
     {
         var gitHub = new GitHubService(GitPkgApp.Http);
         var manifest = new ManifestService();
@@ -80,7 +84,9 @@ public class InfoCommand : Command
         Models.GitHubRelease release;
         try
         {
-            release = await gitHub.GetLatestReleaseAsync(owner, repoName, ct);
+            release = prerelease
+                ? await gitHub.GetLatestReleaseIncludingPrereleaseAsync(owner, repoName, ct)
+                : await gitHub.GetLatestReleaseAsync(owner, repoName, ct);
         }
         catch (HttpRequestException ex) when (ex.Message.Contains("资源不存在"))
         {
