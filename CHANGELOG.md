@@ -5,6 +5,9 @@
 ### Added
 - `install`/`update`/`outdated`/`info` 命令新增 `--prerelease` 选项，获取最新版本时包含预发布版本
 
+### Changed
+- 所有命令继承 `CommandBase` 抽象基类，统一命令类层次结构
+
 ## [2.8.2] - 2026-08-21
 
 ### Added

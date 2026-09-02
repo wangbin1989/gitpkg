@@ -7,7 +7,7 @@ namespace GitPkg.Commands;
 /// <summary>
 /// outdated 命令：对比已安装工具与 GitHub 最新 Release，列出可更新的工具。
 /// </summary>
-public class OutdatedCommand : Command
+public class OutdatedCommand : CommandBase
 {
     /// <summary>创建 outdated 命令。</summary>
     public OutdatedCommand() : base("outdated", "检查已安装工具的更新")

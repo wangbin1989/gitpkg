@@ -7,7 +7,7 @@ namespace GitPkg.Commands;
 /// 底层使用静态定义的子命令和选项列表提供补全。
 /// update/uninstall/info 子命令支持动态补全已安装工具名称。
 /// </summary>
-public class CompletionCommand : Command
+public class CompletionCommand : CommandBase
 {
     /// <summary>创建 completion 命令。</summary>
     public CompletionCommand() : base("completion", "输出 shell 自动补全脚本")

@@ -10,7 +10,7 @@ namespace GitPkg.Commands;
 /// install 命令：从 GitHub Release 下载并安装工具。
 /// 核心流程：解析仓库 → 获取 Release → 匹配资产 → 下载 → 解压 → 链接到 bin → 记录清单。
 /// </summary>
-public class InstallCommand : Command
+public class InstallCommand : CommandBase
 {
     /// <summary>创建 install 命令，支持单工具安装和批量清单安装。</summary>
     public InstallCommand() : base("install", "从 GitHub Release 安装工具")

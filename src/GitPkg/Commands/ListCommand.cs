@@ -7,7 +7,7 @@ namespace GitPkg.Commands;
 /// <summary>
 /// list 命令：以表格形式列出所有已安装的工具及其版本、仓库和安装时间。
 /// </summary>
-public class ListCommand : Command
+public class ListCommand : CommandBase
 {
     /// <summary>创建 list 命令。</summary>
     public ListCommand() : base("list", "列出已安装的工具")

@@ -7,7 +7,7 @@ namespace GitPkg.Commands;
 /// 设置 GITPKG_HOME 环境变量并将其 bin 目录加入 PATH。
 /// 如需自动补全，请单独使用 completion 命令。
 /// </summary>
-public class InitCommand : Command
+public class InitCommand : CommandBase
 {
     /// <summary>创建 init 命令。</summary>
     public InitCommand() : base("init", "输出 shell 初始化脚本")

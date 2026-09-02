@@ -9,7 +9,7 @@ namespace GitPkg.Commands;
 /// <summary>
 /// manifest 命令组：清单管理（导出等），将 manifest.json 内容序列化为 JSON 输出。
 /// </summary>
-public class ManifestCommand : Command
+public class ManifestCommand : CommandBase
 {
     /// <summary>创建 manifest 命令组。</summary>
     public ManifestCommand() : base("manifest", "清单管理")
@@ -20,7 +20,7 @@ public class ManifestCommand : Command
     /// <summary>
     /// export 子命令：导出清单文件到标准输出。
     /// </summary>
-    private class ExportCommand : Command
+    private class ExportCommand : CommandBase
     {
         public ExportCommand() : base("export", "导出清单文件到标准输出")
         {

@@ -9,7 +9,7 @@ namespace GitPkg.Commands;
 /// update 命令：将已安装的工具更新到最新版本。
 /// 支持更新全部工具或指定单个工具，更新过程包含备份和回滚机制。
 /// </summary>
-public class UpdateCommand : Command
+public class UpdateCommand : CommandBase
 {
     /// <summary>创建 update 命令。</summary>
     public UpdateCommand() : base("update", "更新已安装的工具")

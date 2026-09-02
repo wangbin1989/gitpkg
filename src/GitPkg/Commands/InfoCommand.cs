@@ -8,7 +8,7 @@ namespace GitPkg.Commands;
 /// info 命令：查看工具的详细信息。
 /// 优先按已安装工具名查找，其次按 owner/repo 格式远程查询。
 /// </summary>
-public class InfoCommand : Command
+public class InfoCommand : CommandBase
 {
     /// <summary>创建 info 命令。</summary>
     public InfoCommand() : base("info", "查看工具详情")
