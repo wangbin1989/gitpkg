@@ -15,6 +15,7 @@ public static class GitPkgApp
         Http = new HttpClient();
         Http.DefaultRequestHeaders.Add("User-Agent", "gitpkg");
         Http.DefaultRequestHeaders.Add("Accept", "application/vnd.github+json");
+        Http.DefaultRequestHeaders.Add("X-GitHub-Api-Version", "2026-03-10");
         Http.Timeout = TimeSpan.FromMinutes(10);
     }
 }

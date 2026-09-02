@@ -1,0 +1,26 @@
+@host = https://api.github.com
+@accept = application/vnd.github+json
+@x_github_api_version = 2026-03-10
+@owner = ggml-org
+@repo = llama.cpp
+@tag = b10752
+
+### List releases
+GET {{host}}/repos/{{owner}}/{{repo}}/releases
+Accept: {{accept}}
+X-GitHub-Api-Version: {{x_github_api_version}}
+
+### Get the latest release
+GET {{host}}/repos/{{owner}}/{{repo}}/releases/latest
+Accept: {{accept}}
+X-GitHub-Api-Version: {{x_github_api_version}}
+
+### Get a release by tag name
+GET {{host}}/repos/{{owner}}/{{repo}}/releases/tags/{{tag}}
+Accept: {{accept}}
+X-GitHub-Api-Version: {{x_github_api_version}}
+
+### Get a repository
+GET {{host}}/repos/{{owner}}/{{repo}}
+Accept: {{accept}}
+X-GitHub-Api-Version: {{x_github_api_version}}

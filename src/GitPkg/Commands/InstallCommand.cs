@@ -10,7 +10,7 @@ namespace GitPkg.Commands;
 /// install 命令：从 GitHub Release 下载并安装工具。
 /// 核心流程：解析仓库 → 获取 Release → 匹配资产 → 下载 → 解压 → 链接到 bin → 记录清单。
 /// </summary>
-public class InstallCommand : Command
+public class InstallCommand : CommandBase
 {
     /// <summary>创建 install 命令，支持单工具安装和批量清单安装。</summary>
     public InstallCommand() : base("install", "从 GitHub Release 安装工具")
@@ -21,17 +21,20 @@ public class InstallCommand : Command
         var fromOpt = new Option<string?>("--from") { Description = "从清单文件批量安装" };
         Add(fromOpt);
 
+        var prereleaseOpt = AddPrereleaseOption();
+
         SetAction(async (parseResult, ct) =>
         {
             var repo = parseResult.GetValue(repoArg);
             var fromFile = parseResult.GetValue(fromOpt);
+            var prerelease = parseResult.GetValue(prereleaseOpt);
 
             try
             {
                 if (fromFile != null)
                     await HandleBatchAsync(fromFile, ct);
                 else if (repo != null)
-                    await HandleSingleAsync(repo, ct);
+                    await HandleSingleAsync(repo, prerelease, ct);
                 else
                     throw new ArgumentException("请指定 owner/repo 或使用 --from <file>");
                 return 0;
@@ -83,7 +86,7 @@ public class InstallCommand : Command
 
             try
             {
-                await InstallSingleAsync(repo, ct);
+                await InstallSingleAsync(repo, false, ct);
                 success++;
             }
             catch (Exception ex)
@@ -96,9 +99,9 @@ public class InstallCommand : Command
         AnsiConsole.MarkupLine($"[bold]安装: {success} | 失败: {failed}[/]");
     }
 
-    private static async Task HandleSingleAsync(string repo, CancellationToken ct)
+    private static async Task HandleSingleAsync(string repo, bool prerelease, CancellationToken ct)
     {
-        await InstallSingleAsync(repo, ct);
+        await InstallSingleAsync(repo, prerelease, ct);
     }
 
     /// <summary>
@@ -111,7 +114,7 @@ public class InstallCommand : Command
     /// 6. 链接可执行文件到 ~/.gitpkg/bin/
     /// 7. 更新 manifest.json
     /// </summary>
-    private static async Task InstallSingleAsync(string repo, CancellationToken ct)
+    private static async Task InstallSingleAsync(string repo, bool prerelease, CancellationToken ct)
     {
         var gitHub = new GitHubService(GitPkgApp.Http);
         var matcher = new AssetMatcher();
@@ -129,6 +132,10 @@ public class InstallCommand : Command
         if (version != null)
         {
             release = await gitHub.GetReleaseByTagAsync(owner, repoName, version, ct);
+        }
+        else if (prerelease)
+        {
+            release = await gitHub.GetLatestReleaseIncludingPrereleaseAsync(owner, repoName, ct);
         }
         else
         {

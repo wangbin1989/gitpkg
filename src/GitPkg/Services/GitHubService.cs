@@ -26,6 +26,16 @@ public class GitHubService
         return await GetAsync(url, AppJsonContext.Default.GitHubRelease, ct);
     }
 
+    /// <summary>获取仓库最新的 Release（含 prerelease）。</summary>
+    public async Task<GitHubRelease> GetLatestReleaseIncludingPrereleaseAsync(string owner, string repo, CancellationToken ct = default)
+    {
+        var url = $"https://api.github.com/repos/{owner}/{repo}/releases";
+        var releases = await GetAsync(url, AppJsonContext.Default.ListGitHubRelease, ct);
+        // /releases 按发布时间降序排列，取第一个非 draft release
+        return releases.FirstOrDefault()
+            ?? throw new HttpRequestException($"仓库 {owner}/{repo} 没有 Release");
+    }
+
     /// <summary>按版本标签获取指定 Release。</summary>
     public async Task<GitHubRelease> GetReleaseByTagAsync(string owner, string repo, string tag, CancellationToken ct = default)
     {

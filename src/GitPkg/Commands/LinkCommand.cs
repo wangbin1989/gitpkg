@@ -8,13 +8,12 @@ namespace GitPkg.Commands;
 /// <summary>
 /// link 命令：重新为已安装工具创建符号链接。
 /// </summary>
-public class LinkCommand : Command
+public class LinkCommand : CommandBase
 {
     /// <summary>创建 link 命令。</summary>
     public LinkCommand() : base("link", "重新为已安装工具创建符号链接")
     {
-        var nameArg = new Argument<string>("name") { Description = "工具名称" };
-        Add(nameArg);
+        var nameArg = AddNameArg();
 
         SetAction(async (parseResult, ct) =>
         {

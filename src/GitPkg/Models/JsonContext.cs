@@ -9,6 +9,7 @@ namespace GitPkg.Models;
 /// </summary>
 [JsonSourceGenerationOptions(WriteIndented = true)]
 [JsonSerializable(typeof(GitHubRelease))]
+[JsonSerializable(typeof(List<GitHubRelease>))]
 [JsonSerializable(typeof(GitHubRepo))]
 [JsonSerializable(typeof(ToolManifest))]
 [JsonSerializable(typeof(ToolEntry))]

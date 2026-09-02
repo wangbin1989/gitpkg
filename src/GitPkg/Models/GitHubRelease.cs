@@ -21,6 +21,10 @@ public record GitHubRelease
     [JsonPropertyName("body")]
     public string? Body { get; init; }
 
+    /// <summary>是否为预发布版本。</summary>
+    [JsonPropertyName("prerelease")]
+    public bool Prerelease { get; init; }
+
     /// <summary>附加的资产文件列表。</summary>
     [JsonPropertyName("assets")]
     public List<GitHubAsset> Assets { get; init; } = [];

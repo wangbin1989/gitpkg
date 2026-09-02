@@ -9,7 +9,7 @@ namespace GitPkg.Commands;
 /// update 命令：将已安装的工具更新到最新版本。
 /// 支持更新全部工具或指定单个工具，更新过程包含备份和回滚机制。
 /// </summary>
-public class UpdateCommand : Command
+public class UpdateCommand : CommandBase
 {
     /// <summary>创建 update 命令。</summary>
     public UpdateCommand() : base("update", "更新已安装的工具")
@@ -17,13 +17,16 @@ public class UpdateCommand : Command
         var nameArg = new Argument<string?>("name") { Description = "工具名称（不指定则更新全部）", Arity = ArgumentArity.ZeroOrOne };
         Add(nameArg);
 
+        var prereleaseOpt = AddPrereleaseOption();
+
         SetAction(async (parseResult, ct) =>
         {
             var name = parseResult.GetValue(nameArg);
+            var prerelease = parseResult.GetValue(prereleaseOpt);
 
             try
             {
-                await HandleAsync(name, ct);
+                await HandleAsync(name, prerelease, ct);
                 return 0;
             }
             catch (HttpRequestException ex) when (ex.Message.Contains("Not Found") || ex.Message.Contains("资源不存在"))
@@ -53,7 +56,7 @@ public class UpdateCommand : Command
     /// 执行更新流程：检查版本 → 下载新版本 → 备份旧版本 → 解压替换 → 链接到 bin → 更新清单。
     /// 解压失败时自动恢复备份。
     /// </summary>
-    private static async Task HandleAsync(string? name, CancellationToken ct)
+    private static async Task HandleAsync(string? name, bool prerelease, CancellationToken ct)
     {
         var gitHub = new GitHubService(GitPkgApp.Http);
         var matcher = new AssetMatcher();
@@ -99,7 +102,9 @@ public class UpdateCommand : Command
                 var innerEntry = innerManifest.FindEntry(tool.Repo);
                 var newName = InnerManifestService.GetToolName(innerEntry, parts[1]);
 
-                var release = await gitHub.GetLatestReleaseAsync(parts[0], parts[1], ct);
+                var release = prerelease
+                    ? await gitHub.GetLatestReleaseIncludingPrereleaseAsync(parts[0], parts[1], ct)
+                    : await gitHub.GetLatestReleaseAsync(parts[0], parts[1], ct);
 
                 if (release.TagName == tool.Version)
                 {

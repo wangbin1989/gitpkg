@@ -2,6 +2,16 @@
 
 ## [Unreleased]
 
+## [2.8.3] - 2026-09-02
+
+### Added
+- `install`/`update`/`outdated`/`info` 命令新增 `--prerelease` 选项，获取最新版本时包含预发布版本
+- 补全脚本添加 `--prerelease` 选项的自动补全支持
+
+### Changed
+- 所有命令继承 `CommandBase` 抽象基类，统一命令类层次结构
+- 提取公用参数和选项到 `CommandBase`（`AddNameArg`、`AddShellArg`、`AddPrereleaseOption`）
+
 ## [2.8.2] - 2026-08-21
 
 ### Added
