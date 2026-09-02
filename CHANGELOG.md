@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [2.8.3] - 2026-09-02
+
 ### Added
 - `install`/`update`/`outdated`/`info` 命令新增 `--prerelease` 选项，获取最新版本时包含预发布版本
 - 补全脚本添加 `--prerelease` 选项的自动补全支持
