@@ -12,8 +12,7 @@ public class OutdatedCommand : CommandBase
     /// <summary>创建 outdated 命令。</summary>
     public OutdatedCommand() : base("outdated", "检查已安装工具的更新")
     {
-        var prereleaseOpt = new Option<bool>("--prerelease") { Description = "包含预发布版本" };
-        Add(prereleaseOpt);
+        var prereleaseOpt = AddPrereleaseOption();
 
         SetAction(async (parseResult, ct) =>
         {

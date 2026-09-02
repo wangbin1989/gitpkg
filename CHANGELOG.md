@@ -7,6 +7,7 @@
 
 ### Changed
 - 所有命令继承 `CommandBase` 抽象基类，统一命令类层次结构
+- 提取公用参数和选项到 `CommandBase`（`AddNameArg`、`AddShellArg`、`AddPrereleaseOption`）
 
 ## [2.8.2] - 2026-08-21
 

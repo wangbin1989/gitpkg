@@ -17,8 +17,7 @@ public class UpdateCommand : CommandBase
         var nameArg = new Argument<string?>("name") { Description = "工具名称（不指定则更新全部）", Arity = ArgumentArity.ZeroOrOne };
         Add(nameArg);
 
-        var prereleaseOpt = new Option<bool>("--prerelease") { Description = "包含预发布版本" };
-        Add(prereleaseOpt);
+        var prereleaseOpt = AddPrereleaseOption();
 
         SetAction(async (parseResult, ct) =>
         {

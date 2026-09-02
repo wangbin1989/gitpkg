@@ -21,8 +21,7 @@ public class InstallCommand : CommandBase
         var fromOpt = new Option<string?>("--from") { Description = "从清单文件批量安装" };
         Add(fromOpt);
 
-        var prereleaseOpt = new Option<bool>("--prerelease") { Description = "包含预发布版本" };
-        Add(prereleaseOpt);
+        var prereleaseOpt = AddPrereleaseOption();
 
         SetAction(async (parseResult, ct) =>
         {

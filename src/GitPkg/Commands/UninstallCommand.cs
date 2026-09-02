@@ -12,8 +12,7 @@ public class UninstallCommand : CommandBase
     /// <summary>创建 uninstall 命令。</summary>
     public UninstallCommand() : base("uninstall", "卸载已安装的工具")
     {
-        var nameArg = new Argument<string>("name") { Description = "工具名称" };
-        Add(nameArg);
+        var nameArg = AddNameArg();
 
         SetAction(async (parseResult, ct) =>
         {

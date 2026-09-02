@@ -12,8 +12,7 @@ public class InitCommand : CommandBase
     /// <summary>创建 init 命令。</summary>
     public InitCommand() : base("init", "输出 shell 初始化脚本")
     {
-        var shellArg = new Argument<string>("shell") { Description = "目标 shell: zsh, bash, powershell (pwsh), cmd" };
-        Add(shellArg);
+        var shellArg = AddShellArg();
 
         SetAction((parseResult, _) =>
         {

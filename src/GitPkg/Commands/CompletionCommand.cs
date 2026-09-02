@@ -12,8 +12,7 @@ public class CompletionCommand : CommandBase
     /// <summary>创建 completion 命令。</summary>
     public CompletionCommand() : base("completion", "输出 shell 自动补全脚本")
     {
-        var shellArg = new Argument<string>("shell") { Description = "目标 shell: zsh, bash, powershell (pwsh), cmd" };
-        Add(shellArg);
+        var shellArg = AddShellArg();
 
         SetAction((parseResult, _) =>
         {

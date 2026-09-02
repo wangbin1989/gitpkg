@@ -16,8 +16,7 @@ public class InfoCommand : CommandBase
         var nameArg = new Argument<string>("name") { Description = "工具名称或 owner/repo" };
         Add(nameArg);
 
-        var prereleaseOpt = new Option<bool>("--prerelease") { Description = "包含预发布版本" };
-        Add(prereleaseOpt);
+        var prereleaseOpt = AddPrereleaseOption();
 
         SetAction(async (parseResult, ct) =>
         {
