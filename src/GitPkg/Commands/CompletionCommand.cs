@@ -58,9 +58,17 @@ public class CompletionCommand : CommandBase
 
             case "$cmd" in
                 install)
-                    completions=(--from --help)
+                    completions=(--from --prerelease --help)
                     ;;
-                update|uninstall|info|link)
+                update|outdated|info)
+                    # 动态补全已安装工具名称
+                    local manifest="$HOME/.gitpkg/manifest.json"
+                    if [[ -f "$manifest" ]]; then
+                        completions=(${(f)"$(grep -o '"name"[[:space:]]*:[[:space:]]*"[^"]*"' "$manifest" 2>/dev/null | sed 's/"name"[[:space:]]*:[[:space:]]*"//;s/"//' 2>/dev/null)"})
+                    fi
+                    completions+=("--prerelease" "--help")
+                    ;;
+                uninstall|link)
                     # 动态补全已安装工具名称
                     local manifest="$HOME/.gitpkg/manifest.json"
                     if [[ -f "$manifest" ]]; then
@@ -104,9 +112,18 @@ public class CompletionCommand : CommandBase
 
             case "$cmd" in
                 install)
-                    opts="--from --help"
+                    opts="--from --prerelease --help"
                     ;;
-                update|uninstall|info|link)
+                update|outdated|info)
+                    # 动态补全已安装工具名称
+                    local manifest="$HOME/.gitpkg/manifest.json"
+                    if [[ -f "$manifest" ]]; then
+                        opts="$(grep -o '"name"[[:space:]]*:[[:space:]]*"[^"]*"' "$manifest" 2>/dev/null | sed 's/"name"[[:space:]]*:[[:space:]]*"//;s/"//' | tr '\n' ' ')--prerelease --help"
+                    else
+                        opts="--prerelease --help"
+                    fi
+                    ;;
+                uninstall|link)
                     # 动态补全已安装工具名称
                     local manifest="$HOME/.gitpkg/manifest.json"
                     if [[ -f "$manifest" ]]; then
@@ -152,7 +169,7 @@ public class CompletionCommand : CommandBase
             $manifestPath = Join-Path $env:USERPROFILE ".gitpkg" "manifest.json"
 
             $completions = switch ($cmd) {
-                "install"   { @('--from', '--help') }
+                "install"   { @('--from', '--prerelease', '--help') }
                 "update"    {
                     # 动态补全已安装工具名称
                     $names = @()
@@ -160,8 +177,9 @@ public class CompletionCommand : CommandBase
                         $json = Get-Content $manifestPath -Raw | ConvertFrom-Json
                         $names = @($json.tools | ForEach-Object { $_.name })
                     }
-                    $names + @('--help')
+                    $names + @('--prerelease', '--help')
                 }
+                "outdated"  { @('--prerelease', '--help') }
                 "uninstall" {
                     $names = @()
                     if (Test-Path $manifestPath) {
@@ -176,7 +194,7 @@ public class CompletionCommand : CommandBase
                         $json = Get-Content $manifestPath -Raw | ConvertFrom-Json
                         $names = @($json.tools | ForEach-Object { $_.name })
                     }
-                    $names + @('--help')
+                    $names + @('--prerelease', '--help')
                 }
                 "link"      {
                     $names = @()
@@ -190,7 +208,6 @@ public class CompletionCommand : CommandBase
                 "completion"{ @('zsh', 'bash', 'powershell', 'cmd') }
                 "manifest"  { @('export', '--help') }
                 "list"      { @('--help') }
-                "outdated"  { @('--help') }
                 "self-update" { @('--help') }
                 default     { @('install', 'update', 'uninstall', 'link', 'outdated', 'list', 'info', 'init', 'completion', 'manifest', 'self-update', '--help', '--version') }
             }
@@ -232,12 +249,12 @@ public class CompletionCommand : CommandBase
         end
 
         local sub_completions = {
-            install = {"--from", "--help"},
+            install = {"--from", "--prerelease", "--help"},
             init = {"zsh", "bash", "powershell", "cmd"},
             completion = {"zsh", "bash", "powershell", "cmd"},
             manifest = {"export", "--help"},
             list = {"--help"},
-            outdated = {"--help"},
+            outdated = {"--prerelease", "--help"},
             ["self-update"] = {"--help"},
         }
 
@@ -253,7 +270,13 @@ public class CompletionCommand : CommandBase
                 local cmd = line_state:getword(2)
                 if cmd then
                     -- update/uninstall/info 动态补全已安装工具名称
-                    if cmd == "update" or cmd == "uninstall" or cmd == "info" or cmd == "link" then
+                    if cmd == "update" or cmd == "info" then
+                        local names = get_tool_names()
+                        table.insert(names, "--prerelease")
+                        table.insert(names, "--help")
+                        return names
+                    end
+                    if cmd == "uninstall" or cmd == "link" then
                         local names = get_tool_names()
                         table.insert(names, "--help")
                         return names
